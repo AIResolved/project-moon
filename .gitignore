@@ -63,3 +63,4 @@ coverage/
 # Supabase temp (if any)
 supabase/.temp/
 
+Dockerfile
