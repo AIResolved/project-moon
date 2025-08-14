@@ -1,25 +1,24 @@
-FROM node:20-bullseye AS base
+FROM node:20-bullseye AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
-
-FROM base AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
-FROM base AS builder
+FROM node:20-bullseye AS builder
 WORKDIR /app
+ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-COPY .env .env
-
-
 RUN npm run build
 
-FROM base AS runner
+FROM node:20-bullseye AS runner
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-ENV NODE_ENV=production PORT=3000
-COPY --from=builder /app .
-RUN groupadd -r nodejs && useradd -r -g nodejs nextjs
-USER nextjs
-EXPOSE 3000
-CMD ["npm", "run", "start"]
+ENV NODE_ENV=production
+ENV PORT=8080
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 8080
+CMD ["sh","-c","npm run start -- --port ${PORT:-8080} --hostname 0.0.0.0"]
