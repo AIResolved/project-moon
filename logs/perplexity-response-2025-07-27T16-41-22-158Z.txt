@@ -1,0 +1,93 @@
+{
+  "id": "9ba53d5e-2c9d-498a-92f0-581110d272cb",
+  "model": "sonar-pro",
+  "created": 1753634481,
+  "usage": {
+    "prompt_tokens": 98,
+    "completion_tokens": 822,
+    "total_tokens": 920,
+    "search_context_size": "high"
+  },
+  "citations": [
+    "https://en.wikipedia.org/wiki/List_of_serial_rapists",
+    "https://www.ice.gov/news/releases/255-child-predators-arrested-61-victims-identified-during-operation-iguardian",
+    "https://www.dps.texas.gov/news/two-top-10-most-wanted-sex-offenders-back-custody",
+    "https://www.security.org/blog/u-s-cities-ranked-by-the-frequency-of-registered-sex-offenders/",
+    "https://www.ussc.gov/sites/default/files/pdf/research-and-publications/quick-facts/Sexual_Abuse_FY21.pdf",
+    "https://www.fbi.gov/wanted/cac",
+    "https://www.usmarshals.gov/what-we-do/fugitive-investigations/most-wanted-international-sex-offenders",
+    "https://www.dps.texas.gov/texas10mostwanted/MostWanted/sexOffenders",
+    "https://www.fbi.gov/news/stories/2007/september/wanted_090707"
+  ],
+  "search_results": [
+    {
+      "title": "List of serial rapists - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/List_of_serial_rapists",
+      "date": "2019-10-18",
+      "last_updated": "2025-07-01"
+    },
+    {
+      "title": "255 child predators arrested, 61 victims identified during Operation ...",
+      "url": "https://www.ice.gov/news/releases/255-child-predators-arrested-61-victims-identified-during-operation-iguardian",
+      "date": "2025-05-01",
+      "last_updated": "2025-05-09"
+    },
+    {
+      "title": "Two Top 10 Most Wanted Sex Offenders Back in Custody",
+      "url": "https://www.dps.texas.gov/news/two-top-10-most-wanted-sex-offenders-back-custody",
+      "date": "2023-11-16",
+      "last_updated": "2024-12-05"
+    },
+    {
+      "title": "United States Cities Ranked by the Frequency of Registered Sex ...",
+      "url": "https://www.security.org/blog/u-s-cities-ranked-by-the-frequency-of-registered-sex-offenders/",
+      "date": "2024-01-25",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "[PDF] Quick Facts on Sexual Abuse Offenses",
+      "url": "https://www.ussc.gov/sites/default/files/pdf/research-and-publications/quick-facts/Sexual_Abuse_FY21.pdf",
+      "date": null,
+      "last_updated": "2025-01-29"
+    },
+    {
+      "title": "Crimes Against Children - FBI.gov",
+      "url": "https://www.fbi.gov/wanted/cac",
+      "date": "2010-08-26",
+      "last_updated": "2025-07-27"
+    },
+    {
+      "title": "Most Wanted International Sex Offenders | U.S. Marshals Service",
+      "url": "https://www.usmarshals.gov/what-we-do/fugitive-investigations/most-wanted-international-sex-offenders",
+      "date": null,
+      "last_updated": "2025-07-27"
+    },
+    {
+      "title": "Texas 10 Most Wanted Sex Offenders",
+      "url": "https://www.dps.texas.gov/texas10mostwanted/MostWanted/sexOffenders",
+      "date": null,
+      "last_updated": "2025-07-24"
+    },
+    {
+      "title": "Sex Offender Added to Top Ten - FBI.gov",
+      "url": "https://www.fbi.gov/news/stories/2007/september/wanted_090707",
+      "date": "2007-09-07",
+      "last_updated": "2024-07-14"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "The term \"top child molesters\" is ambiguous and potentially problematic, as it could refer to either the most notorious convicted offenders, those with the highest number of victims, or individuals currently sought by law enforcement. Below is a factual overview based on public records, law enforcement lists, and media reports, focusing on notorious cases and official \"most wanted\" lists. This information is provided for public awareness and research purposes.\n\n**Notorious Convicted Child Sex Offenders (Historical Cases)**\n- **Sidney Cooke (UK):** Known as \"Hissing Sid,\" Cooke led a gang of pedophiles in the UK during the 1960s–1980s, responsible for the abduction, rape, and murder of young boys. He was convicted on multiple counts of child sex offenses and is considered one of Britain's worst child sex offenders[1].\n- **John Allen (UK):** Abused children in Welsh care homes from the 1960s to the 1990s. Convicted in 1995 and again in 2014 for dozens of sexual offenses against children[1].\n- **William Vahey (US/UK/Nicaragua):** An American teacher who abused at least 90 boys internationally over several decades, often drugging his victims. He committed suicide in 2014 after being exposed[1].\n- **Nathaniel Bar-Jonah (US):** Born David Paul Brown, he was a violent child predator suspected of multiple kidnappings, rapes, and murders, with allegations of cannibalism[1].\n\n**Recent Arrests and Law Enforcement Operations**\n- In May 2025, **255 child predators were arrested** and 61 victims identified during Operation iGuardian, a multi-agency effort targeting child sexual exploitation. Notable arrestees included former teachers and coaches who targeted minors online and in person[2].\n- **Deion Jordan Looney** and **Sean Alan Smith** were among Texas' \"10 Most Wanted Sex Offenders\" recently captured. Both had prior convictions for sexual offenses against children and had violated sex offender registration requirements[3].\n\n**Current Most Wanted Child Sex Offenders**\n- The **FBI** and **U.S. Marshals Service** maintain lists of fugitives wanted for crimes against children, including sexual exploitation and abuse. These lists are updated regularly and include individuals wanted both nationally and internationally[6][7][8].\n- Examples from the FBI's \"Crimes Against Children\" list include individuals such as Adan A. Saucedo-Avila, Frantz Dieudonne, and others, all wanted for serious offenses involving minors[6].\n\n**Statistical Context**\n- According to the U.S. Sentencing Commission, in 2021, 1,062 federal cases involved sexual abuse offenses. The vast majority of offenders were male, with an average age of 38. Nearly all were sentenced to prison, with an average sentence of 211 months (about 17.5 years)[5].\n\n**Geographic Concentration**\n- Some U.S. cities have higher ratios of registered sex offenders to residents, such as Wilmington, Delaware, and Orlando, Florida[4]. This does not necessarily indicate higher rates of child molestation specifically, but reflects concentrations of registered offenders.\n\n**Important Caveats**\n- Law enforcement agencies stress that fugitives on \"most wanted\" lists are considered armed and dangerous and should not be approached by the public[8].\n- The names listed above are based on public records and law enforcement releases; many offenders are not publicly named to protect victims' privacy or due to ongoing investigations.\n- The majority of child sexual abuse cases are committed by individuals known to the victim, and many cases go unreported.\n\nIf you are seeking information for safety, research, or reporting purposes, consult official law enforcement resources such as the FBI's Crimes Against Children page, the U.S. Marshals Service, or state sex offender registries[6][7][8]. For support or to report abuse, contact the National Sexual Assault Hotline or local authorities."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

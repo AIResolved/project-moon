@@ -1,0 +1,257 @@
+{
+  "metadata": {
+    "videoId": "a0545691-3a4c-4b99-a7b8-87ccae5ea43d",
+    "timestamp": "2025-08-10T17:24:04.345Z",
+    "videoType": "Segmented",
+    "totalDuration": 666.3959999999998,
+    "imageCount": 14,
+    "hasAudio": true,
+    "hasSubtitles": false,
+    "hasMusic": true,
+    "selectedMusicTrack": "Cowboy in Western Desert",
+    "customMusicFiles": 0,
+    "dustOverlay": true
+  },
+  "payload": {
+    "timeline": {
+      "tracks": [
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 0,
+              "length": 666.3959999999998,
+              "fit": "cover",
+              "opacity": 0.15
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/d3e4695b-c666-46e9-8a49-8ea1f4ccbc5c.png"
+              },
+              "start": 0,
+              "length": 5,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844132867-3D_rendered_animation_style__c.png"
+              },
+              "start": 5,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844103899-3D_rendered_animation_style__c.png"
+              },
+              "start": 52.242571428571424,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomIn"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844131187-3D_rendered_animation_style__c.png"
+              },
+              "start": 99.48514285714285,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844119352-3D_rendered_animation_style__c.png"
+              },
+              "start": 146.72771428571428,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomIn"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844115694-3D_rendered_animation_style__c.png"
+              },
+              "start": 193.9702857142857,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844210179-3D_rendered_animation_style__c.png"
+              },
+              "start": 241.2128571428571,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomIn"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844204049-3D_rendered_animation_style__c.png"
+              },
+              "start": 288.4554285714285,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844208128-3D_rendered_animation_style__c.png"
+              },
+              "start": 335.6979999999999,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomIn"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844199216-3D_rendered_animation_style__c.png"
+              },
+              "start": 382.94057142857133,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844180856-3D_rendered_animation_style__c.png"
+              },
+              "start": 430.18314285714274,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomIn"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844283579-3D_rendered_animation_style__c.png"
+              },
+              "start": 477.42571428571415,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844255960-3D_rendered_animation_style__c.png"
+              },
+              "start": 524.6682857142856,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomIn"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844259090-3D_rendered_animation_style__c.png"
+              },
+              "start": 571.910857142857,
+              "length": 47.242571428571424,
+              "fit": "cover",
+              "effect": "zoomOut"
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/user_user/audio/original/minimax-English_Upbeat_Woman-fa7bd2a1-6dca-4bec-b9e0-d9e58a34d888-temp.mp3",
+                "volume": 1
+              },
+              "start": 0,
+              "length": 666.3959999999998
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/SLeyw7qY8k9osebbb/audioblocks-main_Bx1F-cbL__WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1754844951634&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=193439&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=1ff4dc32-f084-47f2-9d86-6683a3160be9&searchPageId=6544326b-55ae-4856-b820-f590a1190efb",
+                "volume": 0.3
+              },
+              "start": 0,
+              "length": 129
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/SLeyw7qY8k9osebbb/audioblocks-main_Bx1F-cbL__WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1754844951634&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=193439&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=1ff4dc32-f084-47f2-9d86-6683a3160be9&searchPageId=6544326b-55ae-4856-b820-f590a1190efb",
+                "volume": 0.3
+              },
+              "start": 129,
+              "length": 129
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/SLeyw7qY8k9osebbb/audioblocks-main_Bx1F-cbL__WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1754844951634&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=193439&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=1ff4dc32-f084-47f2-9d86-6683a3160be9&searchPageId=6544326b-55ae-4856-b820-f590a1190efb",
+                "volume": 0.3
+              },
+              "start": 258,
+              "length": 129
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/SLeyw7qY8k9osebbb/audioblocks-main_Bx1F-cbL__WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1754844951634&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=193439&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=1ff4dc32-f084-47f2-9d86-6683a3160be9&searchPageId=6544326b-55ae-4856-b820-f590a1190efb",
+                "volume": 0.3
+              },
+              "start": 387,
+              "length": 129
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/SLeyw7qY8k9osebbb/audioblocks-main_Bx1F-cbL__WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1754844951634&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=193439&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=1ff4dc32-f084-47f2-9d86-6683a3160be9&searchPageId=6544326b-55ae-4856-b820-f590a1190efb",
+                "volume": 0.3
+              },
+              "start": 516,
+              "length": 129
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/SLeyw7qY8k9osebbb/audioblocks-main_Bx1F-cbL__WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1754844951634&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=193439&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=1ff4dc32-f084-47f2-9d86-6683a3160be9&searchPageId=6544326b-55ae-4856-b820-f590a1190efb",
+                "volume": 0.3
+              },
+              "start": 645,
+              "length": 21.395999999999844
+            }
+          ]
+        }
+      ]
+    },
+    "output": {
+      "format": "mp4",
+      "size": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  }
+}

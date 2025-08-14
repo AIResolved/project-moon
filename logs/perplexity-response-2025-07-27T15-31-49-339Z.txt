@@ -1,0 +1,86 @@
+{
+  "id": "9178a7bd-7bf4-44ba-9b5e-e2f19a6accfc",
+  "model": "sonar-pro",
+  "created": 1753630309,
+  "usage": {
+    "prompt_tokens": 99,
+    "completion_tokens": 978,
+    "total_tokens": 1077,
+    "search_context_size": "high"
+  },
+  "citations": [
+    "https://hiphopdx.com/news/hip-hop-biggest-trials/",
+    "https://allrapnews.com/articles/tragic-legacy-gun-violence-hip-hop-notable-rappers-shot/",
+    "https://www.revolt.tv/article/13-rappers-who-nearly-died-and-came-back-stronger",
+    "https://www.ranker.com/list/rappers-who-have-been-shot/ranker-hip-hop",
+    "https://www.imdb.com/list/ls052761608/",
+    "https://www.prestigeonline.com/my/lifestyle/culture-plus-entertainment/biggest-controversies-involving-rappers-2024-diddy-drake-kendrick-lamar/",
+    "https://en.wikipedia.org/wiki/List_of_murdered_hip-hop_musicians",
+    "https://www.xxlmag.com/rappers-beat-legal-cases/"
+  ],
+  "search_results": [
+    {
+      "title": "Rap On Trial: Hip Hop's Most Notorious Criminal Cases - HipHopDX",
+      "url": "https://hiphopdx.com/news/hip-hop-biggest-trials/",
+      "date": "2025-03-04",
+      "last_updated": "2025-07-27"
+    },
+    {
+      "title": "The Tragic Legacy of Gun Violence in Hip-Hop: Notable Rappers ...",
+      "url": "https://allrapnews.com/articles/tragic-legacy-gun-violence-hip-hop-notable-rappers-shot/",
+      "date": "2024-09-20",
+      "last_updated": "2025-02-27"
+    },
+    {
+      "title": "13 rappers who nearly died and came back stronger - Revolt TV",
+      "url": "https://www.revolt.tv/article/13-rappers-who-nearly-died-and-came-back-stronger",
+      "date": "2024-07-20",
+      "last_updated": "2025-07-21"
+    },
+    {
+      "title": "33 Rappers Who Have Been Shot - Ranker",
+      "url": "https://www.ranker.com/list/rappers-who-have-been-shot/ranker-hip-hop",
+      "date": "2024-02-06",
+      "last_updated": "2025-07-26"
+    },
+    {
+      "title": "Rappers and Their Rap Sheets - IMDb",
+      "url": "https://www.imdb.com/list/ls052761608/",
+      "date": "2013-10-09",
+      "last_updated": "2025-07-26"
+    },
+    {
+      "title": "The biggest controversies involving rappers in 2024: Diddy's arrest ...",
+      "url": "https://www.prestigeonline.com/my/lifestyle/culture-plus-entertainment/biggest-controversies-involving-rappers-2024-diddy-drake-kendrick-lamar/",
+      "date": "2024-12-10",
+      "last_updated": "2025-05-21"
+    },
+    {
+      "title": "List of murdered hip-hop musicians - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/List_of_murdered_hip-hop_musicians",
+      "date": "2013-10-20",
+      "last_updated": "2025-07-15"
+    },
+    {
+      "title": "Rappers Who Won Serious Legal Cases - XXL Mag",
+      "url": "https://www.xxlmag.com/rappers-beat-legal-cases/",
+      "date": "2025-02-20",
+      "last_updated": "2025-02-21"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "Some of the **top rapper incidents** in hip-hop history involve high-profile murders, shootings, legal cases, and public controversies. These events have shaped the genre’s narrative and often reflect broader social issues. Below are some of the most significant incidents, organized by type and impact:\n\n---\n\n**1. Murders and Fatal Shootings**\n\n- **Tupac Shakur (1996):** Tupac was shot multiple times in a drive-by shooting in Las Vegas and died six days later. His murder remains unsolved and is one of the most infamous cases in music history[2][4][7].\n- **The Notorious B.I.G. (1997):** Biggie Smalls was killed in a drive-by shooting in Los Angeles, just months after Tupac. His murder also remains unsolved, fueling conspiracy theories and East Coast–West Coast rivalry narratives[2][4][7].\n- **XXXTentacion (2018):** The Florida rapper was shot and killed during a robbery outside a motorcycle dealership at age 20, shocking fans and highlighting ongoing violence in hip-hop[2].\n- **Young Dolph (2021):** He was fatally shot while visiting a bakery in Memphis, his hometown, in a targeted attack that underscored the dangers faced by independent artists[2].\n- **Takeoff (2022):** The Migos member was killed as an innocent bystander during a shooting at a Houston bowling alley, sparking widespread mourning in the hip-hop community[2][4].\n\n---\n\n**2. Rappers Who Survived Violent Attacks**\n\n- **50 Cent (2000):** Survived being shot nine times at close range outside his grandmother’s house. This incident became central to his persona and debut album, *Get Rich or Die Tryin’*[3][4].\n- **Lil Tjay (2022):** Critically injured after being shot seven times during a robbery attempt, but made a comeback with the single “Beat the Odds”[3].\n- **Yella Beezy (2018):** Survived a drive-by shooting in Texas, being shot at over a dozen times while driving[4].\n- **Rick Ross:** Survived a drive-by shooting and multiple seizures, continuing his career afterward[3].\n\n---\n\n**3. Major Legal Cases and Trials**\n\n- **Snoop Dogg (1995):** Acquitted of first-degree murder after a highly publicized trial; the case was ruled self-defense[1][8].\n- **Gucci Mane (2005):** Charged with murder after shooting an associate of Jeezy. He claimed self-defense and was acquitted after nine months in jail[1][8].\n- **T.I. (2008):** Sentenced to a year in prison for federal weapons charges after being caught trying to buy machine guns as a convicted felon[1].\n- **6ix9ine (2018–2019):** Arrested in a RICO case involving the Nine Trey Gangsters. He became a government witness, testifying against gang members in a landmark moment for hip-hop[1].\n- **C-Murder:** Convicted of second-degree murder in 2009 and sentenced to life without parole, a case that remains controversial[5].\n\n---\n\n**4. Recent and Ongoing Controversies (2024)**\n\n- **Diddy (Sean Combs):** Arrested in 2024 on sex trafficking and racketeering charges, causing a major scandal in the music industry[6].\n- **Drake vs. Kendrick Lamar:** Their 2024 feud, marked by diss tracks and public sparring, dominated headlines and social media, reflecting the competitive nature of modern rap[6].\n- **Nicki Minaj vs. Ice Spice:** Public fallout and social media drama, including unfollowing and leaked messages, highlighted the volatility of relationships in the rap industry[6].\n\n---\n\n**5. Other Notorious Incidents**\n\n- **Slick Rick:** Served over seven years in prison for attempted murder and immigration issues, but was later pardoned and remains influential in hip-hop[5].\n- **Big Lurch:** Serving life in prison for a gruesome murder committed while under the influence of PCP[5].\n\n---\n\n**Key Themes and Impact**\n\n- **Gun violence** and **unsolved murders** remain persistent issues, with many cases still open decades later[7].\n- **Legal troubles** and **courtroom drama** are common, often intertwined with artists’ public personas and music.\n- **Feuds and controversies**—from lyrical battles to personal scandals—continue to shape hip-hop’s culture and media coverage[6].\n\nThese incidents are not only pivotal moments in hip-hop history but also reflect broader societal challenges, including violence, systemic inequality, and the pressures of fame."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

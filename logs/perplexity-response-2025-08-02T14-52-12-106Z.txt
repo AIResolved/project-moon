@@ -1,0 +1,99 @@
+{
+  "id": "42005a66-bc60-4fad-81f8-f068ec63f731",
+  "model": "sonar-pro",
+  "created": 1754146332,
+  "usage": {
+    "prompt_tokens": 96,
+    "completion_tokens": 501,
+    "total_tokens": 597,
+    "search_context_size": "high",
+    "cost": {
+      "input_tokens_cost": 0.000288,
+      "output_tokens_cost": 0.007515,
+      "request_cost": 0.014,
+      "total_cost": 0.021803
+    }
+  },
+  "citations": [
+    "https://www.fbi.gov/contact-us/field-offices/losangeles/news/nineteen-members-or-associates-of-the-mexican-mafia-prison-gang-charged-in-murder-conspiracy-targeting-a-well-known-rapper",
+    "https://themobmuseum.org/blog/the-biggest-mafia-sweep-in-american-history/",
+    "https://www.cbsnews.com/news/italy-mafia-arrests-cosa-nostra-historic-blow/",
+    "https://en.wikipedia.org/wiki/American_Mafia",
+    "https://www.youtube.com/watch?v=X35HGOTYdUc",
+    "https://www.fbi.gov/investigate/transnational-organized-crime/major-cases",
+    "https://www.youtube.com/watch?v=kdFAO2AK6CY",
+    "https://en.wikipedia.org/wiki/Category:American_Mafia_events",
+    "https://www.youtube.com/playlist?list=PLcuHpcV2MbFhd-4o5u_w1qsfuD-OSofEK"
+  ],
+  "search_results": [
+    {
+      "title": "Nineteen Members or Associates of the Mexican Mafia Prison Gang ...",
+      "url": "https://www.fbi.gov/contact-us/field-offices/losangeles/news/nineteen-members-or-associates-of-the-mexican-mafia-prison-gang-charged-in-murder-conspiracy-targeting-a-well-known-rapper",
+      "date": "2025-06-18",
+      "last_updated": "2025-06-18"
+    },
+    {
+      "title": "The biggest Mafia sweep in American history - The Mob Museum",
+      "url": "https://themobmuseum.org/blog/the-biggest-mafia-sweep-in-american-history/",
+      "date": "2021-01-20",
+      "last_updated": "2025-06-15"
+    },
+    {
+      "title": "Police blitz targeting Italian mafia nets nearly 150 arrests - CBS News",
+      "url": "https://www.cbsnews.com/news/italy-mafia-arrests-cosa-nostra-historic-blow/",
+      "date": "2025-02-11",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "American Mafia - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/American_Mafia",
+      "date": "2005-05-26",
+      "last_updated": "2025-07-21"
+    },
+    {
+      "title": "Mafia Stories | 60 Minutes Marathon - YouTube",
+      "url": "https://www.youtube.com/watch?v=X35HGOTYdUc",
+      "date": "2025-07-04",
+      "last_updated": "2025-07-10"
+    },
+    {
+      "title": "Major Cases - FBI.gov",
+      "url": "https://www.fbi.gov/investigate/transnational-organized-crime/major-cases",
+      "date": "2016-06-01",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Inside the FBI Operation that Destroyed the Mafia - YouTube",
+      "url": "https://www.youtube.com/watch?v=kdFAO2AK6CY",
+      "date": "2025-04-05",
+      "last_updated": "2025-07-05"
+    },
+    {
+      "title": "Category:American Mafia events - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Category:American_Mafia_events",
+      "date": "2022-01-01",
+      "last_updated": "2025-04-02"
+    },
+    {
+      "title": "FOX 5 Mob Stories - YouTube",
+      "url": "https://www.youtube.com/playlist?list=PLcuHpcV2MbFhd-4o5u_w1qsfuD-OSofEK",
+      "date": "2025-03-27",
+      "last_updated": "2025-03-30"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "Recent mafia incidents include a major 2025 murder conspiracy involving the Mexican Mafia in Los Angeles, a historic 2025 crackdown on the Sicilian Cosa Nostra in Italy, and the largest-ever U.S. mafia sweep in 2011 targeting multiple American crime families.\n\nIn June 2025, nineteen members or associates of the Mexican Mafia prison gang were charged in a murder conspiracy targeting a well-known rapper in Los Angeles. The plot involved coordinated efforts from inside prison and on the streets, with the victim placed on a \"green-light\" list (marked for death). After a failed attack in jail, further attempts were planned, but law enforcement intervention disrupted the conspiracy. Eleven defendants were already incarcerated on unrelated charges, and one fugitive remains at large[1].\n\nIn February 2025, Italian police arrested nearly 150 people in Palermo in a major operation against the Sicilian mafia, Cosa Nostra. The crackdown targeted mafia-type criminal association, attempted murder, extortion, drug trafficking, and illegal gambling. Despite decades of law enforcement pressure, the Cosa Nostra continues to exert control over local businesses, demand protection money, and recruit young people. The operation was described as the largest against the Sicilian mafia since 1984, with authorities noting the mafia's adaptation to modern technology, such as encrypted smartphones, to coordinate activities[3].\n\nHistorically, the largest single-day mafia takedown in the U.S. occurred on January 20, 2011, when over 700 federal agents arrested 127 mobsters across the Northeast. This sweep targeted all five New York crime families and others, charging them with crimes including murder, extortion, racketeering, and drug trafficking. High-ranking members such as Luigi Manocchio (Patriarca family) and Andy Russo (Colombo family) were among those arrested. Many defendants took plea deals, resulting in relatively short sentences for some[2][4].\n\nOther notable incidents include:\n- The murder of Judge Vincent Sherry and his wife by the Dixie Mafia in the 1980s, exposing deep corruption on Mississippi’s Gulf Coast[6].\n- The 1980s and 1990s FBI operations that used undercover work and wiretaps to dismantle major mafia operations, including the Chicago Outfit and the Gambino family[7].\n\nThese cases illustrate the ongoing evolution of mafia organizations, their persistent influence in both the U.S. and Italy, and the significant law enforcement efforts required to combat them."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

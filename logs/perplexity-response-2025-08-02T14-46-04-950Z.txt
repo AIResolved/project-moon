@@ -1,0 +1,64 @@
+{
+  "id": "8f4f70ad-d744-4d5c-898c-f59b4fdc8aab",
+  "model": "sonar-pro",
+  "created": 1754145964,
+  "usage": {
+    "prompt_tokens": 97,
+    "completion_tokens": 276,
+    "total_tokens": 373,
+    "search_context_size": "high",
+    "cost": {
+      "input_tokens_cost": 0.000291,
+      "output_tokens_cost": 0.00414,
+      "request_cost": 0.014,
+      "total_cost": 0.018431
+    }
+  },
+  "citations": [
+    "https://arthurandtheminimoys.fandom.com/wiki/Darkos",
+    "https://powerrangers.fandom.com/wiki/Los_Dark",
+    "https://www.pandora.com/artist/los-darkos/las-de-siempre-y-por-siempre-explicit/como-fui-a-enamorarme-de-ti/TR5x6r435Prkvtm",
+    "https://github.com/ahmad1abbadi/darkos"
+  ],
+  "search_results": [
+    {
+      "title": "Darkos | Arthur And The Minimoys Wiki - Fandom",
+      "url": "https://arthurandtheminimoys.fandom.com/wiki/Darkos",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "Los Dark | RangerWiki - Fandom",
+      "url": "https://powerrangers.fandom.com/wiki/Los_Dark",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "Como Fui a Enamorarme de Ti by Los Darkos - Pandora",
+      "url": "https://www.pandora.com/artist/los-darkos/las-de-siempre-y-por-siempre-explicit/como-fui-a-enamorarme-de-ti/TR5x6r435Prkvtm",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "ahmad1abbadi/darkos: small project that allow run pc ...",
+      "url": "https://github.com/ahmad1abbadi/darkos",
+      "date": "2024-02-07",
+      "last_updated": "2025-07-10"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "\"Los Darkos\" most commonly refers to a musical group, but the term also appears in other unrelated contexts, including fictional characters and software projects.\n\n1. Music Group:  \nLos Darkos is the name of a musical artist or band, with songs available on platforms like Pandora[3]. Their music includes tracks such as \"Como Fui a Enamorarme de Ti,\" and they have a presence on streaming services, suggesting they are active in the Latin music scene[3].\n\n2. Other Uses:  \n- In fiction, \"Darkos\" is the name of a character in the \"Arthur and the Minimoys\" franchise, where Darkos is the son of Maltazard and a commander of the Seides[1].  \n- \"Los Dark\" (not \"Los Darkos\") appears in the Power Rangers universe as an undead captain named Los Dark, unrelated to the music group[2].  \n- \"Darkos\" is also the name of a software project designed to run Windows x86_64 applications and games on Android devices using Termux, Box86, and Box64[4].\n\nIf you are seeking information about the musical group, they are best known for their songs in the Latin genre and are available on major streaming platforms[3]. If you meant another context, such as fiction or software, please specify for more targeted information."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

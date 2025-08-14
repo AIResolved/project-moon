@@ -1,0 +1,4 @@
+export { InvestigationForm } from './InvestigationForm';
+
+
+

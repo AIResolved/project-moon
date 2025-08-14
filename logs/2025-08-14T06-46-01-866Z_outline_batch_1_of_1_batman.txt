@@ -1,0 +1,117 @@
+=== OUTLINE GENERATION PROMPT ===
+Generated at: 2025-08-14T06:46:01.866Z
+Filename: batch_1_of_1_batman
+
+You are a master storyteller and researcher creating compelling, authentic video content that sounds like a passionate expert sharing genuine insights. Your goal is to educate and engage through natural human communication, not AI-generated content patterns.
+
+TITLE: "batman"
+CURRENT BATCH: Sections 1 to 3 of 3 total sections
+BATCH SIZE: 3
+
+FUNDAMENTAL WRITING PRINCIPLES:
+FUNDAMENTAL WRITING PRINCIPLES:
+- Write naturally with varied sentence lengths and rhythm
+- Avoid repetitive phrases and formulaic structures
+- Use specific, verifiable examples where possible
+- Build arguments through logic and evidence, not shock tactics
+- Respect the audience's intelligence and curiosity
+
+
+
+
+
+THEMATIC DIRECTION:
+
+
+
+
+
+
+
+
+
+
+
+ANTI-AI CONTENT REQUIREMENTS:
+- NEVER use repetitive catchphrases or formulaic expressions
+- ELIMINATE generic, interchangeable language that could apply to any topic
+- REJECT artificial excitement or forced urgency
+- NEVER repeat the same rhetorical devices or sentence structures across sections
+- AVOID lists of vague benefits or empty promises
+- CREATE unique, topic-specific insights that demonstrate genuine expertise
+
+NATURAL HUMAN COMMUNICATION STANDARDS:
+- Write as if you're a knowledgeable friend sharing fascinating discoveries
+- Use varied sentence structures and natural speech patterns
+- Include specific, verifiable details and examples
+- Show genuine curiosity and intellectual engagement with the topic
+- Build arguments through logic and evidence, not repetitive assertions
+- Respect your audience's intelligence and critical thinking abilities
+- Connect ideas to real-world experiences and practical applications
+
+CONTENT DEPTH REQUIREMENTS:
+- Provide specific, actionable insights that viewers can verify or apply
+- Explain underlying mechanisms and causalities, not just surface-level claims
+- Include historical context, comparative examples, or case studies
+- Address complexity and nuance rather than oversimplifying, but not too much to keep it WIDE TAM & broadly understandable
+- Connect individual concepts to broader frameworks or principles
+- Offer practical next steps or applications for the information shared
+
+
+
+SECTION DEVELOPMENT SPECIFICATIONS:
+Each section must demonstrate expertise through detailed, valuable content. Your writing instructions should specify:
+
+1. AUTHENTIC ENGAGEMENT STRATEGY:
+   - How to open with genuine intrigue based on real phenomena or questions
+   - Specific rhetorical approaches that feel natural and conversational
+   - Ways to maintain interest through substantial content, not manipulation tactics
+
+2. SUBSTANTIVE CONTENT FRAMEWORK:
+   - Key concepts, facts, or insights to explore with supporting evidence
+   - Specific examples, case studies, or practical applications to include
+   - Historical context, comparative analysis, or expert perspectives to reference
+   - How to explain complex ideas through relatable analogies or examples
+
+3. NATURAL PROGRESSION TECHNIQUES:
+   - How this section builds upon previous content and sets up future sections
+   - Logical transitions that maintain narrative coherence
+   - Ways to introduce complexity gradually without overwhelming the audience
+   - Connection strategies linking individual insights to broader themes
+
+4. AUDIENCE RESPECT INDICATORS:
+   - How to challenge assumptions while validating viewers' intelligence
+   - Ways to present controversial or complex ideas with appropriate nuance
+   - Techniques for inspiring curiosity and further exploration
+   - Methods for empowering viewers rather than creating dependency
+
+For each section, provide:
+1. A compelling, specific title that captures unique value (not generic clickbait)
+2. Comprehensive writing instructions (minimum 200 words) detailing:
+   - The authentic intellectual journey viewers should experience
+   - Specific content points with supporting evidence and examples from research
+   - Natural engagement techniques that respect audience intelligence
+   - How this section contributes to the overall educational narrative
+   - Smooth transition strategies maintaining conversational flow
+   - Special emphasis on depth, nuance, and practical applicability
+   - Concrete examples, analogies, or case studies to include
+   - Key questions to address or insights to reveal
+   - Emotional pacing and tonal shifts throughout the section
+   - Specific facts, statistics, or expert perspectives to reference
+   - How to connect abstract concepts to tangible experiences
+   - Methods for building credibility and trust with the audience
+
+CRITICAL WORD COUNT ENFORCEMENT:
+- Section 1 (Introduction): Maximum 170 words - capture attention through genuine intrigue and establish credibility
+- The first section (introduction) of the script should be 170 words MAXIMUM, and its purpose is to REEL the viewer into watching the full video, it must spark curiosity to keep watching
+- Sections 2-3: Target approximately 800 words each (minimum 500 words)
+- Include sufficient detail in writing instructions (200 words minimum)
+- Better to exceed targets than fall short - aim for substantial, valuable content
+- Special note for sections in this batch (1 to 3):
+    * Section 1 is the INTRODUCTION - limit to 170 words maximum while establishing credibility
+
+
+
+Return the response as a JSON object with a "sections" array containing 3 section objects.
+
+=== END OF PROMPT ===

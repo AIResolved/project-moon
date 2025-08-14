@@ -1,0 +1,100 @@
+{
+  "id": "6563648d-6705-4f72-80a2-01b4dfabc3fb",
+  "model": "sonar-pro",
+  "created": 1753632665,
+  "usage": {
+    "prompt_tokens": 97,
+    "completion_tokens": 955,
+    "total_tokens": 1052,
+    "search_context_size": "high"
+  },
+  "citations": [
+    "https://www.americanbar.org/groups/public_education/programs/constitution_day/landmark-cases/",
+    "https://www.youtube.com/watch?v=e-jFr0t1v70",
+    "https://www.dougbeam.com/blog-posts/3-famous-courtroom-trials",
+    "https://www.youtube.com/watch?v=rab4NLfRH7Q",
+    "https://www.uscourts.gov/about-federal-courts/educational-resources/supreme-court-landmarks/supreme-court-activity/discussion-questions-supreme-court-activity",
+    "https://www.youtube.com/watch?v=WfIkLgiL41M",
+    "https://www.rasmussen.edu/degrees/justice-studies/blog/courtroom-terms/",
+    "https://nvcourts.gov/aoc/programs_and_services/court_interpreter/interpreter_resources/common_courtroom_phrases",
+    "https://www.youtube.com/watch?v=LuHppjGkvIo",
+    "https://content.time.com/time/specials/packages/completelist/0,29569,2036448,00.html"
+  ],
+  "search_results": [
+    {
+      "title": "Landmark United States Supreme Court Cases",
+      "url": "https://www.americanbar.org/groups/public_education/programs/constitution_day/landmark-cases/",
+      "date": "2003-01-01",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Top 7 Heated Court Moments Between Lawyers and Judges",
+      "url": "https://www.youtube.com/watch?v=e-jFr0t1v70",
+      "date": "2024-12-29",
+      "last_updated": "2025-07-10"
+    },
+    {
+      "title": "3 Famous Courtroom Trials That Captivated America",
+      "url": "https://www.dougbeam.com/blog-posts/3-famous-courtroom-trials",
+      "date": "2025-07-16",
+      "last_updated": "2025-07-20"
+    },
+    {
+      "title": "Top 7 Heated Court Moments Between Lawyers and Judges",
+      "url": "https://www.youtube.com/watch?v=rab4NLfRH7Q",
+      "date": "2023-09-21",
+      "last_updated": "2025-07-15"
+    },
+    {
+      "title": "Discussion Questions - Supreme Court Activity",
+      "url": "https://www.uscourts.gov/about-federal-courts/educational-resources/supreme-court-landmarks/supreme-court-activity/discussion-questions-supreme-court-activity",
+      "date": null,
+      "last_updated": "2025-06-06"
+    },
+    {
+      "title": "Students Debate High Court Decisions and Precedent",
+      "url": "https://www.youtube.com/watch?v=WfIkLgiL41M",
+      "date": null,
+      "last_updated": "2024-11-13"
+    },
+    {
+      "title": "50 Courtroom Terms You Hear in Your Favorite Legal ...",
+      "url": "https://www.rasmussen.edu/degrees/justice-studies/blog/courtroom-terms/",
+      "date": "2018-06-15",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Common Courtroom Phrases",
+      "url": "https://nvcourts.gov/aoc/programs_and_services/court_interpreter/interpreter_resources/common_courtroom_phrases",
+      "date": "2022-09-30",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Cameras in courtroom: Lawyers Dershowitz, Geragos debate",
+      "url": "https://www.youtube.com/watch?v=LuHppjGkvIo",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "Complete List - Top 10 Controversial Supreme Court Cases",
+      "url": "https://content.time.com/time/specials/packages/completelist/0,29569,2036448,00.html",
+      "date": "2014-01-01",
+      "last_updated": "2025-06-27"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "Some of the **top courtroom debates in history** have shaped legal precedent, ignited public controversy, and dramatically influenced society. These debates range from landmark Supreme Court arguments to high-profile criminal trials and heated exchanges between attorneys and judges. Below are several of the most significant and dramatic courtroom debates, with context and their broader impact:\n\n**Landmark Supreme Court Debates**\n\n- **Brown v. Board of Education (1954):** This case debated whether racial segregation in public schools was constitutional. The Supreme Court ultimately ruled that \"separate but equal\" schools were inherently unequal, ending legal segregation in education and fueling the civil rights movement[5].\n- **Miranda v. Arizona (1966):** The debate centered on whether police must inform suspects of their rights before interrogation. The Court ruled yes, establishing the now-famous \"Miranda warnings\" to protect Fifth and Sixth Amendment rights[1].\n- **Roe v. Wade (1973):** This case debated whether the Constitution protects a woman's right to choose an abortion. The Court found that restrictive abortion laws violated the right to privacy, making the case a central battleground in the abortion debate for decades[1].\n- **Regents of the University of California v. Bakke (1978):** The debate here was over affirmative action and whether race could be used in university admissions. The Court ruled that race could be a factor, but strict quotas were unconstitutional, shaping affirmative action policy nationwide[1].\n\n**Historic and Dramatic Trial Debates**\n\n- **The Scopes Monkey Trial (1925):** John Scopes was prosecuted for teaching evolution in violation of Tennessee law. The trial became a national spectacle, pitting science against religion and drawing legendary lawyers Clarence Darrow and William Jennings Bryan into a fierce public debate over academic freedom and the role of religion in public life[3].\n- **The Nuremberg Trials (1945-1946):** After World War II, top Nazi officials were prosecuted for war crimes and crimes against humanity. The debates at Nuremberg established principles of international law and accountability for atrocities, with dramatic cross-examinations and moral arguments that resonated worldwide[3].\n- **The O.J. Simpson Trial (1995):** Dubbed the \"trial of the century,\" this case involved the murder of Nicole Brown Simpson and Ronald Goldman. The debate between the prosecution and Simpson's \"Dream Team\" defense captivated the nation, raising issues of race, celebrity, and the criminal justice system[3].\n\n**Modern Heated Courtroom Exchanges**\n\n- **Parkland School Shooter Penalty Trial (2022):** The sentencing phase for the Marjory Stoneman Douglas High School shooter saw intense debate over the death penalty, with emotionally charged victim impact statements and heated exchanges between defense attorneys and the judge. The judge's conduct was later publicly reprimanded by the Florida Supreme Court[2].\n- **Kyle Rittenhouse Trial (2021):** Rittenhouse was charged with homicide after shootings during protests in Kenosha, Wisconsin. The trial featured heated debates over self-defense, gun rights, and vigilantism, with dramatic moments during cross-examination and closing arguments[2].\n- **Young Thug RICO Trial (ongoing):** The rapper's trial on racketeering charges has featured contentious legal arguments and confrontations between attorneys and the judge, highlighting the complexity and high stakes of modern criminal prosecutions[4].\n\n**Educational and Simulated Debates**\n\n- **Supreme Court Simulations:** Programs where students debate real Supreme Court cases, such as whether detainees at Guantanamo Bay have the right to challenge their detention, help illustrate the complexity and passion of courtroom debate, even outside actual trials[6].\n\n**Key Elements of Dramatic Courtroom Debates**\n- **High stakes:** The outcome often affects not just the parties involved but society at large.\n- **Clashing values:** Debates frequently center on constitutional rights, morality, or social policy.\n- **Charismatic advocates:** Legendary lawyers and judges often play pivotal roles, using rhetoric and legal reasoning to sway juries and the public.\n- **Public attention:** Many of these debates are broadcast or widely reported, amplifying their impact and drama.\n\n**Caveats and Limitations**\n- While the above cases are among the most famous, countless other debates—some less publicized—have also shaped legal doctrine and public opinion.\n- The most \"heated\" or \"dramatic\" debates are not always the most legally significant, and vice versa.\n\nThese cases and moments illustrate how courtroom debates can become defining events in legal and cultural history, combining legal reasoning, personal drama, and societal stakes[1][3][2][4][5]."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

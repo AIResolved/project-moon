@@ -1,0 +1,86 @@
+{
+  "id": "20275118-d86b-46b3-8582-6772ffd1ca4f",
+  "model": "sonar-pro",
+  "created": 1753629667,
+  "usage": {
+    "prompt_tokens": 95,
+    "completion_tokens": 372,
+    "total_tokens": 467,
+    "search_context_size": "high"
+  },
+  "citations": [
+    "https://dictionary.cambridge.org/us/dictionary/english/test",
+    "https://www.dictionary.com/browse/test",
+    "https://en.wikipedia.org/wiki/Test",
+    "https://fast.com",
+    "https://implicit.harvard.edu/implicit/takeatest.html",
+    "https://fiber.google.com/speedtest/",
+    "https://www.speedtest.net",
+    "https://englishtest.duolingo.com/applicants"
+  ],
+  "search_results": [
+    {
+      "title": "TEST | definition in the Cambridge English Dictionary",
+      "url": "https://dictionary.cambridge.org/us/dictionary/english/test",
+      "date": "2025-01-01",
+      "last_updated": "2025-07-01"
+    },
+    {
+      "title": "TEST Definition & Meaning - Dictionary.com",
+      "url": "https://www.dictionary.com/browse/test",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "Test - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Test",
+      "date": "2002-02-15",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Fast.com: Internet Speed Test",
+      "url": "https://fast.com",
+      "date": "2005-10-01",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Take a Test",
+      "url": "https://implicit.harvard.edu/implicit/takeatest.html",
+      "date": null,
+      "last_updated": "2025-07-02"
+    },
+    {
+      "title": "Internet Speed Test | Check Broadband Speed - Google Fiber",
+      "url": "https://fiber.google.com/speedtest/",
+      "date": "2024-05-27",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Speedtest by Ookla - The Global Broadband Speed Test",
+      "url": "https://www.speedtest.net",
+      "date": "2020-09-01",
+      "last_updated": "2025-06-16"
+    },
+    {
+      "title": "Test your English online - Duolingo English Test",
+      "url": "https://englishtest.duolingo.com/applicants",
+      "date": "2000-10-06",
+      "last_updated": null
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "The word **\"test\"** most commonly refers to a method of assessing knowledge, ability, or performance, typically through questions or practical activities[1][2]. It can also mean a scientific or medical procedure to evaluate a condition or function, or more broadly, any process or tool used to measure, examine, or evaluate something[1][2][3].\n\n**Key contexts for \"test\":**\n- **Education:** An exam or quiz to measure knowledge or skills (e.g., a math test)[1][2][3].\n- **Science and Medicine:** Procedures to check health or diagnose conditions (e.g., blood test, medical test)[1][2].\n- **Technology:** Assessing the performance or functionality of software, hardware, or networks (e.g., internet speed test, software testing)[3][4][6][7].\n- **Social Science:** Tools like the Implicit Association Test (IAT) to measure attitudes or biases[5].\n- **Sports:** Official matches, such as \"Test cricket,\" which are high-level international games[3].\n- **Other Uses:** The term can refer to a shell in biology, a legal evaluation, or even a river's name[3].\n\n**Examples:**\n- \"She scored 18 out of 20 in the spelling test.\"\n- \"The drug is still being tested and will not go into commercial production for at least two years.\"\n- \"FAST.com provides a simple internet speed test to estimate your ISP speed.\"[1][4]\n\n**Alternative meanings:** \"Test\" can also refer to specific people (e.g., a wrestler's ring name), artistic works (films, albums), or technical commands in computing[3].\n\nThe meaning of \"test\" depends on context, but it always involves some form of measurement, evaluation, or examination[1][2][3]."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

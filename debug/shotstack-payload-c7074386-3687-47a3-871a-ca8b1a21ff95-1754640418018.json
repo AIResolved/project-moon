@@ -1,0 +1,421 @@
+{
+  "metadata": {
+    "videoId": "c7074386-3687-47a3-871a-ca8b1a21ff95",
+    "timestamp": "2025-08-08T08:06:58.018Z",
+    "videoType": "Traditional",
+    "totalDuration": 86.346667,
+    "imageCount": 15,
+    "hasAudio": true,
+    "hasSubtitles": true,
+    "hasMusic": false,
+    "musicVolume": "N/A",
+    "muteStockVideo": true,
+    "overlayEffects": "dust, fire-particles"
+  },
+  "payload": {
+    "timeline": {
+      "tracks": [
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 0,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 10,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 20,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 30,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 40,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 50,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 60,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 70,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm",
+                "volume": 0
+              },
+              "start": 80,
+              "length": 6.3466669999999965,
+              "fit": "cover",
+              "opacity": 0.2
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 0,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 10,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 20,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 30,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 40,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 50,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 60,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 70,
+              "length": 10,
+              "fit": "cover",
+              "opacity": 0.2
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/drive-download-20250803T085638Z-1-001/Fire%20Particles%20Overlay.mov",
+                "volume": 0
+              },
+              "start": 80,
+              "length": 6.3466669999999965,
+              "fit": "cover",
+              "opacity": 0.2
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "caption",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio//storage/v1/object/public/audio/subtitles/subtitles_1754640378986.srt",
+                "font": {
+                  "family": "Montserrat",
+                  "size": 24,
+                  "color": "#ffffff",
+                  "weight": "700",
+                  "stroke": "#000000",
+                  "strokeWidth": 2
+                },
+                "background": {
+                  "color": "#ffffff",
+                  "opacity": 0,
+                  "padding": 12
+                },
+                "margin": {
+                  "top": 0.75,
+                  "left": 0.05,
+                  "right": 0.05
+                }
+              },
+              "start": 0,
+              "length": 86.346667
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/gen-1754639935376-ybmvbclro-chunk-1-1754640348989.jpg"
+              },
+              "start": 0,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/gen-1754639935376-ybmvbclro-chunk-2-1754640349018.jpg"
+              },
+              "start": 5.756444466666666,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/gen-1754639935376-ybmvbclro-chunk-3-1754640348970.jpg"
+              },
+              "start": 11.512888933333333,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/gen-1754639935376-ybmvbclro-chunk-4-1754640349009.jpg"
+              },
+              "start": 17.2693334,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/gen-1754639935376-ybmvbclro-chunk-5-1754640349010.jpg"
+              },
+              "start": 23.025777866666665,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/search-1754639953100-fr45ndthm-chunk-1-1754640348670.jpg"
+              },
+              "start": 28.78222233333333,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/search-1754639953100-fr45ndthm-chunk-2-1754640349681.jpg"
+              },
+              "start": 34.5386668,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/search-1754639953100-fr45ndthm-chunk-3-1754640349943.jpg"
+              },
+              "start": 40.295111266666666,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/search-1754639953100-fr45ndthm-chunk-4-1754640349940.jpg"
+              },
+              "start": 46.05155573333333,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/search-1754639953100-fr45ndthm-chunk-5-1754640349880.jpg"
+              },
+              "start": 51.808000199999995,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://videos.pexels.com/video-files/4988847/4988847-hd_1280_720_30fps.mp4",
+                "volume": 0
+              },
+              "start": 57.56444466666666,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://videos.pexels.com/video-files/6954267/6954267-uhd_2732_1440_25fps.mp4",
+                "volume": 0
+              },
+              "start": 63.32088913333333,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://videos.pexels.com/video-files/2887463/2887463-hd_1920_1080_25fps.mp4",
+                "volume": 0
+              },
+              "start": 69.0773336,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://videos.pexels.com/video-files/2887463/2887463-hd_1920_1080_25fps.mp4",
+                "volume": 0
+              },
+              "start": 74.83377806666667,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://videos.pexels.com/video-files/4232959/4232959-hd_1920_1080_24fps.mp4",
+                "volume": 0
+              },
+              "start": 80.59022253333333,
+              "length": 5.756444466666666,
+              "fit": "cover"
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://wbbhdqthxqdzzdandrfy.supabase.co/storage/v1/object/public/audio/voiceover/joined/original-1754640372302.wav",
+                "volume": 1
+              },
+              "start": 0,
+              "length": 86.346667
+            }
+          ]
+        }
+      ]
+    },
+    "output": {
+      "format": "mp4",
+      "size": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  }
+}

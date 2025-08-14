@@ -1,0 +1,85 @@
+{
+  "id": "3e8a5653-1198-4663-8bfb-11492b4eabd4",
+  "model": "sonar-pro",
+  "created": 1754145805,
+  "usage": {
+    "prompt_tokens": 97,
+    "completion_tokens": 263,
+    "total_tokens": 360,
+    "search_context_size": "high",
+    "cost": {
+      "input_tokens_cost": 0.000291,
+      "output_tokens_cost": 0.003945,
+      "request_cost": 0.014,
+      "total_cost": 0.018236
+    }
+  },
+  "citations": [
+    "https://en.wikipedia.org/wiki/Real_Madrid_CF",
+    "https://www.sports-king.com/dictionary.php?q=los-blancos",
+    "https://www.wildrecordseurope.com/bands/los-blancos.html",
+    "https://open.spotify.com/artist/0Yxlpso76AzLasEic69leP",
+    "https://www.instagram.com/reel/DMyHD_Voyjz/",
+    "https://www.instagram.com/blancoslive/",
+    "http://www.oldboyrecords.com/losblancos"
+  ],
+  "search_results": [
+    {
+      "title": "Real Madrid CF - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Real_Madrid_CF",
+      "date": "2001-12-19",
+      "last_updated": "2025-07-31"
+    },
+    {
+      "title": "Definition of Los Blancos - Sports King",
+      "url": "https://www.sports-king.com/dictionary.php?q=los-blancos",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "Los Blancos - Wild Records Europe",
+      "url": "https://www.wildrecordseurope.com/bands/los-blancos.html",
+      "date": null,
+      "last_updated": "2024-11-12"
+    },
+    {
+      "title": "Los Blancos | Spotify",
+      "url": "https://open.spotify.com/artist/0Yxlpso76AzLasEic69leP",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "DAZN Football on Instagram: \"Los Blancos in full effect ...",
+      "url": "https://www.instagram.com/reel/DMyHD_Voyjz/",
+      "date": "2025-07-31",
+      "last_updated": null
+    },
+    {
+      "title": "Los Blancos Live (@blancoslive) • Instagram photos and videos",
+      "url": "https://www.instagram.com/blancoslive/",
+      "date": null,
+      "last_updated": null
+    },
+    {
+      "title": "Los Blancos - Old Boy Records",
+      "url": "http://www.oldboyrecords.com/losblancos",
+      "date": null,
+      "last_updated": "2025-03-12"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "\"Los Blancos\" most commonly refers to Real Madrid CF, the Spanish professional football club, and is a widely recognized nickname meaning \"The Whites,\" derived from the club's iconic all-white home kit[1][2]. The term is deeply associated with Real Madrid's identity and history in both Spanish and international football.\n\nReal Madrid, founded in 1902, has worn an almost purely white kit since its inception, which led to the adoption of the nickname \"Los Blancos\" (\"The Whites\") among fans, media, and the football community[1][2]. The club is one of the most successful and storied in the world, with a fierce rivalry against FC Barcelona known as \"El Clásico,\" reflecting broader cultural and political tensions within Spain[1].\n\nWhile \"Los Blancos\" is most famously linked to Real Madrid, the term can also refer to other entities. For example, there are music bands named Los Blancos, including a group with roots in soul, R&B, and rock 'n' roll[3][4][7]. However, in most sports and cultural contexts, especially in Europe and Latin America, \"Los Blancos\" is synonymous with Real Madrid CF.\n\nAlternative meanings are possible in other contexts, but none are as globally prominent as the football club association."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      }
+    }
+  ]
+}

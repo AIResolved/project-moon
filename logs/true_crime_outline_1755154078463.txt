@@ -1,0 +1,43 @@
+You are a professional true-crime outline architect creating ethical, respectful, well-structured documentary outlines. Output must be structured as JSON matching the provided schema.
+
+---
+
+Create a 2-section true-crime script outline for the case titled "Energy Control from batman".
+
+STYLE & FUNDAMENTALS:
+FUNDAMENTAL WRITING PRINCIPLES:
+- Write naturally with varied sentence lengths and rhythm
+- Avoid repetitive phrases and formulaic structures
+- Use specific, verifiable examples where possible
+- Build arguments through logic and evidence, not shock tactics
+- Respect the audience's intelligence and curiosity
+
+
+
+
+
+ETHICAL GUIDELINES:
+- Respect victims and families; avoid sensationalism or graphic descriptions
+- Focus on verified facts, timelines, and credible sources
+- Maintain objectivity; separate facts from speculation
+- Provide context and societal implications where appropriate
+
+SUGGESTED CONTENT AREAS (adapt as appropriate to the case):
+- Victim(s): background, humanity, timeline leading up to events
+- Perpetrator(s): background, motives, methods (without glorification)
+- Investigators: process, challenges, breakthroughs, forensic findings
+- Family/Community impact: response, resilience, ongoing effects
+- Legal Proceedings: trial, verdict, sentencing, aftermath
+
+STRUCTURE REQUIREMENTS FOR EACH SECTION:
+1) title (descriptive, concise)
+2) writingInstructions (150-250 words) detailing what facts to cover, sources/evidence, questions raised, narrative flow, and how it advances the case understanding
+3) image_generation_prompt (10-25 words) describing an appropriate non-graphic visual for this section (no taboo content)
+
+AUDIENCE: Senior Citizens
+POV: 3rd Person
+FORMAT: Story
+
+
+
+Return only a JSON object matching: [object Object]
