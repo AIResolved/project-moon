@@ -213,6 +213,17 @@ export const audioSlice = createSlice({
         state.audioProgress.phase = 'waiting';
       }
     },
+
+    // Record a single chunk success to drive per-chunk progress updates
+    recordChunkSuccess: (state, action: PayloadAction<{ url: string }>) => {
+      state.successfulChunkUrls.push(action.payload.url)
+      state.audioProgress.completed = state.successfulChunkUrls.length
+      state.batchState.processedChunks += 1
+      // Keep phase as batching while generating
+      if (state.audioProgress.phase === 'idle') {
+        state.audioProgress.phase = 'batching'
+      }
+    },
     
     // Check if wait time is over and ready for next batch
     checkWaitStatus: (state) => {
@@ -397,6 +408,7 @@ export const {
   startAudioGeneration,
   startBatch,
   completeBatch,
+  recordChunkSuccess,
   checkWaitStatus,
   completeAudioGeneration,
   addSubtitlesToGeneration,

@@ -19,6 +19,7 @@ import {
   saveGenerationToHistory,
   setIsGeneratingSubtitles
 } from '../lib/features/audio/audioSlice'
+import { recordChunkSuccess } from '../lib/features/audio/audioSlice'
 import { VoiceManager } from './voice-manager'
 import { AIVoice } from '@/app/api/ai-voices/route'
 
@@ -496,6 +497,8 @@ export function AudioGenerator() {
         }
 
         chunkUrls.push(chunkData.audioUrl);
+        // Update per-chunk progress immediately
+        dispatch(recordChunkSuccess({ url: chunkData.audioUrl }))
         console.log(`✅ Chunk ${i + 1} completed: ${chunkData.audioUrl}`);
 
         // Update progress (checkWaitStatus doesn't take parameters)

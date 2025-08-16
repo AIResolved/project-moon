@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scriptSectionsResponseSchema } from "../../../../types/script-section";
 import { createModelInstance } from "../../../../lib/utils/model-factory";
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
+import { readFileSync, existsSync, mkdirSync, writeFileSync, write } from "fs";
 import { join } from "path";
 
 export async function POST(request: NextRequest) {
@@ -15,16 +15,14 @@ export async function POST(request: NextRequest) {
       modelName = "gpt-4o-mini",
       audience = "",
       povSelection = "3rd",
-      scriptFormat = "Documentary"
+      scriptFormat = "Documentary",
+      sectionPrompt = ""
     } = await request.json();
 
     if (!title) {
       return NextResponse.json({ error: "Missing required field: title" }, { status: 400 });
     }
 
-    // Read style file for fundamentals
-    const stylePath = join(process.cwd(), 'lib', 'data', 'feeder_script_style.txt');
-    const styleContent = readFileSync(stylePath, 'utf-8');
 
     const model = createModelInstance(modelName, 0.7) as any;
 
@@ -42,9 +40,16 @@ export async function POST(request: NextRequest) {
 
     const system = `You are a professional true-crime outline architect creating ethical, respectful, well-structured documentary outlines. Output must be structured as JSON matching the provided schema.`;
 
-    const user = `Create a ${targetSections}-section true-crime script outline for the case titled "${title}".
+    // Hard-enforce intro hook when signaled in sectionPrompt
+    let introHookInstruction = "";
+    if (sectionPrompt && /intro\s*hook/i.test(sectionPrompt)) {
+      const m = sectionPrompt.match(/(\d{1,4})\s*words?/i);
+      const maxWords = m ? Math.max(10, Math.min(200, parseInt(m[1] || "65"))) : 65;
+      introHookInstruction = `\n\nINTRO HOOK REQUIREMENT (MANDATORY):\n- Section 1 MUST be a short, gripping intro hook (max ${maxWords} words). In the title, it must be apparent that it is an intro hook.\n- Purpose: capture attention, set tone, hint the case without spoilers, and invite curiosity.\n- Keep respectful, non-graphic wording.\n- Following sections should continue with the investigation/story in sequence.
+      instruct the llm to write max ${maxWords} words for that section`;
+    }
 
-STYLE & FUNDAMENTALS:\n${styleContent}
+    const user = `Create a ${targetSections}-section true-crime script outline for the case titled "${title}".
 
 ETHICAL GUIDELINES:
 - Respect victims and families; avoid sensationalism or graphic descriptions
@@ -59,6 +64,8 @@ SUGGESTED CONTENT AREAS (adapt as appropriate to the case):
 - Family/Community impact: response, resilience, ongoing effects
 - Legal Proceedings: trial, verdict, sentencing, aftermath
 
+${introHookInstruction}
+
 STRUCTURE REQUIREMENTS FOR EACH SECTION:
 1) title (descriptive, concise)
 2) writingInstructions (150-250 words) detailing what facts to cover, sources/evidence, questions raised, narrative flow, and how it advances the case understanding
@@ -67,6 +74,8 @@ STRUCTURE REQUIREMENTS FOR EACH SECTION:
 AUDIENCE: ${audience || 'general audience'}
 POV: ${povSelection}
 FORMAT: ${scriptFormat}
+
+${sectionPrompt && String(sectionPrompt).trim() ? `SECTION RULES:\n${String(sectionPrompt).trim()}` : ""}
 
 ${extra.join('\n\n')}
 

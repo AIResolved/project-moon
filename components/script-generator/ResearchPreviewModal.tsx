@@ -77,39 +77,41 @@ export function ResearchPreviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-[#0B0F14] text-[#E5ECF3] border-[#1F2937]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-blue-600" />
+          <DialogTitle className="flex items-center gap-2 text-[#E5ECF3]">
+            <Eye className="h-5 w-5 text-[#60A5FA]" />
             Research Context Preview
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-[#9FB3C8]">
             This is exactly what research context will be provided to the AI when generating your script.
-            <div className="flex items-center gap-2 mt-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                <FileText className="h-3 w-3 mr-1" />
-                {appliedResearchCount} Research Item{appliedResearchCount !== 1 ? 's' : ''} Applied
-              </Badge>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                {researchContext.length} Characters
-              </Badge>
-            </div>
           </DialogDescription>
         </DialogHeader>
 
+        {/* Meta badges: must not be inside <p> (DialogDescription) to avoid div-in-p hydration issues */}
+        <div className="flex items-center gap-2 mt-2">
+          <Badge variant="outline" className="bg-[#0F172A] text-[#93C5FD] border-[#1F2937]">
+            <FileText className="h-3 w-3 mr-1" />
+            {appliedResearchCount} Research Item{appliedResearchCount !== 1 ? 's' : ''} Applied
+          </Badge>
+          <Badge variant="outline" className="bg-[#0F172A] text-[#86EFAC] border-[#1F2937]">
+            {researchContext.length} Characters
+          </Badge>
+        </div>
+
         <ScrollArea className="h-[500px] pr-4">
           {!researchContext ? (
-            <div className="text-center py-8 text-gray-500">
-              <Brain className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8 text-[#6B7280]">
+              <Brain className="h-12 w-12 mx-auto mb-4 text-[#374151]" />
               <p className="text-lg font-medium">No Research Applied</p>
               <p className="text-sm">Apply research from the YouTube Research Assistant to see the context here.</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="font-bold text-blue-900 mb-2">🧠 AI Context Information</h3>
-                <p className="text-sm text-blue-700">
+              <div className="bg-[#0F172A] p-4 rounded-lg border border-[#1F2937]">
+                <h3 className="font-bold text-[#E5ECF3] mb-2">🧠 AI Context Information</h3>
+                <p className="text-sm text-[#9FB3C8]">
                   This research data will be automatically included when generating your script to ensure it's backed by insights and analysis.
                 </p>
               </div>
@@ -117,14 +119,14 @@ export function ResearchPreviewModal({
               {/* Research Sections */}
               {researchSections.length > 0 ? (
                 <div className="space-y-4">
-                  <h4 className="font-bold text-gray-900 text-lg border-b border-gray-200 pb-2">
+                  <h4 className="font-bold text-[#E5ECF3] text-lg border-b border-[#1F2937] pb-2">
                     📚 YOUTUBE VIDEO ANALYSIS
                   </h4>
                   
                   {researchSections.map((section, index) => (
-                    <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <h5 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                    <div key={index} className="bg-[#0F172A] border border-[#1F2937] rounded-lg p-4 shadow-sm">
+                      <h5 className="font-semibold text-[#D1D5DB] mb-3 flex items-center gap-2">
+                        <span className="bg-[#1E3A8A] text-[#93C5FD] text-xs font-medium px-2 py-1 rounded">
                           Analysis {index + 1}
                         </span>
                         {section.title}
@@ -132,21 +134,21 @@ export function ResearchPreviewModal({
                       
                       {section.theme && (
                         <div className="mb-3">
-                          <div className="font-medium text-gray-700 mb-1">Overall Theme:</div>
-                          <div className="text-gray-600 bg-gray-50 p-2 rounded text-sm">{section.theme}</div>
+                          <div className="font-medium text-[#9FB3C8] mb-1">Overall Theme:</div>
+                          <div className="text-[#9FB3C8] bg-[#0B1220] p-2 rounded text-sm">{section.theme}</div>
                         </div>
                       )}
                       
                       {section.insights.length > 0 && (
                         <div className="mb-3">
-                          <div className="font-medium text-gray-700 mb-2 flex items-center gap-1">
-                            <Lightbulb className="h-4 w-4 text-yellow-500" />
+                          <div className="font-medium text-[#9FB3C8] mb-2 flex items-center gap-1">
+                            <Lightbulb className="h-4 w-4 text-yellow-400" />
                             Key Insights:
                           </div>
                           <ul className="space-y-1">
                             {section.insights.map((insight, i) => (
-                              <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                                <span className="text-blue-500 font-bold text-xs mt-1">{i + 1}.</span>
+                              <li key={i} className="text-sm text-[#9FB3C8] flex items-start gap-2">
+                                <span className="text-[#60A5FA] font-bold text-xs mt-1">{i + 1}.</span>
                                 <span>{insight}</span>
                               </li>
                             ))}
@@ -156,14 +158,14 @@ export function ResearchPreviewModal({
                       
                       {section.characterInsights.length > 0 && (
                         <div className="mb-3">
-                          <div className="font-medium text-gray-700 mb-2 flex items-center gap-1">
-                            <span className="text-purple-500">👥</span>
+                          <div className="font-medium text-[#9FB3C8] mb-2 flex items-center gap-1">
+                            <span className="text-[#C084FC]">👥</span>
                             Character Insights:
                           </div>
                           <ul className="space-y-1">
                             {section.characterInsights.map((insight, i) => (
-                              <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                                <span className="text-purple-500 font-bold text-xs mt-1">{i + 1}.</span>
+                              <li key={i} className="text-sm text-[#9FB3C8] flex items-start gap-2">
+                                <span className="text-[#C084FC] font-bold text-xs mt-1">{i + 1}.</span>
                                 <span>{insight}</span>
                               </li>
                             ))}
@@ -173,14 +175,14 @@ export function ResearchPreviewModal({
                       
                       {section.conflicts.length > 0 && (
                         <div className="mb-3">
-                          <div className="font-medium text-gray-700 mb-2 flex items-center gap-1">
-                            <span className="text-red-500">⚡</span>
+                          <div className="font-medium text-[#9FB3C8] mb-2 flex items-center gap-1">
+                            <span className="text-[#F87171]">⚡</span>
                             Dramatic Conflicts:
                           </div>
                           <ul className="space-y-1">
                             {section.conflicts.map((conflict, i) => (
-                              <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                                <span className="text-red-500 font-bold text-xs mt-1">{i + 1}.</span>
+                              <li key={i} className="text-sm text-[#9FB3C8] flex items-start gap-2">
+                                <span className="text-[#F87171] font-bold text-xs mt-1">{i + 1}.</span>
                                 <span>{conflict}</span>
                               </li>
                             ))}
@@ -190,14 +192,14 @@ export function ResearchPreviewModal({
                       
                       {section.storyIdeas.length > 0 && (
                         <div className="mb-3">
-                          <div className="font-medium text-gray-700 mb-2 flex items-center gap-1">
-                            <Target className="h-4 w-4 text-green-500" />
+                          <div className="font-medium text-[#9FB3C8] mb-2 flex items-center gap-1">
+                            <Target className="h-4 w-4 text-[#34D399]" />
                             Story Ideas:
                           </div>
                           <ul className="space-y-1">
                             {section.storyIdeas.map((idea, i) => (
-                              <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                                <span className="text-green-500 font-bold text-xs mt-1">{i + 1}.</span>
+                              <li key={i} className="text-sm text-[#9FB3C8] flex items-start gap-2">
+                                <span className="text-[#34D399] font-bold text-xs mt-1">{i + 1}.</span>
                                 <span>{idea}</span>
                               </li>
                             ))}
@@ -206,21 +208,21 @@ export function ResearchPreviewModal({
                       )}
                       
                       {section.creativePrompt && (
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded border border-purple-200">
-                          <div className="font-medium text-purple-700 mb-1 flex items-center gap-1">
-                            <span className="text-purple-500">✨</span>
+                        <div className="bg-[#0B1220] p-3 rounded border border-[#1F2937]">
+                          <div className="font-medium text-[#C084FC] mb-1 flex items-center gap-1">
+                            <span className="text-[#C084FC]">✨</span>
                             Creative Prompt:
                           </div>
-                          <div className="text-sm text-purple-600">{section.creativePrompt}</div>
+                          <div className="text-sm text-[#D8B4FE]">{section.creativePrompt}</div>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-bold text-gray-700 mb-2">Raw Research Context:</h4>
-                  <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono bg-white p-3 rounded border overflow-auto max-h-40">
+                <div className="bg-[#0F172A] p-4 rounded-lg border border-[#1F2937]">
+                  <h4 className="font-bold text-[#E5ECF3] mb-2">Raw Research Context:</h4>
+                  <pre className="text-xs text-[#9FB3C8] whitespace-pre-wrap font-mono bg-[#0B1220] p-3 rounded border border-[#1F2937] overflow-auto max-h-40">
                     {researchContext}
                   </pre>
                 </div>
@@ -229,8 +231,8 @@ export function ResearchPreviewModal({
           )}
         </ScrollArea>
 
-        <div className="flex justify-end pt-4 border-t">
-          <Button onClick={onClose} variant="outline">
+        <div className="flex justify-end pt-4 border-t border-[#1F2937]">
+          <Button onClick={onClose} variant="outline" className="bg-[#111827] text-[#E5ECF3] border-[#374151] hover:bg-[#0B0F14]">
             Close Preview
           </Button>
         </div>

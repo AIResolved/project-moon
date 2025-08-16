@@ -15,9 +15,8 @@ export function PepeForm() {
   const { scriptSections, fullScript } = useAppSelector(state => state.scripts)
 
   const [title, setTitle] = useState('')
-  const [wordCount, setWordCount] = useState(2400)
-  const [audience, setAudience] = useState('')
-  const [emotionalTone, setEmotionalTone] = useState('')
+  const [wordCount, setWordCount] = useState(1000)
+  const [theme, setTheme] = useState('')
   const [additionalPrompt, setAdditionalPrompt] = useState('')
   const [selectedModel, setSelectedModel] = useState('gpt-5')
 
@@ -35,9 +34,8 @@ export function PepeForm() {
           title,
           wordCount: Math.max(800, wordCount),
           themeId: '',
+          theme,
           additionalPrompt,
-          emotionalTone,
-          targetAudience: audience,
           forbiddenWords: '',
           selectedModel,
           uploadedStyle: '',
@@ -77,8 +75,7 @@ export function PepeForm() {
           title,
           sections: scriptSections,
           selectedModel,
-          emotionalTone,
-          targetAudience: audience,
+          theme,
           forbiddenWords: '',
           additionalPrompt
         })
@@ -108,45 +105,33 @@ export function PepeForm() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Pepe Variant — Configuration</CardTitle>
-          <CardDescription>Outline and full script generation using the Pepe prompts.</CardDescription>
+          <CardTitle>AI Story Niche</CardTitle>
+          <CardDescription>Create AI-driven story scripts with a minimal, focused setup.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Video Title</Label>
-              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter title" />
+              <Label htmlFor="title">Title</Label>
+              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter a title for your script" />
+              <p className="text-xs text-muted-foreground">Required for regeneration</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="words">Target Word Count</Label>
-              <Input id="words" type="number" value={wordCount} onChange={(e) => setWordCount(parseInt(e.target.value) || 2400)} />
+              <Label htmlFor="words">Word Count</Label>
+              <Input id="words" type="number" value={wordCount} onChange={(e) => setWordCount(parseInt(e.target.value) || 1000)} />
+              <p className="text-xs text-muted-foreground">This will generate {Math.max(1, Math.floor((Number(wordCount) || 0) / 1000))} script sections</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label>Emotional Tone</Label>
-              <Input value={emotionalTone} onChange={(e) => setEmotionalTone(e.target.value)} placeholder="e.g., urgent, intimate" />
-            </div>
-            <div className="space-y-2">
-              <Label>Target Audience</Label>
-              <Input value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="e.g., entrepreneurs" />
-            </div>
-            <div className="space-y-2">
-            <Label>Model</Label>
-            <select className="border rounded px-3 py-2 bg-background" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
-              <option value="gpt-5">GPT-5</option>
-              <option value="gpt-5-mini">GPT-5 Mini</option>
-              <option value="gpt-5-nano">GPT-5 Nano</option>
-              <option value="gpt-4o">GPT-4o</option>
-              <option value="gpt-4o-mini">GPT-4o Mini</option>
-            </select>
+              <Label>Story Theme</Label>
+              <Input value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="E.g., Mystery, Romance, Sci-Fi" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Additional Instructions</Label>
-            <Textarea rows={3} value={additionalPrompt} onChange={(e) => setAdditionalPrompt(e.target.value)} placeholder="Guidance for this variant" />
+            <Label>Additional Instructions (Optional)</Label>
+            <Textarea rows={3} value={additionalPrompt} onChange={(e) => setAdditionalPrompt(e.target.value)} placeholder="Add any specific instructions for the AI to follow when generating your script" />
           </div>
 
           <div className="flex items-center gap-2">

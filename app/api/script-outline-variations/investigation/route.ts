@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scriptSectionsResponseSchema } from "../../../../types/script-section";
 import { createModelInstance } from "../../../../lib/utils/model-factory";
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
 export async function POST(request: NextRequest) {
@@ -21,10 +21,6 @@ export async function POST(request: NextRequest) {
     // Sections by desired word count (~800 words per section)
     const numSections = Math.max(1, Math.ceil((Number(wordCount) || 2400) / 800));
 
-    // Style fallback
-    const stylePath = join(process.cwd(), 'lib', 'data', 'feeder_script_style.txt');
-    const styleContent = readFileSync(stylePath, 'utf-8');
-
     const model = createModelInstance(selectedModel, 0.7) as any;
 
     const forbid = forbiddenWords
@@ -39,8 +35,6 @@ export async function POST(request: NextRequest) {
 
 TITLE: "${title}"
 TARGET SECTIONS: ${numSections}
-
-STYLE & PRINCIPLES:\n${styleContent}
 
 INVESTIGATIVE APPROACH:
 - Open with the most compelling question or anomaly

@@ -214,12 +214,11 @@ export function CurrentGenerationCard({
           </div>
         )}
 
-        {/* Subtitles */}
         {currentGeneration.subtitlesUrl && (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
             <div className="flex items-center gap-2 mb-3">
-              <Subtitles className="h-5 w-5 text-blue-400" />
-              <span className="font-medium text-blue-300">Subtitles Generated</span>
+              <Subtitles className="h-5 w-5 text-blue-200" />
+              <span className="font-medium text-blue-200">Subtitles Generated</span>
             </div>
             <div className="flex gap-2">
               <Button 

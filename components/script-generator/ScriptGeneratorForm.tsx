@@ -134,7 +134,7 @@ export function ScriptGeneratorForm({
                 Load Cached Data
               </Button>
             </ScaleOnHover>
-            <ScaleOnHover>
+            {/* <ScaleOnHover>
               <Button
                 variant="outline"
                 onClick={onOpenPromptHistory}
@@ -143,7 +143,7 @@ export function ScriptGeneratorForm({
                 <History className="h-4 w-4" />
                 Prompt History
               </Button>
-            </ScaleOnHover>
+            </ScaleOnHover> */}
           </div>
         </div>
       </StaggerItem>
@@ -285,47 +285,6 @@ export function ScriptGeneratorForm({
         </div>
       </StaggerItem>
 
-      {/* Research Context Box */}
-      {researchContext && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="researchContext" className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Applied Research Context
-            </Label>
-            <div className="flex gap-2">
-              <button
-                onClick={onPreviewResearch}
-                className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
-              >
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                Preview Research
-              </button>
-              <button
-                onClick={onClearResearch}
-                className="text-red-500 hover:text-red-700 text-sm"
-              >
-                Clear Research
-              </button>
-            </div>
-          </div>
-          <Textarea
-            id="researchContext"
-            value={researchContext}
-            onChange={(e) => onResearchContextChange(e.target.value)}
-            className="min-h-[120px] bg-blue-50 border-blue-200"
-            placeholder="Research context will appear here when applied from YouTube Research Assistant"
-          />
-          <p className="text-xs text-blue-600">
-            This research data will be automatically included when generating your script to ensure it's backed by insights and analysis.
-          </p>
-        </div>
-      )}
 
       <div className="space-y-4">
         <div className="space-y-2">

@@ -32,8 +32,9 @@ import { LoadCachedDataModal } from "./script-generator/LoadCachedDataModal";
 import { Button } from "./ui/button";
 import { PepeScriptGenerator } from "./script-variations/pepe/index";
 import { InvestigationForm } from "./script-variations/investigation";
-import { OptionsGenerator } from "./script-variations/options";
-import { Investigation2Form } from "./script-variations/investigation-2";
+import { OptionsGenerator } from "./script-variations/investigation-1";
+import { Philosophy2Form } from "./script-variations/philosophy-2";
+
 // True-crime uses the same UI as original; only the full-script route differs
 import { 
   saveScriptFormDataToLocalStorage,
@@ -43,6 +44,16 @@ import {
   type CachedScriptSections,
   type CachedFullScript
 } from "@/utils/script-storage-utils";
+
+// True-crime variation specific components (aliased)
+import { ScriptGeneratorForm as TrueCrimeScriptGeneratorForm } from "./script-variations/true-crime/ScriptGeneratorForm";
+import { ScriptSectionsDisplay as TrueCrimeScriptSectionsDisplay } from "./script-variations/true-crime/ScriptSectionsDisplay";
+import { FullScriptDisplay as TrueCrimeFullScriptDisplay } from "./script-variations/true-crime/FullScriptDisplay";
+import { PromptHistoryModal as TrueCrimePromptHistoryModal } from "./script-variations/true-crime/PromptHistoryModal";
+import { CTAModal as TrueCrimeCTAModal } from "./script-variations/true-crime/CTAModal";
+import { HookModal as TrueCrimeHookModal } from "./script-variations/true-crime/HookModal";
+import { ResearchPreviewModal as TrueCrimeResearchPreviewModal } from "./script-variations/true-crime/ResearchPreviewModal";
+import { LoadCachedDataModal as TrueCrimeLoadCachedDataModal } from "./script-variations/true-crime/LoadCachedDataModal";
 
 interface OpenAIModel {
   id: string;
@@ -97,16 +108,8 @@ const ScriptGenerator: React.FC = () => {
   const [povSelection, setPovSelection] = useState<string>("3rd Person");
   const [scriptFormat, setScriptFormat] = useState<string>("Story");
   const [audience, setAudience] = useState<string>("");
-  const [promptVariant, setPromptVariant] = useState<'original' | 'pepe' | 'investigation' | 'true-crime' | 'options' | 'investigation-2' | 'philosophy-2'>('original');
-  const [presetTopic, setPresetTopic] = useState<string>("");
-  const PRESET_TOPICS = [
-    "Energy Control",
-    "The truth about life, death & the afterlife",
-    "Conspiracy Controlling Reality",
-    "Escaping Simulation",
-    "Time Loops, Alternate Realities"
-  ];
-  
+  const [promptVariant, setPromptVariant] = useState<'original' | 'pepe' | 'investigation' | 'true-crime' | 'options' | 'philosophy-1' | 'philosophy-2'>('original');
+
   // State for prompt history sidebar
   const [isPromptHistoryOpen, setIsPromptHistoryOpen] = useState(false);
   
@@ -275,11 +278,11 @@ const ScriptGenerator: React.FC = () => {
       // Route based on selected prompt variant
       // Route outline generation based on selected variant
       let endpoint = "/api/generate-script";
-      if (promptVariant === 'pepe' || promptVariant === 'options' || promptVariant === 'philosophy-2') {
+      if (promptVariant === 'pepe' || promptVariant === 'options' || promptVariant === 'philosophy-1' || promptVariant === 'philosophy-2') {
         endpoint = "/api/script-outline-variations/pepe";
       } else if (promptVariant === 'true-crime') {
         endpoint = "/api/script-outline-variations/true-crime";
-      } else if (promptVariant === 'investigation' || promptVariant === 'investigation-2') {
+      } else if (promptVariant === 'investigation') {
         endpoint = "/api/script-outline-variations/investigation";
       }
 
@@ -370,8 +373,8 @@ const ScriptGenerator: React.FC = () => {
       
       const fullScriptEndpoint =
         promptVariant === 'true-crime' ? "/api/full-script-variations/true-crime" :
-        (promptVariant === 'pepe' || promptVariant === 'options' || promptVariant === 'philosophy-2') ? "/api/full-script-variations/pepe" :
-        (promptVariant === 'investigation' || promptVariant === 'investigation-2') ? "/api/full-script-variations/investigation" :
+        (promptVariant === 'pepe' || promptVariant === 'options' || promptVariant === 'philosophy-1' || promptVariant === 'philosophy-2') ? "/api/full-script-variations/pepe" :
+        (promptVariant === 'investigation') ? "/api/full-script-variations/investigation" :
         "/api/generate-full-script";
 
       const response = await fetch(fullScriptEndpoint, {
@@ -1018,21 +1021,28 @@ const ScriptGenerator: React.FC = () => {
         )}
         
         <TabsContent value="form">
-          {/* Variant selector */}
-          <div className="mb-4 flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Generator:</span>
-            <select
-              className="border rounded px-2 py-1 text-sm bg-background"
-              value={promptVariant}
-              onChange={(e) => setPromptVariant(e.target.value as any)}
-            >
-              <option value="original">NEW Script</option>
-              <option value="pepe">Philosophy niche</option>
-              <option value="investigation">Investigation Niche</option>
-              <option value="true-crime">True Crime Niche</option>
-              <option value="philosophy-2">Philosophy Niche 2</option>
-              <option value="investigation-2">Investigation Niche 2</option>
-            </select>
+          {/* Variant selector + global research preview */}
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Generator:</span>
+              <select
+                className="border rounded px-2 py-1 text-sm bg-background"
+                value={promptVariant}
+                onChange={(e) => setPromptVariant(e.target.value as any)}
+              >
+                <option value="original">NEW Script</option>
+                <option value="pepe">AI Story Niche</option>
+                <option value="investigation">Investigation Niche</option>
+                <option value="true-crime">True Crime Niche</option>
+                <option value="philosophy-1">Philosophy Story Niche</option>
+                <option value="philosophy-2">Philosophy Niche 2</option>
+              </select>
+            </div>
+            {getAppliedResearchCount() > 0 && (
+              <Button variant="outline" onClick={handlePreviewResearch}>
+                Research Preview ({getAppliedResearchCount()})
+              </Button>
+            )}
           </div>
 
 
@@ -1041,7 +1051,7 @@ const ScriptGenerator: React.FC = () => {
           ) : promptVariant === 'investigation' ? (
             <InvestigationForm />
           ) : promptVariant === 'true-crime' ? (
-            <ScriptGeneratorForm
+            <TrueCrimeScriptGeneratorForm
               title={title}
               targetSections={targetSections}
               theme={theme}
@@ -1078,10 +1088,10 @@ const ScriptGenerator: React.FC = () => {
               hasFullScript={hasFullScript}
               scriptGenerationError={scriptGenerationError}
             />
-          ) : (promptVariant === 'options' || promptVariant === 'philosophy-2') ? (
+          ) : (promptVariant === 'options' || promptVariant === 'philosophy-1') ? (
             <OptionsGenerator />
-          ) : promptVariant === 'investigation-2' ? (
-            <Investigation2Form />
+          ) : (promptVariant === 'philosophy-2') ? (
+            <Philosophy2Form />
           ) : (
             <ScriptGeneratorForm
             title={title}
@@ -1136,87 +1146,183 @@ const ScriptGenerator: React.FC = () => {
         )}
       </Tabs>
 
-      <ScriptSectionsDisplay
-        scriptSections={scriptSections}
-        hasScriptSections={hasScriptSections}
-        editingSectionIndex={editingSectionIndex}
-        editingSectionData={editingSectionData}
-        onStartEditingSection={startEditingSection}
-        onSaveEditingSection={saveEditingSection}
-        onCancelEditingSection={cancelEditingSection}
-        onUpdateEditingSectionField={updateEditingSectionField}
-        onRegenerateSegment={handleRegenerateSegment}
-        onOpenCtaModal={openCtaModal}
-        onOpenHookModal={openHookModal}
-        onRemoveCta={removeCta}
-        onRemoveHook={removeHook}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimeScriptSectionsDisplay
+          scriptSections={scriptSections}
+          hasScriptSections={hasScriptSections}
+          editingSectionIndex={editingSectionIndex}
+          editingSectionData={editingSectionData}
+          onStartEditingSection={startEditingSection}
+          onSaveEditingSection={saveEditingSection}
+          onCancelEditingSection={cancelEditingSection}
+          onUpdateEditingSectionField={updateEditingSectionField}
+          onRegenerateSegment={handleRegenerateSegment}
+          onOpenCtaModal={openCtaModal}
+          onOpenHookModal={openHookModal}
+          onRemoveCta={removeCta}
+          onRemoveHook={removeHook}
+        />
+      ) : (
+        <ScriptSectionsDisplay
+          scriptSections={scriptSections}
+          hasScriptSections={hasScriptSections}
+          editingSectionIndex={editingSectionIndex}
+          editingSectionData={editingSectionData}
+          onStartEditingSection={startEditingSection}
+          onSaveEditingSection={saveEditingSection}
+          onCancelEditingSection={cancelEditingSection}
+          onUpdateEditingSectionField={updateEditingSectionField}
+          onRegenerateSegment={handleRegenerateSegment}
+          onOpenCtaModal={openCtaModal}
+          onOpenHookModal={openHookModal}
+          onRemoveCta={removeCta}
+          onRemoveHook={removeHook}
+        />
+      )}
 
-      <FullScriptDisplay
-        fullScript={fullScript}
-        scriptWordCount={scriptWordCount}
-        isGeneratingScript={isGeneratingScript}
-        isLoading={isLoading}
-        scriptSegments={scriptSegments}
-        editingSegmentIndex={editingSegmentIndex}
-        editingSegmentText={editingSegmentText}
-        onStartEditingSegment={startEditingSegment}
-        onSaveEditingSegment={saveEditingSegment}
-        onCancelEditingSegment={cancelEditingSegment}
-        onEditingSegmentTextChange={setEditingSegmentText}
-        onDirectRegeneration={handleDirectRegeneration}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimeFullScriptDisplay
+          fullScript={fullScript}
+          scriptWordCount={scriptWordCount}
+          isGeneratingScript={isGeneratingScript}
+          isLoading={isLoading}
+          scriptSegments={scriptSegments}
+          editingSegmentIndex={editingSegmentIndex}
+          editingSegmentText={editingSegmentText}
+          onStartEditingSegment={startEditingSegment}
+          onSaveEditingSegment={saveEditingSegment}
+          onCancelEditingSegment={cancelEditingSegment}
+          onEditingSegmentTextChange={setEditingSegmentText}
+          onDirectRegeneration={handleDirectRegeneration}
+        />
+      ) : (
+        <FullScriptDisplay
+          fullScript={fullScript}
+          scriptWordCount={scriptWordCount}
+          isGeneratingScript={isGeneratingScript}
+          isLoading={isLoading}
+          scriptSegments={scriptSegments}
+          editingSegmentIndex={editingSegmentIndex}
+          editingSegmentText={editingSegmentText}
+          onStartEditingSegment={startEditingSegment}
+          onSaveEditingSegment={saveEditingSegment}
+          onCancelEditingSegment={cancelEditingSegment}
+          onEditingSegmentTextChange={setEditingSegmentText}
+          onDirectRegeneration={handleDirectRegeneration}
+        />
+      )}
 
-      <PromptHistoryModal
-        isOpen={isPromptHistoryOpen}
-        onClose={() => setIsPromptHistoryOpen(false)}
-        savedPrompts={savedPrompts}
-        loadingPrompts={loadingPrompts}
-        onApplyPrompt={applyPromptToForm}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimePromptHistoryModal
+          isOpen={isPromptHistoryOpen}
+          onClose={() => setIsPromptHistoryOpen(false)}
+          savedPrompts={savedPrompts}
+          loadingPrompts={loadingPrompts}
+          onApplyPrompt={applyPromptToForm}
+        />
+      ) : (
+        <PromptHistoryModal
+          isOpen={isPromptHistoryOpen}
+          onClose={() => setIsPromptHistoryOpen(false)}
+          savedPrompts={savedPrompts}
+          loadingPrompts={loadingPrompts}
+          onApplyPrompt={applyPromptToForm}
+        />
+      )}
 
-      <CTAModal
-        isOpen={ctaModalOpen}
-        onClose={() => setCtaModalOpen(false)}
-        editingCta={editingCta}
-        ctaText={ctaText}
-        ctaPlacement={ctaPlacement}
-        ctaCustomPlacement={ctaCustomPlacement}
-        ctaAdditionalInstructions={ctaAdditionalInstructions}
-        onCtaTextChange={setCtaText}
-        onCtaPlacementChange={setCtaPlacement}
-        onCtaCustomPlacementChange={setCtaCustomPlacement}
-        onCtaAdditionalInstructionsChange={setCtaAdditionalInstructions}
-        onSave={saveCta}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimeCTAModal
+          isOpen={ctaModalOpen}
+          onClose={() => setCtaModalOpen(false)}
+          editingCta={editingCta}
+          ctaText={ctaText}
+          ctaPlacement={ctaPlacement}
+          ctaCustomPlacement={ctaCustomPlacement}
+          ctaAdditionalInstructions={ctaAdditionalInstructions}
+          onCtaTextChange={setCtaText}
+          onCtaPlacementChange={setCtaPlacement}
+          onCtaCustomPlacementChange={setCtaCustomPlacement}
+          onCtaAdditionalInstructionsChange={setCtaAdditionalInstructions}
+          onSave={saveCta}
+        />
+      ) : (
+        <CTAModal
+          isOpen={ctaModalOpen}
+          onClose={() => setCtaModalOpen(false)}
+          editingCta={editingCta}
+          ctaText={ctaText}
+          ctaPlacement={ctaPlacement}
+          ctaCustomPlacement={ctaCustomPlacement}
+          ctaAdditionalInstructions={ctaAdditionalInstructions}
+          onCtaTextChange={setCtaText}
+          onCtaPlacementChange={setCtaPlacement}
+          onCtaCustomPlacementChange={setCtaCustomPlacement}
+          onCtaAdditionalInstructionsChange={setCtaAdditionalInstructions}
+          onSave={saveCta}
+        />
+      )}
 
-      <HookModal
-        isOpen={hookModalOpen}
-        onClose={() => setHookModalOpen(false)}
-        editingHook={editingHook}
-        hookText={hookText}
-        hookStyle={hookStyle}
-        hookAdditionalInstructions={hookAdditionalInstructions}
-        onHookTextChange={setHookText}
-        onHookStyleChange={setHookStyle}
-        onHookAdditionalInstructionsChange={setHookAdditionalInstructions}
-        onSave={saveHook}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimeHookModal
+          isOpen={hookModalOpen}
+          onClose={() => setHookModalOpen(false)}
+          editingHook={editingHook}
+          hookText={hookText}
+          hookStyle={hookStyle}
+          hookAdditionalInstructions={hookAdditionalInstructions}
+          onHookTextChange={setHookText}
+          onHookStyleChange={setHookStyle}
+          onHookAdditionalInstructionsChange={setHookAdditionalInstructions}
+          onSave={saveHook}
+        />
+      ) : (
+        <HookModal
+          isOpen={hookModalOpen}
+          onClose={() => setHookModalOpen(false)}
+          editingHook={editingHook}
+          hookText={hookText}
+          hookStyle={hookStyle}
+          hookAdditionalInstructions={hookAdditionalInstructions}
+          onHookTextChange={setHookText}
+          onHookStyleChange={setHookStyle}
+          onHookAdditionalInstructionsChange={setHookAdditionalInstructions}
+          onSave={saveHook}
+        />
+      )}
 
-      <ResearchPreviewModal
-        isOpen={isResearchPreviewOpen}
-        onClose={() => setIsResearchPreviewOpen(false)}
-        researchContext={researchContext || formatResearchForScript()}
-        appliedResearchCount={getAppliedResearchCount()}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimeResearchPreviewModal
+          isOpen={isResearchPreviewOpen}
+          onClose={() => setIsResearchPreviewOpen(false)}
+          researchContext={researchContext || formatResearchForScript()}
+          appliedResearchCount={getAppliedResearchCount()}
+        />
+      ) : (
+        <ResearchPreviewModal
+          isOpen={isResearchPreviewOpen}
+          onClose={() => setIsResearchPreviewOpen(false)}
+          researchContext={researchContext || formatResearchForScript()}
+          appliedResearchCount={getAppliedResearchCount()}
+        />
+      )}
 
-      <LoadCachedDataModal
-        isOpen={isLoadCachedDataOpen}
-        onClose={() => setIsLoadCachedDataOpen(false)}
-        onLoadFormData={handleLoadFormData}
-        onLoadSections={handleLoadSections}
-        onLoadFullScript={handleLoadFullScript}
-      />
+      {promptVariant === 'true-crime' ? (
+        <TrueCrimeLoadCachedDataModal
+          isOpen={isLoadCachedDataOpen}
+          onClose={() => setIsLoadCachedDataOpen(false)}
+          onLoadFormData={handleLoadFormData}
+          onLoadSections={handleLoadSections}
+          onLoadFullScript={handleLoadFullScript}
+        />
+      ) : (
+        <LoadCachedDataModal
+          isOpen={isLoadCachedDataOpen}
+          onClose={() => setIsLoadCachedDataOpen(false)}
+          onLoadFormData={handleLoadFormData}
+          onLoadSections={handleLoadSections}
+          onLoadFullScript={handleLoadFullScript}
+        />
+      )}
     </div>
   );
 };

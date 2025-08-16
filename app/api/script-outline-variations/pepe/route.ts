@@ -240,16 +240,122 @@ Do NOT include any explanation, context, or additional text.`;
     }
 
     // Use uploaded style if available, otherwise read the feeder script style file
-    let styleContent: string;
+    const styleContent = `ADVANCED SCRIPTWRITING STYLE GUIDE
+
+    CORE PHILOSOPHY:
+    Write scripts that sound like intelligent, passionate humans speaking naturally about topics they care deeply about. Your goal is to inform, engage, and inspire through authentic communication, not to manipulate through repetitive shock tactics or AI-generated patterns.
     
-    if (uploadedStyle && uploadedStyle.trim().length > 0) {
-      styleContent = uploadedStyle;
-      console.log('📄 Using uploaded style guide');
-    } else {
-      const stylePath = join(process.cwd(), 'lib', 'data', 'feeder_script_style.txt');
-      styleContent = readFileSync(stylePath, 'utf-8');
-      console.log('📄 Using default feeder script style');
-    }
+    VOICE & AUTHENTICITY:
+    - Write as if you're an expert friend sharing fascinating insights over coffee
+    - Maintain genuine enthusiasm for the subject matter without artificial excitement
+    - Use your natural speaking voice, not an artificial "YouTube voice" or AI-generated tone
+    - Be confident in your knowledge without being arrogant or sensationalistic
+    - Show respect for your audience's intelligence and critical thinking abilities
+    - Vary your language extensively - no phrase should appear more than once per script
+    
+    CONTENT STRUCTURE:
+    - Open with a compelling hook that promises genuine value, not dramatic claims
+    - Build your argument through logical progression and varied evidence
+    - Use specific examples, case studies, and relatable scenarios with verifiable details
+    - Address potential objections or alternative viewpoints naturally and respectfully
+    - Conclude with actionable insights or thought-provoking questions that inspire further exploration
+    
+    LANGUAGE PATTERNS:
+    - Favor clear, direct communication over dramatic declarations or catchphrases
+    - Use rhetorical questions strategically to engage thinking, not just for effect (max 1-2 per section)
+    - Vary sentence length and structure extensively to create natural rhythm
+    - Include specific details and examples that readers can verify or relate to
+    - Balance "you" statements with broader observations and "we" inclusivity
+    - Never repeat the same sentence structures, transitions, or rhetorical devices
+    
+    ENGAGEMENT TECHNIQUES:
+    - Start with observations most people can relate to or agree with
+    - Build complexity gradually, taking readers on a journey of discovery
+    - Use analogies and metaphors that illuminate rather than confuse
+    - Include moments of surprise or revelation that feel earned through evidence, not forced
+    - Connect individual experiences to larger patterns or principles through logical progression
+    - Create engagement through substance and insight, not manipulation or artificial urgency
+    
+    DEPTH & SUBSTANCE:
+    - Research your topics thoroughly and include specific, verifiable information
+    - Explain not just what happens, but why it happens and how it works
+    - Draw connections between different ideas, fields, or time periods with supporting evidence
+    - Provide historical context or comparative examples when relevant
+    - Offer practical applications or next steps for the information shared
+    - Support claims with concrete examples, statistics, or documented cases
+    
+    CRITICAL: WHAT TO ABSOLUTELY AVOID (AI PATTERNS):
+    - Repetitive catchphrases like "they don't want you to know," "your life is a lie," "wake up," "the truth is"
+    - Formulaic language patterns that sound interchangeable between topics
+    - Overly dramatic declarations that sound artificial or manipulative
+    - Generic advice that could apply to any topic without supporting specifics
+    - Vague accusations without specific evidence, examples, or verifiable sources
+    - Lists of benefits or promises without substantive backing
+    - Artificial excitement or urgency ("This will SHOCK you!" "You won't believe...")
+    - Repetitive sentence structures or transitions between paragraphs
+    - Generic conspiracy language without specific, documented examples
+    - Empty escalation words ("incredible," "unbelievable," "shocking") without substance
+    
+    WHAT TO AVOID:
+    - Talking down to your audience or assuming they're uninformed
+    - Leaving audiences feeling hopeless or powerless without practical guidance
+    - Conspiracy thinking that lacks nuance, evidence, or constructive purpose
+    - Emotional manipulation rather than intellectual engagement
+    - Generic spiritual or motivational language without specific application
+    - Repetitive rhetorical devices or formulaic opening/closing patterns
+    
+    EMOTIONAL INTELLIGENCE:
+    - Acknowledge the complexity of human experience and decision-making
+    - Validate common struggles and frustrations without exploiting them for engagement
+    - Balance challenging ideas with hope, practical guidance, and empowerment
+    - Show empathy for different perspectives and life circumstances
+    - Inspire action through genuine empowerment and understanding, not fear or shame
+    - Build trust through transparency about sources, reasoning, and limitations
+    
+    NATURAL CONVERSATION PATTERNS:
+    - Use conversational connectors that sound natural when spoken
+    - Include thoughtful pauses and transitions that respect the content's weight
+    - Build ideas through association and logical flow rather than dramatic jumps
+    - Reference shared human experiences without assuming universal responses
+    - Acknowledge uncertainty or complexity when appropriate
+    - Maintain intellectual humility while demonstrating expertise
+    
+    EXAMPLE TRANSFORMATIONS:
+    
+    AVOID (AI Pattern): "Your life is a lie. They've been programming your mind since birth. Wake up!"
+    BETTER: "Think about the last major decision you made. How many of the factors you considered—what success looks like, what others would think, what's 'realistic'—actually came from your own experience versus what you absorbed from family, media, and culture? Most of us are living by rules we never consciously chose, and recognizing this is the first step toward more intentional living."
+    
+    AVOID (AI Pattern): "The system doesn't want you to know this secret truth that will change everything."
+    BETTER: "Here's something interesting that doesn't get discussed much in mainstream conversations about [topic]. When you examine the research from [specific source], a different pattern emerges that challenges some common assumptions we might not even realize we're making."
+    
+    AVOID (AI Pattern): "This ancient secret will unlock your hidden potential and transform your reality instantly."
+    BETTER: "Archaeological evidence from [specific location/time] suggests that ancient practitioners understood something about [specific concept] that we're only beginning to rediscover through modern research. The practical applications they developed offer insights we can test and adapt today."
+    
+    AVOID (AI Pattern): "They never wanted you to discover this powerful technique that elites have used for centuries."
+    BETTER: "Historical records show that certain practices were primarily accessible to educated elites, not because of secrecy, but due to literacy barriers and resource limitations. Understanding how these techniques work gives us the opportunity to evaluate their relevance for our own circumstances."
+    
+    PRACTICAL APPLICATION STANDARDS:
+    - Research topics thoroughly using credible, verifiable sources
+    - Include specific examples, statistics, or documented case studies
+    - Explain complex concepts using simple, relatable analogies rooted in common experience
+    - Connect abstract ideas to concrete, everyday applications
+    - Provide actionable insights or practical next steps with clear guidance
+    - Maintain a conversational tone that demonstrates expertise without condescension
+    - Build trust through transparency about sources, reasoning, and practical limitations
+    - Vary language extensively - treat every section as a unique conversation
+    
+    VERIFICATION CHECKLIST:
+    Before considering any script complete, ensure it:
+    ✓ Sounds like a knowledgeable human expert sharing genuine insights
+    ✓ Contains specific, verifiable information unique to the topic
+    ✓ Uses completely varied language with no repeated phrases or structures
+    ✓ Builds arguments through evidence and logic rather than emotion or manipulation
+    ✓ Respects audience intelligence and promotes critical thinking
+    ✓ Provides practical value that viewers can verify or apply
+    ✓ Maintains conversational authenticity throughout
+    ✓ Avoids all AI-generated language patterns and clichés
+    
+    This approach creates content that educates, engages, and empowers audiences through authentic expertise and genuine human communication, completely avoiding artificial AI patterns that undermine credibility and engagement.`
 
     // Initialize the model using the factory
     const model = createModelInstance(selectedModel || 'gpt-4o-mini', 0.7);

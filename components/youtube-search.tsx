@@ -625,7 +625,31 @@ export default function YouTubeSearch() {
     try {
       const savedHistory = localStorage.getItem('research-history')
       if (savedHistory) {
-        setResearchHistory(JSON.parse(savedHistory))
+        const parsed = JSON.parse(savedHistory)
+        setResearchHistory(parsed)
+        // Sync any history items already applied to script back into Redux current research
+        try {
+          const existing = (researchSummaries.youtubeResearchSummaries || []) as any[]
+          const existingIds = new Set(existing.map((s: any) => s.id))
+          const appliedFromHistory = Array.isArray(parsed) ? parsed.filter((h: any) => h?.appliedToScript) : []
+          appliedFromHistory.forEach((h: any) => {
+            const stableId = `restored-${h.historyId || h.id || h.query}`
+            if (!existingIds.has(stableId)) {
+              dispatch(addYouTubeResearchSummary({
+                id: stableId,
+                query: h.query,
+                videosSummary: h.videosSummary,
+                timestamp: new Date().toISOString(),
+                usingMock: Boolean(h.usingMock),
+                appliedToScript: true,
+                analysisType: h.analysisType || 'history'
+              }))
+              existingIds.add(stableId)
+            }
+          })
+        } catch (e) {
+          console.warn('Failed to sync applied history into Redux:', e)
+        }
       }
     } catch (error) {
       console.error('Error loading research history:', error)
@@ -763,7 +787,7 @@ export default function YouTubeSearch() {
       if (researchItem.historyId && !researchItem.id) {
         const researchToAdd = {
           ...researchItem,
-          id: `restored-${Date.now()}`, // Give it a new ID for current research
+          id: `restored-${researchItem.historyId}`, // stable ID based on history
           appliedToScript: true,
           timestamp: new Date().toISOString() // Update timestamp to show when it was restored
         }

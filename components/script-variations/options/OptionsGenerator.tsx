@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Lightbulb, Zap, UploadCloud, Search, SlidersHorizontal, ListChecks, Sparkles, Check } from 'lucide-react'
+import { ResearchPreviewModal } from '@/components/script-generator/ResearchPreviewModal'
 
 interface OpenAIModel { id: string; owned_by: string }
 
@@ -43,6 +44,7 @@ export function OptionsGenerator() {
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const [uploadedStyleText, setUploadedStyleText] = useState<string>('');
   const [pasteMode, setPasteMode] = useState<boolean>(false);
+  const [isResearchPreviewOpen, setIsResearchPreviewOpen] = useState(false);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -113,7 +115,7 @@ export function OptionsGenerator() {
           emotionalTone: '',
           targetAudience: '',
           forbiddenWords,
-          additionalPrompt: additionalData,
+          additionalPrompt: additionalData + ((researchSummaries && researchSummaries.length > 0) ? `\n\nRESEARCH CONTEXT:\n${JSON.stringify(researchSummaries).slice(0, 2000)}` : ''),
         })
       })
       if (!response.ok) {
@@ -167,6 +169,29 @@ export function OptionsGenerator() {
     }
   }, [hasAppliedResearch])
 
+  // Mark 'Script Style' step complete when a style is selected or a custom reference is provided
+  useEffect(() => {
+    const hasStyle = Boolean(selectedThemeId) || (uploadedStyleText && uploadedStyleText.trim().length > 0)
+    const styleStep = stepIndex.style
+    if (hasStyle && !completedSteps.includes(styleStep)) {
+      dispatch(markStepCompleted(styleStep))
+    }
+  }, [selectedThemeId, uploadedStyleText, completedSteps, stepIndex.style])
+
+  // Mark 'Configuration' step complete when required fields are provided (title or preset option)
+  useEffect(() => {
+    const hasConfig = Boolean((title && title.trim()) || (selectedOption && selectedOption.trim()))
+    const configStep = stepIndex.config
+    if (hasConfig && !completedSteps.includes(configStep)) {
+      dispatch(markStepCompleted(configStep))
+    }
+  }, [title, selectedOption, completedSteps, stepIndex.config])
+
+  const formattedResearchContext = () => {
+    if (!Array.isArray(researchSummaries) || researchSummaries.length === 0) return ''
+    return JSON.stringify(researchSummaries, null, 2).slice(0, 5000)
+  }
+
   const StepIndicator = () => {
     const items = steps.map((label, i) => {
       const isActive = i === currentStep
@@ -214,10 +239,19 @@ export function OptionsGenerator() {
     <Card>
       <CardContent className="space-y-6 pt-6">
         <StepIndicator />
+        <ResearchPreviewModal
+          isOpen={isResearchPreviewOpen}
+          onClose={() => setIsResearchPreviewOpen(false)}
+          researchContext={formattedResearchContext()}
+          appliedResearchCount={(Array.isArray(researchSummaries) && researchSummaries.filter((r:any)=>r.appliedToScript).length) || 0}
+        />
         {currentStep === stepIndex.style && (
           <>
             <div className="space-y-2">
-              <Label>Select AI Model:</Label>
+              <div className="flex items-center justify-between">
+                <Label>Select AI Model:</Label>
+                <Button variant="outline" onClick={() => setIsResearchPreviewOpen(true)} disabled={!hasAppliedResearch}>Research Preview</Button>
+              </div>
               <select
                 className="border rounded px-3 py-2 bg-background"
                 value={selectedModel}

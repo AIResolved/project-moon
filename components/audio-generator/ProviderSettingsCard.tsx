@@ -208,21 +208,6 @@ export function ProviderSettingsCard({
               onCheckedChange={(checked) => onGenerateSubtitlesChange(checked as boolean)}
             />
           </div>
-          {generateSubtitlesOption && (
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-              <div className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-blue-300">
-                  <p className="font-medium">Subtitles will be generated automatically:</p>
-                  <ul className="mt-1 space-y-1 list-disc list-inside text-blue-700">
-                    <li>Uses OpenAI Whisper for accurate transcription</li>
-                    <li>Formatted as 4-word segments for better readability</li>
-                    <li>Available for download as SRT file</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Generate Button */}

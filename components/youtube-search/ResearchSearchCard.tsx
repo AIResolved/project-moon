@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, Download, Globe, Brain, ExternalLink, Zap } from 'lucide-react'
 import { addYouTubeResearchSummary } from '@/lib/features/youtube/youtubeSlice'
+import { ResearchPreviewModal } from '@/components/script-generator/ResearchPreviewModal'
 
 interface ResearchSearchCardProps {
   researchSummaries: any
@@ -22,6 +23,41 @@ export function ResearchSearchCard({
   const [filteringStats, setFilteringStats] = useState<any>(null)
   const [availableLinks, setAvailableLinks] = useState<any[]>([])
   const [scrapingLinks, setScrapingLinks] = useState<Set<string>>(new Set())
+  const [isResearchPreviewOpen, setIsResearchPreviewOpen] = useState(false)
+
+  const appliedResearch = useMemo(() => {
+    const list = researchSummaries?.youtubeResearchSummaries || researchSummaries || []
+    return Array.isArray(list) ? list.filter((r: any) => r?.appliedToScript) : []
+  }, [researchSummaries])
+
+  const formattedResearchContext = useMemo(() => {
+    const applied = appliedResearch
+    if (!applied || applied.length === 0) return ''
+    try {
+      // Reuse same data that script generators consume: summarize into a readable context
+      return applied.map((r: any, i: number) => {
+        const summary = r.videosSummary || {}
+        const keyInsights = (summary.keyInsights || []).map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n')
+        const characterInsights = (summary.characterInsights || []).map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n')
+        const conflictElements = (summary.conflictElements || []).map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n')
+        const storyIdeas = (summary.storyIdeas || []).map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n')
+        return [
+          `Analysis ${i + 1}: "${r.query || 'Untitled Research'}"`,
+          `Overall Theme: ${summary.overallTheme || ''}`,
+          '',
+          'Key Insights:',
+          keyInsights,
+          characterInsights ? '\nCharacter Insights:\n' + characterInsights : '',
+          conflictElements ? '\nDramatic Conflicts:\n' + conflictElements : '',
+          storyIdeas ? '\nStory Ideas:\n' + storyIdeas : '',
+          summary.creativePrompt ? `\nCreative Prompt: ${summary.creativePrompt}` : '',
+          '\n---\n'
+        ].filter(Boolean).join('\n')
+      }).join('\n')
+    } catch {
+      return ''
+    }
+  }, [appliedResearch])
 
   const handlePerplexityResearch = async () => {
     if (!researchQuery.trim()) return
@@ -310,10 +346,17 @@ export function ResearchSearchCard({
     <div className="space-y-6">
       {/* Research Input Section */}
       <div className="bg-gray-900 text-white p-6 rounded-lg border border-gray-700">
-        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <Globe className="h-6 w-6" />
-          AI Research Assistant
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2 m-0">
+            <Globe className="h-6 w-6" />
+            AI Research Assistant
+          </h3>
+          {appliedResearch.length > 0 && (
+            <Button variant="outline" onClick={() => setIsResearchPreviewOpen(true)} className="border-gray-600 text-gray-200 hover:bg-gray-800">
+              Research Preview ({appliedResearch.length})
+            </Button>
+          )}
+        </div>
         
         <div className="space-y-4">
           {/* Research Method */}
@@ -455,6 +498,12 @@ export function ResearchSearchCard({
           </div>
         </div>
       )}
+      <ResearchPreviewModal
+        isOpen={isResearchPreviewOpen}
+        onClose={() => setIsResearchPreviewOpen(false)}
+        researchContext={formattedResearchContext}
+        appliedResearchCount={appliedResearch.length}
+      />
     </div>
   )
 } 
