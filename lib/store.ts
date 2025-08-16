@@ -9,6 +9,7 @@ import videoReducer from './features/video/videoSlice'
 import progressReducer from './features/progress/progressSlice'
 import youtubeReducer from './features/youtube/youtubeSlice'
 import textImageVideoReducer from './features/textImageVideo/textImageVideoSlice'
+import optionsWorkflowReducer from './features/scripts/optionsWorkflowSlice'
 
 // This is our Redux store - the single source of truth for our app's state
 export const store = configureStore({
@@ -24,6 +25,7 @@ export const store = configureStore({
     progress: progressReducer,
     youtube: youtubeReducer,
     textImageVideo: textImageVideoReducer,
+    optionsWorkflow: optionsWorkflowReducer,
   },
   // Redux Toolkit includes good defaults for middleware
   // (like Redux DevTools and thunk for async actions)

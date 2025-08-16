@@ -2,10 +2,14 @@
 
 import textToSpeech from '@google-cloud/text-to-speech';
 
-// Configure the Text-to-Speech client
+// Configure the Text-to-Speech client using base64-encoded JSON credentials
+const googleCredentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS
+  ? JSON.parse(Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'base64').toString('utf-8'))
+  : undefined;
+
 const client = new textToSpeech.TextToSpeechClient({
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  credentials: googleCredentialsJson,
 });
 
 export interface GoogleVoice {

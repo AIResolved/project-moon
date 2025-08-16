@@ -1,13 +1,15 @@
-'use client'
+"use client"
 
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
 import { setScriptSections, setFullScript, type ScriptSection } from '@/lib/features/scripts/scriptsSlice'
+import { setCurrentStep, markStepCompleted } from '@/lib/features/scripts/optionsWorkflowSlice'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { Lightbulb, Zap, UploadCloud, Search, SlidersHorizontal, ListChecks, Sparkles, Check } from 'lucide-react'
 
 interface OpenAIModel { id: string; owned_by: string }
 
@@ -22,6 +24,12 @@ const PRESET_OPTIONS = [
 export function OptionsGenerator() {
   const dispatch = useAppDispatch();
   const scriptSections = useAppSelector(state => state.scripts.scriptSections) as ScriptSection[]
+  const fullScript = useAppSelector(state => state.scripts.fullScript)
+  const currentStep = useAppSelector(state => state.optionsWorkflow.currentStep)
+  const completedSteps = useAppSelector(state => state.optionsWorkflow.completedSteps)
+  const researchSummaries = useAppSelector(state => state.youtube.youtubeResearchSummaries)
+
+  const hasAppliedResearch = Array.isArray(researchSummaries) && researchSummaries.some(r => r.appliedToScript)
   const [models, setModels] = useState<OpenAIModel[]>([]);
   const [selectedModel, setSelectedModel] = useState('gpt-5');
 
@@ -32,6 +40,9 @@ export function OptionsGenerator() {
   const [desiredWordCount, setDesiredWordCount] = useState<number>(1000);
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>('');
+  const [uploadedStyleText, setUploadedStyleText] = useState<string>('');
+  const [pasteMode, setPasteMode] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -59,6 +70,10 @@ export function OptionsGenerator() {
           forbiddenWords,
           selectedModel,
           generateQuote: false,
+          themeId: selectedThemeId,
+          uploadedStyle: uploadedStyleText,
+          // pull research context from Redux (if applied)
+          researchData: researchSummaries && researchSummaries.length > 0 ? { analysis: { context: JSON.stringify(researchSummaries).slice(0, 5000) }, searchResults: [] } : null,
         })
       });
       if (!response.ok) {
@@ -68,6 +83,8 @@ export function OptionsGenerator() {
       const data = await response.json();
       if (data.sections) {
         dispatch(setScriptSections(data.sections));
+        // mark outline node as complete
+        dispatch(markStepCompleted(stepIndex.outline))
       }
     } catch (e) {
       console.error('Options generator failed:', e);
@@ -79,6 +96,11 @@ export function OptionsGenerator() {
 
   const handleGenerateFullScript = async () => {
     if (!scriptSections || scriptSections.length === 0) return;
+    if (!title.trim() && !selectedOption.trim()) {
+      alert('Please enter a title in Configuration before generating the full script.');
+      dispatch(setCurrentStep(stepIndex.config));
+      return;
+    }
     setIsGeneratingScript(true)
     try {
       const response = await fetch('/api/full-script-variations/pepe', {
@@ -95,8 +117,14 @@ export function OptionsGenerator() {
         })
       })
       if (!response.ok) {
-        const err = await response.text();
-        throw new Error(err)
+        let message = 'Request failed'
+        try {
+          const data = await response.json();
+          message = data.error || message
+        } catch {
+          message = await response.text()
+        }
+        throw new Error(message)
       }
       const data = await response.json()
       if (data.scriptWithMarkdown) {
@@ -107,6 +135,8 @@ export function OptionsGenerator() {
           theme: 'Philosophy',
           wordCount: data.wordCount || 0
         }))
+        dispatch(markStepCompleted(stepIndex.generation))
+        dispatch(setCurrentStep(stepIndex.generation))
       }
     } catch (e) {
       console.error('Full script generation failed:', e)
@@ -116,81 +146,215 @@ export function OptionsGenerator() {
     }
   }
 
-  return (
-    <Card>
-      <CardContent className="space-y-6 pt-6">
-        <div className="space-y-2">
-          <Label>Select AI Model:</Label>
-          <select
-            className="border rounded px-3 py-2 bg-background"
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-          >
-            {models.map((m) => (
-              <option key={m.id} value={m.id}>{m.id}</option>
-            ))}
-          </select>
-        </div>
+  const steps = hasAppliedResearch 
+    ? ['Research', 'Script Style', 'Configuration', 'Outline', 'Generation'] 
+    : ['Script Style', 'Configuration', 'Outline', 'Generation']
 
-        <div className="space-y-3">
-          <h3 className="text-2xl font-bold">Choose an Option</h3>
-          <div className="space-y-3">
-            {PRESET_OPTIONS.map((opt) => (
-              <label key={opt} className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="preset-option"
-                  value={opt}
-                  checked={selectedOption === opt}
-                  onChange={() => { setSelectedOption(opt); if (!title.trim()) setTitle(opt); }}
-                />
-                <span>{opt}</span>
-              </label>
+  const stepIndex = {
+    style: hasAppliedResearch ? 1 : 0,
+    config: hasAppliedResearch ? 2 : 1,
+    outline: hasAppliedResearch ? 3 : 2,
+    generation: hasAppliedResearch ? 4 : 3,
+  }
+
+  // If research is applied, auto mark research as completed and start at Script Style
+  useEffect(() => {
+    if (hasAppliedResearch) {
+      dispatch(markStepCompleted(0))
+      if (currentStep === 0) {
+        dispatch(setCurrentStep(stepIndex.style))
+      }
+    }
+  }, [hasAppliedResearch])
+
+  const StepIndicator = () => {
+    const items = steps.map((label, i) => {
+      const isActive = i === currentStep
+      const isDone = completedSteps.includes(i) || (hasAppliedResearch && i === 0)
+      const Icon = hasAppliedResearch && i === 0
+        ? Search
+        : label === 'Script Style' ? Lightbulb
+        : label === 'Configuration' ? SlidersHorizontal
+        : label === 'Outline' ? ListChecks
+        : Sparkles
+      return { label, i, isActive, isDone, Icon }
+    })
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span>Step {Math.min(currentStep + 1, steps.length)} of {steps.length}</span>
+          <span></span>
+        </div>
+        <div className="relative">
+          <div className="absolute left-0 right-0 top-[18px] h-px bg-border" />
+          <div className="relative flex justify-between">
+            {items.map((item) => (
+              <div key={item.label} className="flex-1 flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  className={`z-10 flex items-center justify-center h-9 w-9 rounded-full border transition-colors ${
+                    item.isDone ? 'bg-green-500 text-white border-green-500' : item.isActive ? 'bg-primary text-white border-primary' : 'bg-background text-muted-foreground border-border'
+                  }`}
+                  onClick={() => dispatch(setCurrentStep(item.i))}
+                  aria-current={item.isActive ? 'step' : undefined}
+                >
+                  {item.isDone ? <Check className="h-4 w-4" /> : <item.Icon className="h-4 w-4" />}
+                </button>
+                <div className={`text-xs ${item.isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{item.label}</div>
+              </div>
             ))}
           </div>
         </div>
+      </div>
+    )
+  }
 
-        <div className="space-y-2">
-          <Label>Enter the title of the script:</Label>
-          <Input placeholder="Enter the script title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
+  return (
+    <Card>
+      <CardContent className="space-y-6 pt-6">
+        <StepIndicator />
+        {currentStep === stepIndex.style && (
+          <>
+            <div className="space-y-2">
+              <Label>Select AI Model:</Label>
+              <select
+                className="border rounded px-3 py-2 bg-background"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+              >
+                {models.map((m) => (
+                  <option key={m.id} value={m.id}>{m.id}</option>
+                ))}
+              </select>
+            </div>
 
-        <div className="space-y-2">
-          <Label>Enter additional data (summary, narrative, etc.):</Label>
-          <Textarea
-            placeholder="Enter additional data"
-            value={additionalData}
-            onChange={(e) => setAdditionalData(e.target.value)}
-            rows={5}
-          />
-        </div>
+            <div className="space-y-3">
+              <h3 className="text-2xl font-bold">Choose Your Script Style</h3>
+              <p className="text-sm text-muted-foreground">Select from proven writing styles or upload/paste your own reference script</p>
 
-        <div className="space-y-2">
-          <Label>Words to exclude (not guaranteed):</Label>
-          <Input
-            placeholder="Enter forbidden words"
-            value={forbiddenWords}
-            onChange={(e) => setForbiddenWords(e.target.value)}
-          />
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className={`border rounded p-4 ${selectedThemeId === 'intimate-philosophical' ? 'ring-2 ring-primary' : ''}`}>
+                  <div className="flex items-center gap-2 mb-2"><Lightbulb className="h-5 w-5 text-purple-500" /><div className="font-semibold">Intimate Philosophical</div></div>
+                  <div className="text-sm text-muted-foreground mb-3">Conversational yet profound tone with deep psychological insights and therapeutic guidance</div>
+                  <Button variant={selectedThemeId === 'intimate-philosophical' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedThemeId('intimate-philosophical')}>{selectedThemeId === 'intimate-philosophical' ? 'Selected' : 'Select Style'}</Button>
+                </div>
+                <div className={`border rounded p-4 ${selectedThemeId === 'breaking-free' ? 'ring-2 ring-primary' : ''}`}>
+                  <div className="flex items-center gap-2 mb-2"><Zap className="h-5 w-5 text-orange-500" /><div className="font-semibold">Breaking Free</div></div>
+                  <div className="text-sm text-muted-foreground mb-3">Direct, persuasive monologue style that challenges beliefs and creates paradigm shifts</div>
+                  <Button variant={selectedThemeId === 'breaking-free' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedThemeId('breaking-free')}>{selectedThemeId === 'breaking-free' ? 'Selected' : 'Select Style'}</Button>
+                </div>
+                <div className="border rounded p-4">
+                  <div className="flex items-center gap-2 mb-2"><UploadCloud className="h-5 w-5 text-green-600" /><div className="font-semibold">Custom Reference</div></div>
+                  <div className="text-sm text-muted-foreground mb-3">Upload a file or paste your own script to match your unique writing style</div>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setPasteMode(false)}>Upload File</Button>
+                      <Button size="sm" variant="outline" onClick={() => setPasteMode(true)}>Paste Text</Button>
+                    </div>
+                    {pasteMode ? (
+                      <Textarea rows={4} placeholder="Paste style reference text here" value={uploadedStyleText} onChange={(e) => setUploadedStyleText(e.target.value)} />
+                    ) : (
+                      <Input type="file" accept=".txt,.docx" onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const text = await file.text()
+                        setUploadedStyleText(text)
+                      }} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <div className="space-y-2">
-          <Label>Desired Word Count:</Label>
-          <Input
-            type="number"
-            placeholder="1000"
-            value={desiredWordCount}
-            onChange={(e) => setDesiredWordCount(parseInt(e.target.value || '1000'))}
-          />
-        </div>
+            {/* Navigation handled by global controls below */}
+          </>
+        )}
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={handleGenerateOutline} disabled={isGeneratingOutline || (!selectedOption && !title.trim())} className="w-full sm:flex-1">
-            {isGeneratingOutline ? 'Generating Outline...' : 'Generate Outline'}
-          </Button>
-          <Button onClick={handleGenerateFullScript} disabled={isGeneratingScript || scriptSections.length === 0} variant="secondary" className="w-full sm:flex-1">
-            {isGeneratingScript ? 'Generating Script...' : 'Generate Full Script'}
-          </Button>
+        {currentStep === stepIndex.config && (
+          <>
+            <div className="space-y-2">
+              <Label>Enter the title of the script:</Label>
+              <Input placeholder="Enter the script title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Enter additional data (summary, narrative, etc.):</Label>
+              <Textarea
+                placeholder="Enter additional data"
+                value={additionalData}
+                onChange={(e) => setAdditionalData(e.target.value)}
+                rows={5}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Words to exclude (not guaranteed):</Label>
+              <Input
+                placeholder="Enter forbidden words"
+                value={forbiddenWords}
+                onChange={(e) => setForbiddenWords(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Desired Word Count:</Label>
+              <Input
+                type="number"
+                placeholder="1000"
+                value={desiredWordCount}
+                onChange={(e) => setDesiredWordCount(parseInt(e.target.value || '1000'))}
+              />
+            </div>
+
+            {/* Navigation handled by global controls below */}
+          </>
+        )}
+
+        {currentStep === stepIndex.outline && (
+          <>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handleGenerateOutline} disabled={isGeneratingOutline || (!selectedOption && !title.trim())} className="w-full sm:flex-1">
+                {isGeneratingOutline ? 'Generating Outline...' : 'Generate Outline'}
+              </Button>
+            </div>
+
+            {scriptSections.length > 0 && (
+              <div className="space-y-2">
+                <Label>Generated Outline</Label>
+                <ul className="list-disc pl-6 text-sm">
+                  {scriptSections.map((s, i) => (
+                    <li key={i}>{s.title}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+
+        {currentStep === stepIndex.generation && (
+          <>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handleGenerateFullScript} disabled={isGeneratingScript || scriptSections.length === 0} className="w-full sm:flex-1">
+                {isGeneratingScript ? 'Generating Script...' : 'Generate Full Script'}
+              </Button>
+            </div>
+
+            {fullScript?.scriptWithMarkdown && (
+              <div className="space-y-2">
+                <Label>Script Preview</Label>
+                <div className="border rounded p-3 text-sm max-h-64 overflow-auto whitespace-pre-wrap">
+                  {fullScript.scriptWithMarkdown.slice(0, 1500)}{fullScript.scriptWithMarkdown.length > 1500 ? '…' : ''}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Global navigation - always available */}
+        <div className="flex items-center justify-between pt-2">
+          <Button variant="outline" onClick={() => dispatch(setCurrentStep(Math.max(0, currentStep - 1)))} disabled={currentStep === 0}>Previous</Button>
+          <Button onClick={() => dispatch(setCurrentStep(Math.min(steps.length - 1, currentStep + 1)))} disabled={currentStep === steps.length - 1}>Next</Button>
         </div>
       </CardContent>
     </Card>
