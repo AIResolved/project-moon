@@ -50,7 +50,7 @@ export const imageGenerationSlice = createSlice({
     },
 
     setNumberOfScenesToExtract: (state, action: PayloadAction<number>) => {
-      state.numberOfScenesToExtract = Math.max(1, Math.min(100, action.payload))
+      state.numberOfScenesToExtract = Math.max(1, Math.min(1000, action.payload))
     },
 
     // Rate limiting for flux models

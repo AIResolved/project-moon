@@ -15,7 +15,7 @@ export interface ImageToVideoRequest {
   prompt: string
   image?: string // base64 encoded image (for replicate)
   image_url?: string // URL for FAL AI
-  duration: 5 | 10
+  duration: number
   provider: VideoProvider
   model: string
   // FAL AI specific parameters
@@ -30,7 +30,7 @@ export interface GeneratedVideo {
   prompt: string
   imageInput?: string // base64 for image-to-video (replicate)
   imageUrl?: string // URL for image-to-video (FAL AI)
-  duration: 5 | 10
+  duration: number
   videoUrl: string
   provider: VideoProvider
   model: string
@@ -95,7 +95,7 @@ export interface TextImageVideoState {
   // Settings
   selectedProvider: VideoProvider
   selectedModel: string
-  defaultDuration: 5 | 10
+  defaultDuration: number
   batchSize: number
   
   // History
@@ -170,22 +170,25 @@ export const VIDEO_PROVIDERS = {
     },
     imageToVideoModels: {
       'bytedance-seedance-v1-pro': {
-        name: 'SeeDance v1 Pro',
+        name: 'ByteDance SeedAnce V1 Pro',
         description: 'High-quality image-to-video animation by ByteDance',
         maxDuration: 10,
-        supportedDurations: [5, 10]
+        supportedDurations: [4, 6, 8, 10],
+        defaultDuration: 6
       },
       'pixverse-v4.5': {
-        name: 'PixVerse v4.5',
+        name: 'Pixverse V4.5',
         description: 'Advanced image-to-video generation with smooth motion',
-        maxDuration: 10,
-        supportedDurations: [5, 10]
+        maxDuration: 8,
+        supportedDurations: [5, 8],
+        defaultDuration: 5
       },
       'wan-v2.2-5b': {
-        name: 'WAN v2.2-5B',
+        name: 'WAN V2.2-5B',
         description: 'Animate images with detailed motion control',
-        maxDuration: 5,
-        supportedDurations: [5]
+        maxDuration: 10,
+        supportedDurations: [4, 5],
+        defaultDuration: 5
       }
     }
   },

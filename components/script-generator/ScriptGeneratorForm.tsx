@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { History, Database } from "lucide-react"
+import { History, Database, Upload } from "lucide-react"
 import { 
   Select,
   SelectContent,
@@ -56,6 +56,7 @@ interface ScriptGeneratorFormProps {
   onDownloadDocx: () => void
   onOpenPromptHistory: () => void
   onOpenLoadCachedData: () => void
+  onOpenScriptUpload: () => void
   
   // State
   models: OpenAIModel[]
@@ -96,6 +97,7 @@ export function ScriptGeneratorForm({
   onDownloadDocx,
   onOpenPromptHistory,
   onOpenLoadCachedData,
+  onOpenScriptUpload,
   models,
   isLoading,
   isGeneratingScript,
@@ -132,6 +134,16 @@ export function ScriptGeneratorForm({
               >
                 <Database className="h-4 w-4" />
                 Load Cached Data
+              </Button>
+            </ScaleOnHover>
+            <ScaleOnHover>
+              <Button
+                variant="outline"
+                onClick={onOpenScriptUpload}
+                className="gap-2 bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Script
               </Button>
             </ScaleOnHover>
             {/* <ScaleOnHover>

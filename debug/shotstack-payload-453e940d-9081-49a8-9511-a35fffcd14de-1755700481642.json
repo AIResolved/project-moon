@@ -1,0 +1,243 @@
+{
+  "metadata": {
+    "videoId": "453e940d-9081-49a8-9511-a35fffcd14de",
+    "timestamp": "2025-08-20T14:34:41.642Z",
+    "videoType": "Segmented",
+    "totalDuration": 297.57599999999996,
+    "imageCount": 22,
+    "hasAudio": true,
+    "hasSubtitles": false,
+    "hasMusic": false,
+    "selectedMusicTrack": "Game Show Deliberation",
+    "customMusicFiles": 0,
+    "dustOverlay": false
+  },
+  "payload": {
+    "timeline": {
+      "tracks": [
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1755066812638-hair.png"
+              },
+              "start": 0,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/5e7f74d7-f5a1-4daa-b9a7-3b2b0e466d85.png"
+              },
+              "start": 13.526181818181819,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1d19abb6-e816-4ecf-b021-5301c5b3b802.png"
+              },
+              "start": 27.052363636363637,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1d19abb6-e816-4ecf-b021-5301c5b3b802.png"
+              },
+              "start": 40.578545454545456,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1d19abb6-e816-4ecf-b021-5301c5b3b802.png"
+              },
+              "start": 54.104727272727274,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/5e7f74d7-f5a1-4daa-b9a7-3b2b0e466d85.png"
+              },
+              "start": 67.63090909090909,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1362ce11-1f07-405f-908f-a5fe80924713.png"
+              },
+              "start": 81.1570909090909,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844132867-3D_rendered_animation_style__c.png"
+              },
+              "start": 94.68327272727271,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844103899-3D_rendered_animation_style__c.png"
+              },
+              "start": 108.20945454545452,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844131187-3D_rendered_animation_style__c.png"
+              },
+              "start": 121.73563636363633,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844119352-3D_rendered_animation_style__c.png"
+              },
+              "start": 135.26181818181814,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844115694-3D_rendered_animation_style__c.png"
+              },
+              "start": 148.78799999999995,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844210179-3D_rendered_animation_style__c.png"
+              },
+              "start": 162.31418181818177,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844204049-3D_rendered_animation_style__c.png"
+              },
+              "start": 175.84036363636358,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844208128-3D_rendered_animation_style__c.png"
+              },
+              "start": 189.3665454545454,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844199216-3D_rendered_animation_style__c.png"
+              },
+              "start": 202.8927272727272,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844180856-3D_rendered_animation_style__c.png"
+              },
+              "start": 216.418909090909,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844283579-3D_rendered_animation_style__c.png"
+              },
+              "start": 229.94509090909082,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844255960-3D_rendered_animation_style__c.png"
+              },
+              "start": 243.47127272727263,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844259090-3D_rendered_animation_style__c.png"
+              },
+              "start": 256.99745454545445,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/audio/animation-images/a57a4770-3f68-4cc9-95c9-7c08af001241.png"
+              },
+              "start": 270.5236363636363,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/audio/images/dalle-3/1755153285272-bold_graphic_design_style__cle.png"
+              },
+              "start": 284.0498181818181,
+              "length": 13.526181818181819,
+              "fit": "cover"
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/audio/user_user/audio/original/minimax-English_CalmWoman-bf59038d-3ff9-4d2d-9856-9f4f7c2ec2f9-temp.mp3",
+                "volume": 0.8
+              },
+              "start": 0,
+              "length": 297.57599999999996
+            }
+          ]
+        }
+      ]
+    },
+    "output": {
+      "format": "mp4",
+      "size": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  }
+}

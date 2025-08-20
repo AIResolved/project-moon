@@ -1,0 +1,298 @@
+{
+  "metadata": {
+    "videoId": "8a091215-643f-4a39-b1d3-d2d262be4d51",
+    "timestamp": "2025-08-20T14:44:35.236Z",
+    "videoType": "Segmented",
+    "totalDuration": 246.60000000000005,
+    "imageCount": 22,
+    "hasAudio": true,
+    "hasSubtitles": false,
+    "hasMusic": true,
+    "selectedMusicTrack": "Game Show Deliberation",
+    "customMusicFiles": 0,
+    "dustOverlay": false
+  },
+  "payload": {
+    "timeline": {
+      "tracks": [
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "video",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlays/Fire%20Particles%20Overlay.webm",
+                "volume": 0
+              },
+              "start": 0,
+              "length": 246.60000000000005,
+              "fit": "cover",
+              "opacity": 0.3
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1755066812638-hair.png"
+              },
+              "start": 0,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/5e7f74d7-f5a1-4daa-b9a7-3b2b0e466d85.png"
+              },
+              "start": 11.209090909090909,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1d19abb6-e816-4ecf-b021-5301c5b3b802.png"
+              },
+              "start": 22.418181818181818,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1d19abb6-e816-4ecf-b021-5301c5b3b802.png"
+              },
+              "start": 33.627272727272725,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1d19abb6-e816-4ecf-b021-5301c5b3b802.png"
+              },
+              "start": 44.836363636363636,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/5e7f74d7-f5a1-4daa-b9a7-3b2b0e466d85.png"
+              },
+              "start": 56.04545454545455,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/animation-images/1362ce11-1f07-405f-908f-a5fe80924713.png"
+              },
+              "start": 67.25454545454545,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844132867-3D_rendered_animation_style__c.png"
+              },
+              "start": 78.46363636363635,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844103899-3D_rendered_animation_style__c.png"
+              },
+              "start": 89.67272727272726,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844131187-3D_rendered_animation_style__c.png"
+              },
+              "start": 100.88181818181816,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844119352-3D_rendered_animation_style__c.png"
+              },
+              "start": 112.09090909090907,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844115694-3D_rendered_animation_style__c.png"
+              },
+              "start": 123.29999999999997,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844210179-3D_rendered_animation_style__c.png"
+              },
+              "start": 134.50909090909087,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844204049-3D_rendered_animation_style__c.png"
+              },
+              "start": 145.7181818181818,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844208128-3D_rendered_animation_style__c.png"
+              },
+              "start": 156.9272727272727,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844199216-3D_rendered_animation_style__c.png"
+              },
+              "start": 168.13636363636363,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844180856-3D_rendered_animation_style__c.png"
+              },
+              "start": 179.34545454545454,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844283579-3D_rendered_animation_style__c.png"
+              },
+              "start": 190.55454545454546,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844255960-3D_rendered_animation_style__c.png"
+              },
+              "start": 201.76363636363638,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://fialunubibougfaxszjp.supabase.co/storage/v1/object/public/audio/images/minimax/1754844259090-3D_rendered_animation_style__c.png"
+              },
+              "start": 212.9727272727273,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/audio/animation-images/a57a4770-3f68-4cc9-95c9-7c08af001241.png"
+              },
+              "start": 224.18181818181822,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            },
+            {
+              "asset": {
+                "type": "image",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/audio/images/dalle-3/1755153285272-bold_graphic_design_style__cle.png"
+              },
+              "start": 235.39090909090913,
+              "length": 11.209090909090909,
+              "fit": "cover"
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/audio/user_user/audio/original/minimax-English_magnetic_voiced_man-229cdcc2-d3c8-40ed-a60b-eea59ce758c6-temp.mp3",
+                "volume": 0.8
+              },
+              "start": 0,
+              "length": 246.60000000000005
+            }
+          ]
+        },
+        {
+          "clips": [
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/HxKQM0zSDkf8xwatf/audioblocks-game-show-deliberation_HI8Eyn6oP_WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1755701053829&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=190370&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=87ed3c30-b5b8-491b-9d95-c1b6554f22d5&searchPageId=2e8ba39d-184a-4003-b05a-e8c3bbfc6d69",
+                "volume": 0.3
+              },
+              "start": 0,
+              "length": 53
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/BOB7516nIkb7t2xq2/audioblocks-we20fifty-spacing-test_rUjgNskSd_WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1755701053830&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=192004&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=87ed3c30-b5b8-491b-9d95-c1b6554f22d5&searchPageId=2e8ba39d-184a-4003-b05a-e8c3bbfc6d69",
+                "volume": 0.3
+              },
+              "start": 53,
+              "length": 144
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/HxKQM0zSDkf8xwatf/audioblocks-game-show-final_rqK8GlxPw_WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1755701053831&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=179131&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=87ed3c30-b5b8-491b-9d95-c1b6554f22d5&searchPageId=2e8ba39d-184a-4003-b05a-e8c3bbfc6d69",
+                "volume": 0.3
+              },
+              "start": 197,
+              "length": 28
+            },
+            {
+              "asset": {
+                "type": "audio",
+                "src": "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/audio/HxKQM0zSDkf8xwatf/audioblocks-game-show-deliberation_HI8Eyn6oP_WM.mp3?type=preview&origin=AUDIOBLOCKS&timestamp_ms=1755701053829&publicKey=test_cad4bb906149d3d7e303fd20b62d89dc948496ca10907d4ad184ff5ca2f&apiVersion=2.0&stockItemId=190370&resolution=&endUserId=31676025316fb555e0bfa12f0bcfd0ea43c4c20e&projectId=test_project&searchId=87ed3c30-b5b8-491b-9d95-c1b6554f22d5&searchPageId=2e8ba39d-184a-4003-b05a-e8c3bbfc6d69",
+                "volume": 0.3
+              },
+              "start": 225,
+              "length": 21.60000000000005
+            }
+          ]
+        }
+      ]
+    },
+    "output": {
+      "format": "mp4",
+      "size": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  }
+}

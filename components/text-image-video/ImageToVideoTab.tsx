@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../lib/hooks'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -10,6 +10,7 @@ import { Badge } from '../ui/badge'
 import { Checkbox } from '../ui/checkbox'
 import { Separator } from '../ui/separator'
 import { ProviderModelSelector } from './ProviderModelSelector'
+import { VIDEO_PROVIDERS } from '../../types/text-image-video-generation'
 import { 
   Plus, 
   Trash2, 
@@ -26,7 +27,7 @@ import {
 } from 'lucide-react'
 
 interface ImageToVideoTabProps {
-  defaultDuration: 5 | 10
+  defaultDuration: number
   isGenerating: boolean
   onGenerate: (prompts: string[], images: File[], duration: 5 | 10) => Promise<void>
   onDurationChange: (duration: 5 | 10) => void
@@ -40,15 +41,37 @@ export function ImageToVideoTab({
 }: ImageToVideoTabProps) {
   // Get generated images from Redux
   const { imageSets } = useAppSelector(state => state.imageGeneration)
+  const { selectedProvider, selectedModel } = useAppSelector(state => state.textImageVideo)
   
   const [prompts, setPrompts] = useState<string[]>([''])
   const [images, setImages] = useState<File[]>([])
-  const [duration, setDuration] = useState<5 | 10>(defaultDuration)
+  const [duration, setDuration] = useState<5 | 10>(defaultDuration as 5 | 10)
   const [dragActive, setDragActive] = useState(false)
+  const [availableDurations, setAvailableDurations] = useState<number[]>([4, 6, 8, 10])
+  const [modelDefaultDuration, setModelDefaultDuration] = useState<number>(6)
   
   // State for generated images selection
   const [selectedImageUrls, setSelectedImageUrls] = useState<string[]>([])
   const [generatedImagePrompt, setGeneratedImagePrompt] = useState<string>('')
+
+  // Update available durations when provider/model changes
+  useEffect(() => {
+    const providerConfig = VIDEO_PROVIDERS[selectedProvider]
+    if (providerConfig && providerConfig.imageToVideoModels) {
+      const modelConfig = providerConfig.imageToVideoModels[selectedModel as keyof typeof providerConfig.imageToVideoModels] as any
+      if (modelConfig) {
+        setAvailableDurations(modelConfig.supportedDurations || [4, 6, 8, 10])
+        const defaultDur = modelConfig.defaultDuration || modelConfig.supportedDurations[0] || 6
+        setModelDefaultDuration(defaultDur)
+        
+        // Only set duration if current duration is not supported by new model
+        if (!modelConfig.supportedDurations.includes(duration)) {
+          setDuration(defaultDur)
+          onDurationChange(defaultDur)
+        }
+      }
+    }
+  }, [selectedProvider, selectedModel, onDurationChange, duration])
 
   const updatePrompt = (index: number, value: string) => {
     const newPrompts = [...prompts]
@@ -158,27 +181,37 @@ export function ImageToVideoTab({
             <Clock className="h-4 w-4 text-green-600" />
             Video Duration
           </CardTitle>
+          <CardDescription>
+            Available durations for {selectedModel}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <Button
-              variant={duration === 5 ? 'default' : 'outline'}
-              onClick={() => setDuration(5)}
-              disabled={isGenerating}
-              className="flex-1"
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              5 Seconds
-            </Button>
-            <Button
-              variant={duration === 10 ? 'default' : 'outline'}
-              onClick={() => setDuration(10)}
-              disabled={isGenerating}
-              className="flex-1"
-            >
-              <Clock className="h-4 w-4 mr-2" />
-              10 Seconds
-            </Button>
+          <div className={`grid gap-2 ${availableDurations.length <= 2 ? 'grid-cols-2' : availableDurations.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+            {availableDurations.map((dur) => (
+              <Button
+                key={dur}
+                variant={duration === dur ? 'default' : 'outline'}
+                onClick={() => {
+                  setDuration(dur as 5 | 10)
+                  onDurationChange(dur as 5 | 10 )
+                }}
+                disabled={isGenerating}
+                className="flex-1 h-12"
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                {dur}s
+                {dur === modelDefaultDuration && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    Default
+                  </Badge>
+                )}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-3 text-center">
+            <Badge variant="outline" className="text-xs">
+              Selected: {duration} seconds
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -217,11 +250,13 @@ export function ImageToVideoTab({
               className="hidden"
               id="image-upload"
             />
-            <label htmlFor="image-upload">
-              <Button variant="outline" className="cursor-pointer">
-                Choose Images
-              </Button>
-            </label>
+            <Button 
+              variant="outline" 
+              className="cursor-pointer"
+              onClick={() => document.getElementById('image-upload')?.click()}
+            >
+              Choose Images
+            </Button>
           </div>
 
           {images.length > 0 && (

@@ -444,7 +444,7 @@ export function TextImageVideoGenerator() {
         
         <TabsContent value="text-to-video" className="space-y-6">
           <TextToVideoTab
-            defaultDuration={defaultDuration}
+            defaultDuration={defaultDuration as 5 | 10}
             isGenerating={isGenerating}
             onGenerate={handleTextToVideo}
             onDurationChange={(duration: 5 | 10) => dispatch(setDefaultDuration(duration))}

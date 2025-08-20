@@ -9,7 +9,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload } from 'lucide-react'
+import { ScriptUploadModal } from '../ScriptUploadModal'
 
 // A simplified Investigation v2 form matching the provided look
 export function Investigation2Form() {
@@ -17,12 +18,15 @@ export function Investigation2Form() {
   const { scriptSections } = useAppSelector(state => state.scripts)
 
   const [title, setTitle] = useState('')
+  const [sectionPrompt, setSectionPrompt] = useState('')
+  const [scriptPrompt, setScriptPrompt] = useState('')
   const [additionalContext, setAdditionalContext] = useState('')
   const [forbiddenWords, setForbiddenWords] = useState('')
   const [model, setModel] = useState('gpt-4o-mini')
   const [desiredWordCount, setDesiredWordCount] = useState<number | ''>('')
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false)
   const [isGeneratingScript, setIsGeneratingScript] = useState(false)
+  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false)
 
   const handleGenerateOutline = async () => {
     if (!title.trim()) return
@@ -34,6 +38,7 @@ export function Investigation2Form() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
+          sectionPrompt,
           additionalContext,
           forbiddenWords,
           selectedModel: model,
@@ -67,6 +72,7 @@ export function Investigation2Form() {
           sections: scriptSections,
           selectedModel: model,
           selectedView: '3rd',
+          scriptPrompt,
           excludedWords: forbiddenWords,
           desiredWordCount: desiredWordCount || '',
           additionalData: additionalContext
@@ -88,6 +94,17 @@ export function Investigation2Form() {
     }
   }
 
+  const handleScriptUpload = (script: string) => {
+    dispatch(setFullScript({
+      scriptWithMarkdown: script,
+      scriptCleaned: script,
+      title: title || "Uploaded Script",
+      theme: 'Investigation',
+      wordCount: script.split(/\s+/).filter(Boolean).length
+    }))
+    setIsScriptUploadOpen(false)
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -98,8 +115,20 @@ export function Investigation2Form() {
           </div>
 
           <div className="space-y-2">
-            <Label>Additional Context (optional)</Label>
-            <Textarea placeholder="Enter any additional context or information you'd like to include" value={additionalContext} onChange={(e) => setAdditionalContext(e.target.value)} />
+            <Label>Section Generation Instructions (Optional)</Label>
+            <Textarea placeholder="Specific instructions for how the AI should create and structure the script sections/outline" value={sectionPrompt} onChange={(e) => setSectionPrompt(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Controls how the script is divided into sections and the overall structure</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Script Writing Instructions (Optional)</Label>
+            <Textarea placeholder="Specific instructions for how the AI should write the actual script content" value={scriptPrompt} onChange={(e) => setScriptPrompt(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Controls the writing style, tone, and content approach for the final script</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>General Instructions (Optional)</Label>
+            <Textarea placeholder="Any other general instructions that apply to both section generation and script writing" value={additionalContext} onChange={(e) => setAdditionalContext(e.target.value)} />
           </div>
 
           <div className="space-y-2">
@@ -129,9 +158,24 @@ export function Investigation2Form() {
             <ShadButton onClick={handleGenerateScript} disabled={isGeneratingScript} className="bg-blue-600 hover:bg-blue-700">
               {isGeneratingScript ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating Script</>) : 'Generate Script'}
             </ShadButton>
+
+            <ShadButton
+              variant="outline"
+              onClick={() => setIsScriptUploadOpen(true)}
+              className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Script
+            </ShadButton>
           </div>
         </CardContent>
       </Card>
+
+      <ScriptUploadModal
+        isOpen={isScriptUploadOpen}
+        onClose={() => setIsScriptUploadOpen(false)}
+        onScriptUpload={handleScriptUpload}
+      />
     </div>
   )
 }

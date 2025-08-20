@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '../lib/hooks'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { StaggerContainer, StaggerItem, ScaleOnHover } from './animated-page'
+
+import { StaggerContainer, StaggerItem } from './animated-page'
 import { motion } from 'framer-motion'
 import { IMAGE_STYLES, LIGHTING_TONES } from '@/data/image'
-import { SingleGenerationTab, SceneExtractionTab, BatchGenerationTab } from './animation-generation'
+import { UnifiedAnimationTab } from './animation-generation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { addVideoToGenerator } from '@/lib/features/textImageVideo/textImageVideoSlice'
 import { 
   addImageSet, 
@@ -18,7 +19,8 @@ import {
   loadSelectedImagesOrder
 } from '@/lib/features/imageGeneration/imageGenerationSlice'
 
-import { Sun, Moon, Zap } from 'lucide-react'
+import { Sun, Moon, Zap, Grid, Download, RefreshCw, AlertCircle, Trash2 } from 'lucide-react'
+import { Button } from './ui/button'
 
 interface ExtractedAnimationScene {
   id: string
@@ -53,6 +55,9 @@ export function UnifiedAnimationGenerator() {
   const [selectedImageStyle, setSelectedImageStyle] = useState('realistic')
   const [selectedLightingTone, setSelectedLightingTone] = useState('balanced')
   const [customStylePrompt, setCustomStylePrompt] = useState('')
+  
+  // Reference image description
+  const [referenceImageDescription, setReferenceImageDescription] = useState('')
 
   // Scene extraction state
   const [scriptInput, setScriptInput] = useState('')
@@ -231,6 +236,7 @@ export function UnifiedAnimationGenerator() {
   const handleClearAnimationGenerator = () => {
     setAnimationPrompt('')
     setReferenceImages([])
+    setReferenceImageDescription('')
     setAnimationResult(null)
     setAnimationError(null)
     setSelectedImageStyle('realistic')
@@ -335,6 +341,18 @@ export function UnifiedAnimationGenerator() {
   // Helper function to combine styles into final prompt
   const getStyledPrompt = (basePrompt: string) => {
     let finalPrompt = basePrompt
+    
+    // Apply reference image description first if available
+    if (referenceImageDescription.trim()) {
+      const description = referenceImageDescription.trim()
+      const lowerPrompt = finalPrompt.toLowerCase()
+      const lowerDescription = description.toLowerCase()
+      
+      // Only add if not already mentioned
+      if (!lowerPrompt.includes(lowerDescription)) {
+        finalPrompt = `${description} ${finalPrompt}`
+      }
+    }
     
     // Apply Image Style
     if (selectedImageStyle && selectedImageStyle !== 'realistic') {
@@ -626,94 +644,231 @@ export function UnifiedAnimationGenerator() {
         </motion.div>
       </StaggerItem>
 
-      {/* Tabs Interface */}
+      {/* Main Interface */}
       <StaggerItem>
-        <Tabs defaultValue="single" className="w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="single">Single Generation</TabsTrigger>
-              <TabsTrigger value="extract">Extract & Manage</TabsTrigger>
-              <TabsTrigger value="batch">Batch Generation</TabsTrigger>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <Tabs defaultValue="generate" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="generate">Animation Generation</TabsTrigger>
+              <TabsTrigger value="gallery">Generated Gallery</TabsTrigger>
             </TabsList>
-          </motion.div>
 
-        {/* Single Generation Tab */}
-        <TabsContent value="single">
-          <SingleGenerationTab
-            animationPrompt={animationPrompt}
-            setAnimationPrompt={setAnimationPrompt}
-            referenceImages={referenceImages}
-            setReferenceImages={setReferenceImages}
-            isGeneratingAnimation={isGeneratingAnimation}
-            animationResult={animationResult}
-            animationError={animationError}
-            selectedImageStyle={selectedImageStyle}
-            setSelectedImageStyle={setSelectedImageStyle}
-            selectedLightingTone={selectedLightingTone}
-            setSelectedLightingTone={setSelectedLightingTone}
-            customStylePrompt={customStylePrompt}
-            setCustomStylePrompt={setCustomStylePrompt}
-            onGenerateAnimation={handleGenerateAnimation}
-            onDownloadAnimation={handleDownloadAnimation}
-            onClearAnimationGenerator={handleClearAnimationGenerator}
-          />
-        </TabsContent>
+            {/* Generation Tab */}
+            <TabsContent value="generate">
+              <UnifiedAnimationTab
+                // Script extraction
+                scriptInput={scriptInput}
+                setScriptInput={setScriptInput}
+                numberOfScenesToExtract={numberOfScenesToExtract}
+                setNumberOfScenesToExtract={setNumberOfScenesToExtract}
+                isExtractingScenes={isExtractingScenes}
+                sceneExtractionError={sceneExtractionError}
+                allPrompts={allPrompts}
+                onExtractScenes={handleExtractScenes}
+                onClearAllPrompts={handleClearAllPrompts}
+                getScriptSourceInfo={getScriptSourceInfo}
+                
+                // Generation
+                animationPrompt={animationPrompt}
+                setAnimationPrompt={setAnimationPrompt}
+                isGenerating={isGeneratingAnimation}
+                generationError={animationError}
+                onGenerate={(prompt) => {
+                  setAnimationPrompt(prompt)
+                  handleGenerateAnimation()
+                }}
+                
+                // Reference images
+                referenceImages={referenceImages}
+                setReferenceImages={setReferenceImages}
+                referenceImageDescription={referenceImageDescription}
+                setReferenceImageDescription={setReferenceImageDescription}
+                
+                // Batch generation  
+                batchResults={getAllResults().map(result => ({
+                  id: result.id,
+                  prompt: result.prompt,
+                  videoUrl: result.url,
+                  status: 'completed' as const
+                }))}
+                isBatchGenerating={isBatchGenerating}
+                batchProgress={batchProgress}
+                onBatchGenerate={(prompts) => {
+                  // Convert prompts to selected prompt IDs
+                  const promptIds = allPrompts
+                    .filter(p => prompts.includes(p.prompt))
+                    .map(p => p.id)
+                  setSelectedPrompts(promptIds)
+                  handleBatchGenerate()
+                }}
+                onClearBatch={handleClearAllResults}
+              />
+            </TabsContent>
 
-        {/* Extract & Manage Tab */}
-        <TabsContent value="extract">
-          <SceneExtractionTab
-            scriptInput={scriptInput}
-            setScriptInput={setScriptInput}
-            numberOfScenesToExtract={numberOfScenesToExtract}
-            setNumberOfScenesToExtract={setNumberOfScenesToExtract}
-            isExtractingScenes={isExtractingScenes}
-            sceneExtractionError={sceneExtractionError}
-            allPrompts={allPrompts}
-            mainContext={mainContext}
-            setMainContext={setMainContext}
-            onExtractScenes={handleExtractScenes}
-            onAddManualPrompt={handleAddManualPrompt}
-            onRemovePrompt={handleRemovePrompt}
-            onEditPrompt={handleEditPrompt}
-            onUsePromptForGeneration={handleUsePromptForGeneration}
-            onClearAllPrompts={handleClearAllPrompts}
-            animationPrompt={animationPrompt}
-            setAnimationPrompt={setAnimationPrompt}
-            getScriptSourceInfo={getScriptSourceInfo}
-            editingPromptId={editingPromptId}
-            editingPromptText={editingPromptText}
-            setEditingPromptText={setEditingPromptText}
-            onSaveEditedPrompt={handleSaveEditedPrompt}
-            onCancelEdit={handleCancelEdit}
-          />
-        </TabsContent>
+            {/* Gallery Tab */}
+            <TabsContent value="gallery">
+              <div className="space-y-6">
+                {/* Gallery Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Generated Gallery</h2>
+                    <p className="text-gray-600">
+                      View and manage all your generated animations ({getAllResults().length} total)
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {getAllResults().length > 0 && (
+                      <Button variant="outline" onClick={handleClearAllResults}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear All
+                      </Button>
+                    )}
+                  </div>
+                </div>
 
-        {/* Batch Generation Tab */}
-        <TabsContent value="batch">
-          <BatchGenerationTab
-            allPrompts={allPrompts}
-            selectedPrompts={selectedPrompts}
-            setSelectedPrompts={setSelectedPrompts}
-            referenceImages={referenceImages}
-            isBatchGenerating={isBatchGenerating}
-            batchProgress={batchProgress}
-            batchResults={getAllResults()}
-            batchError={batchError}
-            currentBatchIndex={currentBatchIndex}
-            batchDelayRemaining={batchDelayRemaining}
-            onBatchGenerate={handleBatchGenerate}
-            onClearBatchResults={handleClearAllResults}
-            onRegenerateImage={handleRegenerateImage}
+                {/* Gallery Grid */}
+                {getAllResults().length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getAllResults().map((result) => (
+                      <div key={result.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div className="aspect-video bg-gray-100 relative group">
+                          {/* Animation/Image Display */}
+                          <img
+                            src={result.url}
+                            alt={result.sceneTitle}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback for broken images
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `
+                                  <div class="flex items-center justify-center h-full bg-gray-200">
+                                    <div class="text-center">
+                                      <AlertCircle class="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                      <p class="text-sm text-gray-500">Failed to load</p>
+                                    </div>
+                                  </div>
+                                `;
+                              }
+                            }}
+                          />
+                          
+                          {/* Overlay Actions */}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => {
+                                  const link = document.createElement('a')
+                                  link.href = result.url
+                                  link.download = `animation-${result.id}.png`
+                                  link.target = '_blank'
+                                  document.body.appendChild(link)
+                                  link.click()
+                                  document.body.removeChild(link)
+                                }}
+                              >
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleRegenerateImage(result.prompt, result.id)}
+                                disabled={isGeneratingAnimation || isBatchGenerating}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Regenerate
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Card Content */}
+                        <div className="p-4">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-1">
+                            {result.sceneTitle}
+                          </h3>
+                          <p className="text-xs text-gray-600 line-clamp-2 mb-3">
+                            {result.prompt}
+                          </p>
+                          
+                          {/* Metadata */}
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>
+                              {result.sceneId === 'single' ? '👤 Single' : '📦 Batch'}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setAnimationPrompt(result.prompt)}
+                              className="h-6 px-2 text-xs"
+                            >
+                              Use Prompt
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Grid className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No animations generated yet</h3>
+                    <p className="text-gray-600 mb-4">
+                      Start by generating some animations in the Generation tab
+                    </p>
+                    <Button 
+                      onClick={() => {
+                        // Switch to generation tab (this will need to be implemented)
+                        const tabTrigger = document.querySelector('[value="generate"]') as HTMLButtonElement;
+                        if (tabTrigger) tabTrigger.click();
+                      }}
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start Generating
+                    </Button>
+                  </div>
+                )}
 
-            singleResults={singleResults}
-            onClearSingleResults={handleClearSingleResults}
-          />
-        </TabsContent>
-      </Tabs>
+                {/* Generation Stats */}
+                {getAllResults().length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{getAllResults().length}</div>
+                      <div className="text-sm text-gray-600">Total Generated</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {singleResults.length}
+                      </div>
+                      <div className="text-sm text-gray-600">Single Generations</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {batchResults.length}
+                      </div>
+                      <div className="text-sm text-gray-600">Batch Generated</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {allPrompts.length}
+                      </div>
+                      <div className="text-sm text-gray-600">Extracted Scenes</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
         </StaggerItem>
     </StaggerContainer>
   )

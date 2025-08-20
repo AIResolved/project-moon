@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { History, Database, Bot, User, Send } from "lucide-react"
+import { History, Database, Bot, User, Send, Upload } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -60,6 +60,7 @@ interface ScriptGeneratorFormProps {
   onDownloadDocx: () => void
   onOpenPromptHistory: () => void
   onOpenLoadCachedData: () => void
+  onOpenScriptUpload: () => void
   
   // State
   models: OpenAIModel[]
@@ -100,6 +101,7 @@ export function ScriptGeneratorForm({
   onDownloadDocx,
   onOpenPromptHistory,
   onOpenLoadCachedData,
+  onOpenScriptUpload,
   models,
   isLoading,
   isGeneratingScript,
@@ -201,6 +203,16 @@ export function ScriptGeneratorForm({
               >
                 <Database className="h-4 w-4" />
                 Load Cached Data
+              </Button>
+            </ScaleOnHover>
+            <ScaleOnHover>
+              <Button
+                variant="outline"
+                onClick={onOpenScriptUpload}
+                className="gap-2 bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Script
               </Button>
             </ScaleOnHover>
             {/* <ScaleOnHover>
@@ -318,6 +330,48 @@ export function ScriptGeneratorForm({
               <label className="flex items-center gap-2 text-sm"><input type="radio" name="prompt-mode" checked={useCustomPrompt} onChange={() => setUseCustomPrompt(true)} /> Custom prompt</label>
             </div>
             {useCustomPrompt && (<Textarea className="min-h-[80px] mt-2" placeholder="Paste or write your custom prompt here" value={customPrompt} onChange={(e) => setCustomPrompt(e.target.value)} />)}
+          </div>
+
+          {/* Script Generation Instructions */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="sectionPrompt">Section Generation Instructions (Optional)</Label>
+              <Textarea
+                id="sectionPrompt"
+                placeholder="Specific instructions for how the AI should create and structure the script sections/outline"
+                value={sectionPrompt}
+                onChange={(e) => onSectionPromptChange(e.target.value)}
+                className="min-h-[80px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                Controls how the script is divided into sections and the overall structure
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="scriptPrompt">Script Writing Instructions (Optional)</Label>
+              <Textarea
+                id="scriptPrompt"
+                placeholder="Specific instructions for how the AI should write the actual script content"
+                value={scriptPrompt}
+                onChange={(e) => onScriptPromptChange(e.target.value)}
+                className="min-h-[80px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                Controls the writing style, tone, and content approach for the final script
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="additionalPrompt">General Instructions (Optional)</Label>
+              <Textarea
+                id="additionalPrompt"
+                placeholder="Any other general instructions that apply to both section generation and script writing"
+                value={additionalPrompt}
+                onChange={(e) => onAdditionalPromptChange(e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
           </div>
 
           {/* Intro hook */}

@@ -131,8 +131,12 @@ export async function POST(request: NextRequest) {
       thumbnailUrl, 
       segmentTimings,
       selectedMusicTrack,
+      selectedMusicTracks,
       customMusicFiles,
       useCustomMusic,
+      // Volume controls
+      voiceoverVolume,
+      musicVolume,
       // Subtitle styling properties
       fontFamily,
       fontSize,
@@ -143,42 +147,26 @@ export async function POST(request: NextRequest) {
       // Other properties
       enableOverlay,
       zoomEffect,
-      dustOverlay
+      dustOverlay,
+      snowOverlay,
+      screenDisplacementOverlay,
+      fireOverlay
     } = body;
-    console.log(`🖼️ Image URLs: ${imageUrls?.length || 0} images`);
-    console.log(`🔄 Ordered Content: ${orderedContentUrls ? orderedContentUrls.length + ' items (reordered)' : 'Using legacy mode'}`);
-    console.log(`🎵 Audio URL: ${audioUrl}`);
-    console.log(`🗜️ Compressed Audio URL: ${compressedAudioUrl}`);
-    console.log(`⏱️ Audio Duration: ${audioDuration ? `${audioDuration}s` : 'not provided'}`);
-    console.log(`📝 Subtitles URL: ${subtitlesUrl}`);
-    console.log(`👤 User ID: ${authenticatedUserId}`);
-    console.log(`📷 Thumbnail URL: ${thumbnailUrl}`);
-    console.log(`⏱️ Segment Timings: ${segmentTimings ? segmentTimings.length + ' segments' : 'No custom timing'}`);
-    console.log(`🎶 Selected Music Track: ${selectedMusicTrack ? `${selectedMusicTrack.title} by ${selectedMusicTrack.artist}` : 'None'}`);
-    console.log(`🎵 Custom Music Files: ${customMusicFiles?.length || 0} files`);
-    console.log(`🎤 Use Custom Music: ${useCustomMusic ? 'YES' : 'NO'}`);
-    console.log(`✨ Enable Overlay: ${enableOverlay ? 'YES' : 'NO'}`);
-    console.log(`🔍 Zoom Effect: ${zoomEffect ? 'YES' : 'NO'}`);
-    console.log(`💨 Dust Overlay: ${dustOverlay ? 'YES' : 'NO'}`);
-    console.log(`📋 Text Transform: ${textTransform || 'none'}`);
-    console.log(`🎨 Font Color: ${fontColor || '#ffffff'}`);
-    console.log(`📝 Font Family: ${fontFamily || 'Montserrat ExtraBold'}`);
-    console.log(`📏 Font Size: ${fontSize || 24}px`);
+    // Apply defaults for undefined overlay values
+    const finalDustOverlay = dustOverlay || false;
+    const finalSnowOverlay = snowOverlay || false;
+    const finalScreenDisplacementOverlay = screenDisplacementOverlay || false;
+    const finalFireOverlay = fireOverlay || false;
 
+    console.log(`✨ Overlay Effects - Dust: ${finalDustOverlay}, Snow: ${finalSnowOverlay}, Screen: ${finalScreenDisplacementOverlay}, Fire: ${finalFireOverlay}`);
     
-    console.log(`📋 Video creation request:
-      - Images: ${imageUrls?.length || 0}
-      - Audio URL: ${audioUrl ? 'YES' : 'NO'}
-      - Audio Duration: ${audioDuration ? `${audioDuration}s` : 'not provided'}
-      - Subtitles URL: ${subtitlesUrl ? 'YES' : 'NO'}
-      - Custom Music: ${useCustomMusic ? 'YES' : 'NO'}
-      - Selected Music Track: ${selectedMusicTrack ? 'YES' : 'NO'}
-      - Custom Music Files: ${customMusicFiles?.length || 0}
-      - Enable Overlay: ${enableOverlay ? 'YES' : 'NO'}
-      - Segment timings: ${segmentTimings ? 'YES (segmented video)' : 'NO (traditional video)'}
-      - User ID: ${authenticatedUserId}
-    `);
-
+    // Apply volume defaults if not provided
+    const finalVoiceoverVolume = voiceoverVolume ?? 0.8; // Default 80%
+    const finalMusicVolume = musicVolume ?? 0.3; // Default 30%
+    
+    console.log(`🎵 Music Config: ${selectedMusicTracks?.length ? selectedMusicTracks.length + ' tracks in queue' : selectedMusicTrack ? '1 single track' : customMusicFiles?.length ? customMusicFiles.length + ' uploaded files' : 'none'}`);
+    console.log(`🔊 Audio Volumes - Voiceover: ${Math.round(finalVoiceoverVolume * 100)}%, Music: ${Math.round(finalMusicVolume * 100)}%`);
+   
     // Validate inputs
     if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) {
       return NextResponse.json<CreateVideoResponse>({ error: 'Image URLs are required.' }, { status: 400 });
@@ -234,24 +222,139 @@ export async function POST(request: NextRequest) {
     let tracks = [];
 
     // Track for dust overlay (if dustOverlay is enabled)
-    if (dustOverlay) {
-        console.log(`✨ Adding dust overlay effect`);
+    if (finalDustOverlay) {
+        const overlayDuration = 19; // Each overlay video is 19 seconds long
         const dustOverlayUrl = 'https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlay.webm';
         
-        const overlayTrack = {
-            clips: [{
-                asset: {
-                    type: 'video',
-                    src: dustOverlayUrl,
-                    volume: 0
-                },
-                start: 0,
-                length: totalDuration,
-                fit: 'cover',
-                opacity: 0.15
-            }]
-        };
+        // Calculate how many clips needed to cover total duration
+        const numClips = Math.ceil(totalDuration / overlayDuration);
+        console.log(`✨ Adding dust particles overlay: ${numClips} clips to cover ${totalDuration}s`);
+        
+        const dustClips = [];
+        for (let i = 0; i < numClips; i++) {
+            const startTime = i * overlayDuration;
+            const remainingDuration = totalDuration - startTime;
+            const clipLength = Math.min(overlayDuration, remainingDuration);
+            
+            if (clipLength > 0) {
+                dustClips.push({
+                    asset: {
+                        type: 'video',
+                        src: dustOverlayUrl,
+                        volume: 0
+                    },
+                    start: startTime,
+                    length: clipLength,
+                    fit: 'cover',
+                    opacity: 0.15
+                });
+            }
+        }
+        
+        const overlayTrack = { clips: dustClips };
         tracks.push(overlayTrack);
+    }
+
+    // Track for snow overlay (if snowOverlay is enabled)
+    if (finalSnowOverlay) {
+        const overlayDuration = 19; // Each overlay video is 19 seconds long
+        const snowOverlayUrl = 'https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlays/snow-falling-2023-11-27-04-51-47-utc.webm';
+        
+        // Calculate how many clips needed to cover total duration
+        const numClips = Math.ceil(totalDuration / overlayDuration);
+        console.log(`❄️ Adding snow effect overlay: ${numClips} clips to cover ${totalDuration}s`);
+        
+        const snowClips = [];
+        for (let i = 0; i < numClips; i++) {
+            const startTime = i * overlayDuration;
+            const remainingDuration = totalDuration - startTime;
+            const clipLength = Math.min(overlayDuration, remainingDuration);
+            
+            if (clipLength > 0) {
+                snowClips.push({
+                    asset: {
+                        type: 'video',
+                        src: snowOverlayUrl,
+                        volume: 0
+                    },
+                    start: startTime,
+                    length: clipLength,
+                    fit: 'cover',
+                    opacity: 0.2
+                });
+            }
+        }
+        
+        const snowOverlayTrack = { clips: snowClips };
+        tracks.push(snowOverlayTrack);
+    }
+
+    // Track for screen displacement overlay (if screenDisplacementOverlay is enabled)
+    if (finalScreenDisplacementOverlay) {
+        const overlayDuration = 19; // Each overlay video is 19 seconds long
+        const screenDisplacementOverlayUrl = 'https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlays/screen-displacement-map-glitch-effect-digital-pixe-2024-07-17-05-42-56-utc.webm';
+        
+        // Calculate how many clips needed to cover total duration
+        const numClips = Math.ceil(totalDuration / overlayDuration);
+        console.log(`📺 Adding screen displacement overlay: ${numClips} clips to cover ${totalDuration}s`);
+        
+        const screenClips = [];
+        for (let i = 0; i < numClips; i++) {
+            const startTime = i * overlayDuration;
+            const remainingDuration = totalDuration - startTime;
+            const clipLength = Math.min(overlayDuration, remainingDuration);
+            
+            if (clipLength > 0) {
+                screenClips.push({
+                    asset: {
+                        type: 'video',
+                        src: screenDisplacementOverlayUrl,
+                        volume: 0
+                    },
+                    start: startTime,
+                    length: clipLength,
+                    fit: 'cover',
+                    opacity: 0.25
+                });
+            }
+        }
+        
+        const screenDisplacementOverlayTrack = { clips: screenClips };
+        tracks.push(screenDisplacementOverlayTrack);
+    }
+
+    // Track for fire overlay (if fireOverlay is enabled)
+    if (finalFireOverlay) {
+        const overlayDuration = 19; // Each overlay video is 19 seconds long
+        const fireOverlayUrl = 'https://byktarizdjtreqwudqmv.supabase.co/storage/v1/object/public/video-generator/overlays/Fire%20Particles%20Overlay.webm';
+        
+        // Calculate how many clips needed to cover total duration
+        const numClips = Math.ceil(totalDuration / overlayDuration);
+        console.log(`🔥 Adding fire effect overlay: ${numClips} clips to cover ${totalDuration}s`);
+        
+        const fireClips = [];
+        for (let i = 0; i < numClips; i++) {
+            const startTime = i * overlayDuration;
+            const remainingDuration = totalDuration - startTime;
+            const clipLength = Math.min(overlayDuration, remainingDuration);
+            
+            if (clipLength > 0) {
+                fireClips.push({
+                    asset: {
+                        type: 'video',
+                        src: fireOverlayUrl,
+                        volume: 0
+                    },
+                    start: startTime,
+                    length: clipLength,
+                    fit: 'cover',
+                    opacity: 0.3
+                });
+            }
+        }
+        
+        const fireOverlayTrack = { clips: fireClips };
+        tracks.push(fireOverlayTrack);
     }
 
     // Track for subtitles (captions) - Add after overlay if it exists
@@ -368,7 +471,7 @@ export async function POST(request: NextRequest) {
                 asset: {
                     type: "audio",
                     src: audioUrlToUse,
-                    volume: 1.0 // Full volume for speech - this is the primary audio
+                    volume: finalVoiceoverVolume // User-controlled voiceover volume
                 },
                 start: 0,
                 length: totalDuration
@@ -380,10 +483,60 @@ export async function POST(request: NextRequest) {
     }
 
     // Track for background music (if useCustomMusic is enabled)
-    if (useCustomMusic && (selectedMusicTrack || (customMusicFiles && customMusicFiles.length > 0))) {
-        console.log(`🎶 Adding background music: ${selectedMusicTrack ? 'Search result' : (customMusicFiles?.length || 0) + ' uploaded file(s)'}`);
+      
+    if (useCustomMusic && (selectedMusicTracks?.length || selectedMusicTrack || (customMusicFiles && customMusicFiles.length > 0))) {
+        console.log(`🎶 Adding background music: ${selectedMusicTracks?.length ? selectedMusicTracks.length + ' selected tracks' : selectedMusicTrack ? 'Single search result' : (customMusicFiles?.length || 0) + ' uploaded file(s)'}`);
         
-        if (selectedMusicTrack) {
+        if (selectedMusicTracks && selectedMusicTracks.length > 0) {
+            // Use multiple selected tracks in sequence
+            console.log(`🎵 Creating background music sequence from ${selectedMusicTracks.length} selected tracks`);
+            
+            // Validate that tracks have required properties
+            const validTracks = selectedMusicTracks.filter(track => track.preview_url && track.title);
+            if (validTracks.length === 0) {
+                console.warn('⚠️ No valid tracks found in selectedMusicTracks - tracks missing preview_url or title');
+                return;
+            }
+            console.log(`🎵 Valid tracks found: ${validTracks.length}/${selectedMusicTracks.length}`);
+            
+            const musicClips = [];
+            let currentTime = 0;
+            let trackIndex = 0;
+            
+            // Sort tracks by order to ensure correct sequence
+            const sortedTracks = [...validTracks].sort((a, b) => (a.order || 0) - (b.order || 0));
+            
+            while (currentTime < totalDuration) {
+                for (const track of sortedTracks) {
+                    if (currentTime >= totalDuration) break;
+                    
+                    const trackDuration = track.duration || 30; // Default to 30s if duration not available
+                    const clipDuration = Math.min(trackDuration, totalDuration - currentTime);
+                    
+                    if (clipDuration > 0) {
+                        musicClips.push({
+                            asset: {
+                                type: "audio",
+                                src: track.preview_url,
+                                volume: finalMusicVolume // User-controlled music volume
+                            },
+                            start: currentTime,
+                            length: clipDuration
+                        });
+                        
+                        console.log(`   Adding track #${track.order || (trackIndex + 1)}: "${track.title}" by ${track.artist} - ${clipDuration.toFixed(1)}s at ${currentTime.toFixed(1)}s`);
+                        currentTime += clipDuration;
+                        trackIndex++;
+                    }
+                }
+            }
+            
+            const musicTrack = {
+                clips: musicClips
+            };
+            tracks.push(musicTrack);
+            
+        } else if (selectedMusicTrack) {
             // Use selected track from search results as background music
             console.log(`🔍 Adding background music track: ${selectedMusicTrack.title} by ${selectedMusicTrack.artist}`);
             
@@ -404,7 +557,7 @@ export async function POST(request: NextRequest) {
                         asset: {
                             type: "audio",
                             src: selectedMusicTrack.preview_url,
-                            volume: 0.3 // Lower volume for background music so voiceover is clear
+                            volume: finalMusicVolume // User-controlled music volume
                         },
                         start: startTime,
                         length: clipLength
@@ -435,7 +588,7 @@ export async function POST(request: NextRequest) {
                         asset: {
                             type: "audio",
                             src: musicFile.url,
-                            volume: 0.3 // Lower volume for background music so voiceover is clear
+                            volume: finalMusicVolume // User-controlled music volume
                         },
                         start: currentTime,
                         length: clipDuration

@@ -23,10 +23,16 @@ const initialState: VideoState = {
     videoMode: 'traditional',
     zoomEffect: false,
     dustOverlay: false,
+    snowOverlay: false,
+    screenDisplacementOverlay: false,
+    fireOverlay: false,
     introDuration: 60, // 1 minute default
     useEqualIntroDuration: true,
     useCustomMusic: false,
-    customMusicFiles: []
+    customMusicFiles: [],
+    selectedMusicTracks: [],
+    voiceoverVolume: 0.8,
+    musicVolume: 0.3
   },
   statusRefreshInterval: null,
   selectedVideosForGeneration: []

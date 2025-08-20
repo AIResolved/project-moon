@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Lightbulb, Zap, UploadCloud, Search, SlidersHorizontal, ListChecks, Sparkles, Check } from 'lucide-react'
 import { ResearchPreviewModal } from '@/components/script-generator/ResearchPreviewModal'
+import { ScriptUploadModal } from '../ScriptUploadModal'
 
 interface OpenAIModel { id: string; owned_by: string }
 
@@ -36,6 +37,8 @@ export function OptionsGenerator() {
 
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [title, setTitle] = useState('');
+  const [sectionPrompt, setSectionPrompt] = useState('');
+  const [scriptPrompt, setScriptPrompt] = useState('');
   const [additionalData, setAdditionalData] = useState('');
   const [forbiddenWords, setForbiddenWords] = useState('');
   const [desiredWordCount, setDesiredWordCount] = useState<number>(1000);
@@ -45,6 +48,7 @@ export function OptionsGenerator() {
   const [uploadedStyleText, setUploadedStyleText] = useState<string>('');
   const [pasteMode, setPasteMode] = useState<boolean>(false);
   const [isResearchPreviewOpen, setIsResearchPreviewOpen] = useState(false);
+  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -68,6 +72,7 @@ export function OptionsGenerator() {
         body: JSON.stringify({
           title: title.trim() || selectedOption,
           wordCount: Math.max(800, Number(desiredWordCount) || 1000),
+          sectionPrompt,
           additionalPrompt: additionalData,
           forbiddenWords,
           selectedModel,
@@ -114,6 +119,7 @@ export function OptionsGenerator() {
           selectedModel,
           emotionalTone: '',
           targetAudience: '',
+          scriptPrompt,
           forbiddenWords,
           additionalPrompt: additionalData + ((researchSummaries && researchSummaries.length > 0) ? `\n\nRESEARCH CONTEXT:\n${JSON.stringify(researchSummaries).slice(0, 2000)}` : ''),
         })
@@ -192,6 +198,17 @@ export function OptionsGenerator() {
     return JSON.stringify(researchSummaries, null, 2).slice(0, 5000)
   }
 
+  const handleScriptUpload = (script: string) => {
+    dispatch(setFullScript({
+      scriptWithMarkdown: script,
+      scriptCleaned: script,
+      title: title || "Uploaded Script",
+      theme: selectedOption,
+      wordCount: script.split(/\s+/).filter(Boolean).length
+    }))
+    setIsScriptUploadOpen(false)
+  }
+
   const StepIndicator = () => {
     const items = steps.map((label, i) => {
       const isActive = i === currentStep
@@ -236,6 +253,7 @@ export function OptionsGenerator() {
   }
 
   return (
+    <>
     <Card>
       <CardContent className="space-y-6 pt-6">
         <StepIndicator />
@@ -313,12 +331,34 @@ export function OptionsGenerator() {
             </div>
 
             <div className="space-y-2">
-              <Label>Enter additional data (summary, narrative, etc.):</Label>
+              <Label>Section Generation Instructions (Optional)</Label>
               <Textarea
-                placeholder="Enter additional data"
+                placeholder="Specific instructions for how the AI should create and structure the script sections/outline"
+                value={sectionPrompt}
+                onChange={(e) => setSectionPrompt(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">Controls how the script is divided into sections and the overall structure</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Script Writing Instructions (Optional)</Label>
+              <Textarea
+                placeholder="Specific instructions for how the AI should write the actual script content"
+                value={scriptPrompt}
+                onChange={(e) => setScriptPrompt(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">Controls the writing style, tone, and content approach for the final script</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>General Instructions (Optional)</Label>
+              <Textarea
+                placeholder="Any other general instructions that apply to both section generation and script writing"
                 value={additionalData}
                 onChange={(e) => setAdditionalData(e.target.value)}
-                rows={5}
+                rows={3}
               />
             </div>
 
@@ -372,6 +412,14 @@ export function OptionsGenerator() {
               <Button onClick={handleGenerateFullScript} disabled={isGeneratingScript || scriptSections.length === 0} className="w-full sm:flex-1">
                 {isGeneratingScript ? 'Generating Script...' : 'Generate Full Script'}
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsScriptUploadOpen(true)}
+                className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+              >
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Upload Script
+              </Button>
             </div>
 
             {fullScript?.scriptWithMarkdown && (
@@ -392,6 +440,13 @@ export function OptionsGenerator() {
         </div>
       </CardContent>
     </Card>
+
+    <ScriptUploadModal
+      isOpen={isScriptUploadOpen}
+      onClose={() => setIsScriptUploadOpen(false)}
+      onScriptUpload={handleScriptUpload}
+    />
+    </>
   );
 }
 

@@ -84,15 +84,59 @@ export async function POST(request: NextRequest) {
 
     console.log('🚀 Starting FAL AI text-to-video generation with model:', selectedModel)
 
-    // Start the generation with progress tracking
-    const result = await fal.subscribe(selectedModel, {
-      input,
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === "IN_PROGRESS") {
-          console.log('📊 FAL AI Progress:', update.logs?.map((log) => log.message).join(', '))
-        }
-      },
+    // Submit the request to the queue
+    const { request_id } = await fal.queue.submit(selectedModel, {
+      input
+    })
+
+    console.log(`📋 Request submitted with ID: ${request_id}`)
+
+    // Poll for status and completion
+    let status
+    let attempts = 0
+    const maxAttempts = 180 // 15 minutes with 5-second intervals
+    
+    // Check initial status immediately
+    status = await fal.queue.status(selectedModel, {
+      requestId: request_id,
+      logs: true
+    })
+    
+    console.log(`🔄 Initial status: ${status.status}`)
+    
+    // Continue polling if not completed
+    while (status.status === "IN_PROGRESS" || status.status === "IN_QUEUE") {
+      if (attempts >= maxAttempts) {
+        throw new Error('Request timed out after 15 minutes')
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
+      attempts++
+      
+      status = await fal.queue.status(selectedModel, {
+        requestId: request_id,
+        logs: true
+      })
+      
+      console.log(`🔄 Status check ${attempts}: ${status.status}`)
+      
+      // Log any new progress messages
+      if ((status as any).logs && (status as any).logs.length > 0) {
+        (status as any).logs.forEach((log: any) => {
+          if (log.message) {
+            console.log(log.message)
+          }
+        })
+      }
+    }
+
+    if (status.status !== "COMPLETED") {
+      throw new Error(`Request failed with status: ${status.status}`)
+    }
+
+    // Get the final result
+    const result = await fal.queue.result(selectedModel, {
+      requestId: request_id
     })
 
     console.log('✅ FAL AI generation completed')
@@ -168,7 +212,7 @@ export async function POST(request: NextRequest) {
       videoUrl: finalVideoUrl,
       provider: 'fal',
       model: model,
-      requestId: result.requestId,
+      requestId: request_id,
       message: 'Text-to-video generation completed successfully'
     })
 

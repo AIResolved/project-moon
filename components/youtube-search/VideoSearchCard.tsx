@@ -258,31 +258,63 @@ export function VideoSearchCard({
               </div>
             </div>
             
-            {/* Enhanced Analysis Mode Selection */}
+            {/* Simplified Analysis Buttons */}
             <div className="mb-4">
-               <h5 className="text-sm font-medium text-blue-200 mb-3">Choose Analysis Approach for Selected Videos</h5>
+               <h5 className="text-sm font-medium text-blue-200 mb-3">Analysis Options for Selected Videos</h5>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <button
-                  onClick={() => onAnalysisModeChange('openai')}
-                  className={`p-4 rounded-lg border-2 transition-colors ${
-                    analysisMode === 'openai'
-                      ? 'border-purple-500 bg-purple-900/30 text-purple-200'
-                      : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-purple-400'
-                  }`}
+                <Button
+                  onClick={onGenerateSubtitles}
+                  disabled={searchResults.selectedVideos.length === 0 || subtitleGeneration.generatingSubtitles}
+                  className="p-4 h-auto bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
                 >
                   <div className="flex flex-col items-center gap-3">
-                    <Search className="h-6 w-6" />
+                    {subtitleGeneration.generatingSubtitles ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <FileText className="h-6 w-6" />
+                    )}
                     <div className="text-center">
-                      <div className="font-medium">Transcript Analysis</div>
-                      <div className="text-xs opacity-75 mt-1">OpenAI analyzes generated subtitles</div>
-                      <div className="text-xs mt-1 text-amber-600">
-                        ⚠ Requires subtitle generation first
+                      <div className="font-medium">Generate Transcripts</div>
+                      <div className="text-xs opacity-75 mt-1">
+                        {subtitleGeneration.generatingSubtitles 
+                          ? `Processing ${subtitleGeneration.completedVideosCount}/${subtitleGeneration.totalVideosProcessing}...`
+                          : 'Extract transcripts from selected videos'
+                        }
                       </div>
                     </div>
                   </div>
-                </button>
+                </Button>
+                <Button
+                  onClick={() => {
+                    onAnalysisModeChange('gemini')
+                    onAnalyzeSelectedVideos()
+                  }}
+                  disabled={searchResults.selectedVideos.length === 0 || isAnalyzingBatch}
+                  className="p-4 h-auto bg-purple-600 hover:bg-purple-700 text-white border-2 border-purple-500"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    {isAnalyzingBatch ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-6 w-6" />
+                    )}
+                    <div className="text-center">
+                      <div className="font-medium">Analyze with Gemini</div>
+                      <div className="text-xs opacity-75 mt-1">
+                        {isAnalyzingBatch 
+                          ? `Analyzing ${batchAnalysisProgress.completed}/${batchAnalysisProgress.total}...`
+                          : 'AI analysis of video content'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </Button>
+              </div>
+              
+              {/* Legacy OpenAI Analysis (Hidden) */}
+              <div className="hidden">
                 <button
-                  onClick={() => onAnalysisModeChange('gemini')}
+                  onClick={() => onAnalysisModeChange('openai')}
                   className={`p-4 rounded-lg border-2 transition-colors ${
                     analysisMode === 'gemini'
                       ? 'border-blue-500 bg-blue-900/30 text-blue-200'
@@ -567,3 +599,4 @@ export function VideoSearchCard({
     </div>
   )
 } 
+ 

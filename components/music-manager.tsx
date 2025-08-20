@@ -12,7 +12,7 @@ import { Checkbox } from './ui/checkbox'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { Loader2, Music, Pause, Play, Trash2, Search, Download, Clock, User } from 'lucide-react'
+import { Loader2, Music, Pause, Play, Trash2, Search, Download, Clock, User, ArrowUp, ArrowDown, CheckCircle2 } from 'lucide-react'
 import { SelectedMusicTrack } from '@/types/video-generation'
 
 interface SearchResult {
@@ -37,7 +37,8 @@ export function MusicManager() {
   const [searching, setSearching] = useState(false)
   const [selectedTrack, setSelectedTrack] = useState<SearchResult | null>(null)
   
-  // Get the current selected track from settings
+  // Get the current selected tracks from settings
+  const currentSelectedTracks = settings.selectedMusicTracks || []
   const currentSelectedTrack = settings.selectedMusicTrack
 
   const customMusicFiles: Array<{ id: string; name: string; url: string; duration?: number }> = settings.customMusicFiles || []
@@ -158,12 +159,61 @@ export function MusicManager() {
       artist: track.artist,
       duration: track.duration,
       preview_url: track.preview_url,
-      license_type: track.license_type
+      license_type: track.license_type,
+      order: currentSelectedTracks.length + 1
     }
-    // Update settings to use the selected track
+    
+    // Check if track is already selected
+    const isAlreadySelected = currentSelectedTracks.some(t => t.id === track.id)
+    if (isAlreadySelected) {
+      // Remove track if already selected - ensure we create a fresh array
+      const updatedTracks = [...currentSelectedTracks].filter(t => t.id !== track.id)
+        .map((t, index) => ({ ...t, order: index + 1 })) // Reorder remaining tracks
+      updateSettings({ 
+        selectedMusicTracks: updatedTracks,
+        selectedMusicTrack: updatedTracks[0] || null, // Keep first track as primary
+        useCustomMusic: updatedTracks.length > 0 
+      })
+    } else {
+      // Add track to selection - ensure we create a fresh array
+      const updatedTracks = [...currentSelectedTracks, { ...selectedMusicTrack }]
+      updateSettings({ 
+        selectedMusicTracks: updatedTracks,
+        selectedMusicTrack: updatedTracks[0], // Keep first track as primary
+        useCustomMusic: true 
+      })
+    }
+  }
+
+  const handleRemoveSelectedTrack = (trackId: string) => {
+    const updatedTracks = [...currentSelectedTracks].filter(t => t.id !== trackId)
+      .map((t, index) => ({ ...t, order: index + 1 })) // Reorder remaining tracks
     updateSettings({ 
-      selectedMusicTrack,
-      useCustomMusic: true 
+      selectedMusicTracks: updatedTracks,
+      selectedMusicTrack: updatedTracks[0] || null,
+      useCustomMusic: updatedTracks.length > 0 
+    })
+  }
+
+  const handleMoveTrack = (trackId: string, direction: 'up' | 'down') => {
+    // Create a deep copy of the array to avoid read-only issues
+    const tracksCopy = currentSelectedTracks.map(track => ({ ...track }))
+    const currentIndex = tracksCopy.findIndex(t => t.id === trackId)
+    if (currentIndex === -1) return
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    if (newIndex < 0 || newIndex >= tracksCopy.length) return
+    
+    // Swap tracks using destructuring to avoid array mutation
+    const [movedTrack] = tracksCopy.splice(currentIndex, 1)
+    tracksCopy.splice(newIndex, 0, movedTrack)
+    
+    // Update order numbers with a fresh array
+    const reorderedTracks = tracksCopy.map((t, index) => ({ ...t, order: index + 1 }))
+    
+    updateSettings({ 
+      selectedMusicTracks: reorderedTracks,
+      selectedMusicTrack: reorderedTracks[0] // Keep first track as primary
     })
   }
 
@@ -211,9 +261,9 @@ export function MusicManager() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="use-custom-music"
-                  checked={!!settings.useCustomMusic && (customMusicFiles.length > 0 || !!currentSelectedTrack)}
-                  onCheckedChange={(checked) => updateSettings({ useCustomMusic: !!checked && (customMusicFiles.length > 0 || !!currentSelectedTrack) })}
-                  disabled={customMusicFiles.length === 0 && !currentSelectedTrack}
+                  checked={!!settings.useCustomMusic && (customMusicFiles.length > 0 || currentSelectedTracks.length > 0)}
+                  onCheckedChange={(checked) => updateSettings({ useCustomMusic: !!checked && (customMusicFiles.length > 0 || currentSelectedTracks.length > 0) })}
+                  disabled={customMusicFiles.length === 0 && currentSelectedTracks.length === 0}
                 />
                 <Label htmlFor="use-custom-music" className="text-sm text-gray-300">Use background music</Label>
               </div>
@@ -286,11 +336,82 @@ export function MusicManager() {
                   </Button>
                 </div>
                 
-                {currentSelectedTrack && (
-                  <div className="p-3 bg-green-900/20 border border-green-600 rounded-lg">
-                    <div className="flex items-center gap-2 text-green-400 text-sm">
-                      <Music className="h-4 w-4" />
-                      Selected: {currentSelectedTrack.title} by {currentSelectedTrack.artist}
+                {/* Selected Tracks Queue */}
+                {currentSelectedTracks.length > 0 && (
+                  <div className="space-y-3">
+                                    <Label className="text-sm font-medium text-white">
+                  Selected Music Queue ({currentSelectedTracks.length} tracks)
+                </Label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {[...currentSelectedTracks]
+                        .sort((a, b) => (a.order || 0) - (b.order || 0))
+                        .map((track, index) => (
+                        <div 
+                          key={track.id} 
+                          className="flex items-center justify-between p-3 bg-green-900/30 border border-green-600 rounded-lg backdrop-blur-sm"
+                        >
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs border-green-500 text-green-300">
+                                #{index + 1}
+                              </Badge>
+                              <CheckCircle2 className="h-4 w-4 text-green-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-white truncate">{track.title}</div>
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <User className="h-3 w-3" />
+                                <span>{track.artist}</span>
+                                <Clock className="h-3 w-3 ml-2" />
+                                <span>{Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, '0')}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <audio id={`audio-selected-${track.id}`} src={track.preview_url} preload="none" />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handlePlayPause(`selected-${track.id}`)
+                              }} 
+                              className="h-7 w-7 p-0 text-gray-300 hover:text-white"
+                            >
+                              {playingAudio === `selected-${track.id}` ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleMoveTrack(track.id, 'up')}
+                              disabled={index === 0}
+                              className="h-7 w-7 p-0 text-gray-300 hover:text-white disabled:opacity-30"
+                            >
+                              <ArrowUp className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleMoveTrack(track.id, 'down')}
+                              disabled={index === currentSelectedTracks.length - 1}
+                              className="h-7 w-7 p-0 text-gray-300 hover:text-white disabled:opacity-30"
+                            >
+                              <ArrowDown className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleRemoveSelectedTrack(track.id)}
+                              className="h-7 w-7 p-0 text-red-400 hover:text-red-300"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-sm text-green-300 bg-green-900/20 border border-green-600 p-3 rounded-lg">
+                      🎵 Tracks will play in the order shown above, looping the entire sequence throughout the video.
                     </div>
                   </div>
                 )}
@@ -303,7 +424,7 @@ export function MusicManager() {
                         <div 
                           key={track.id} 
                           className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors
-                            ${currentSelectedTrack?.id === track.id 
+                            ${currentSelectedTracks.some(t => t.id === track.id)
                               ? 'bg-green-900/20 border-green-600' 
                               : 'bg-gray-700 border-gray-600 hover:bg-gray-650'
                             }`}
@@ -311,10 +432,19 @@ export function MusicManager() {
                         >
                           <div className="flex items-center gap-3 flex-1">
                             <div className="flex items-center gap-2">
-                              <Music className="h-4 w-4 text-purple-400" />
+                              {currentSelectedTracks.some(t => t.id === track.id) ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-400" />
+                              ) : (
+                                <Music className="h-4 w-4 text-purple-400" />
+                              )}
                               {track.bpm && (
                                 <Badge variant="outline" className="text-xs border-gray-500 text-gray-300">
                                   {track.bpm} BPM
+                                </Badge>
+                              )}
+                              {currentSelectedTracks.some(t => t.id === track.id) && (
+                                <Badge variant="outline" className="text-xs border-green-500 text-green-300">
+                                  Selected
                                 </Badge>
                               )}
                             </div>

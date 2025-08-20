@@ -8,16 +8,26 @@ fal.config({
   credentials: process.env.FAL_KEY
 })
 
-// Available FAL AI models for image-to-video
+// Available FAL AI models for image-to-video with their duration options
 const FAL_MODELS = {
-  // Text-to-video models
-  'minimax-hailuo-02-pro': 'fal-ai/minimax/hailuo-02/standard/text-to-video',
-  'kling-v2.1-master': 'fal-ai/kling-video/v2.1/master/text-to-video',
-
-  // Image-to-video models
-  'bytedance-seedance-v1-pro': 'fal-ai/bytedance/seedance/v1/pro/image-to-video',
-  'pixverse-v4.5': 'fal-ai/pixverse/v4.5/image-to-video',
-  'wan-v2.2-5b': 'fal-ai/wan/v2.2-5b/image-to-video'
+  'bytedance-seedance-v1-pro': {
+    endpoint: 'fal-ai/bytedance/seedance/v1/pro/image-to-video',
+    supportedDurations: [4, 6, 8, 10], // seconds
+    defaultDuration: 6,
+    supportsDuration: true
+  },
+  'pixverse-v4.5': {
+    endpoint: 'fal-ai/pixverse/v4.5/image-to-video',
+    supportedDurations: [5, 8], // seconds  
+    defaultDuration: 5,
+    supportsDuration: true
+  },
+  'wan-v2.2-5b': {
+    endpoint: 'fal-ai/wan/v2.2-5b/image-to-video',
+    supportedDurations: [4, 5], // seconds
+    defaultDuration: 5,
+    supportsDuration: true
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -26,11 +36,8 @@ export async function POST(request: NextRequest) {
     const { 
       prompt, 
       image_url, 
-      model = 'wan-v2.2-5b',
-      duration = 5,
-      fps = 24,
-      motion_strength = 5,
-      seed
+      model = 'bytedance-seedance-v1-pro',
+      duration
     } = body
 
     console.log('🎬 FAL AI Image-to-video request:', { prompt, model, hasImage: !!image_url })
@@ -50,11 +57,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!FAL_MODELS[model as keyof typeof FAL_MODELS]) {
+    const modelConfig = FAL_MODELS[model as keyof typeof FAL_MODELS]
+    if (!modelConfig) {
       return NextResponse.json(
         { error: `Invalid model. Available models: ${Object.keys(FAL_MODELS).join(', ')}` },
         { status: 400 }
       )
+    }
+
+    // Validate duration if provided
+    if (duration && modelConfig.supportsDuration) {
+      if (!modelConfig.supportedDurations.includes(duration)) {
+        return NextResponse.json(
+          { 
+            error: `Invalid duration for model ${model}. Supported durations: ${modelConfig.supportedDurations.join(', ')} seconds`,
+            supportedDurations: modelConfig.supportedDurations 
+          },
+          { status: 400 }
+        )
+      }
     }
 
     if (!process.env.FAL_KEY) {
@@ -64,54 +85,89 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const selectedModel = FAL_MODELS[model as keyof typeof FAL_MODELS]
+    const selectedModel = modelConfig.endpoint
 
-    // Prepare input based on model requirements
-    let input: any = {
-      image_url: image_url,
-      prompt: prompt.trim()
+    // Prepare input based on model capabilities
+    const input: any = {
+      prompt: prompt.trim(),
+      image_url: image_url
     }
 
-    // Add model-specific parameters
-    if (model === 'wan-v2.2-5b') {
-      // WAN model specific parameters
-      input = {
-        ...input,
-        duration: duration,
-        fps: fps
+    // Add duration if the model supports it
+    if (modelConfig.supportsDuration) {
+      const finalDuration = duration || modelConfig.defaultDuration
+      if (model === 'wan-v2.2-5b') {
+        const frames_per_second = 21
+        const num_frames = duration * frames_per_second
+        input.num_frames = num_frames
+        input.frames_per_second = frames_per_second
+      } else {
+        input.duration = finalDuration
       }
-    } else if (model.startsWith('svd')) {
-      // Stable Video Diffusion parameters
-      input = {
-        ...input,
-        motion_bucket_id: motion_strength,
-        fps: fps
-      }
-    } else if (model === 'haiper') {
-      // Haiper specific parameters
-      input = {
-        ...input,
-        duration: duration,
-        aspect_ratio: "16:9"
-      }
-    }
-
-    if (seed) {
-      input.seed = seed
+      console.log(`🎬 Using duration: ${finalDuration}s for model: ${model}`)
     }
 
     console.log('🚀 Starting FAL AI image-to-video generation with model:', selectedModel)
 
-    // Start the generation with progress tracking
-    const result = await fal.subscribe(selectedModel, {
-      input,
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === "IN_PROGRESS") {
-          console.log('📊 FAL AI Progress:', update.logs?.map((log) => log.message).join(', '))
-        }
-      },
+
+    console.log('🚀 Input:', input)
+    // Submit the request to the queue
+    const { request_id } = await fal.queue.submit(selectedModel, {
+      input
     })
+
+    console.log(`📋 Request submitted with ID: ${request_id}`)
+
+    // Poll for status and completion
+    let status
+    let attempts = 0
+    const maxAttempts = 180 // 15 minutes with 5-second intervals
+    
+    // Check initial status immediately
+    status = await fal.queue.status(selectedModel, {
+      requestId: request_id,
+      logs: true
+    })
+    
+    console.log(`🔄 Initial status: ${status.status}`)
+    
+    // Continue polling if not completed
+    while (status.status === "IN_PROGRESS" || status.status === "IN_QUEUE") {
+      if (attempts >= maxAttempts) {
+        throw new Error('Request timed out after 15 minutes')
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
+      attempts++
+      
+      status = await fal.queue.status(selectedModel, {
+        requestId: request_id,
+        logs: true
+      })
+      
+      console.log(`🔄 Status check ${attempts}: ${status.status}`)
+      
+      // Log any new progress messages
+      if ((status as any).logs && (status as any).logs.length > 0) {
+        (status as any).logs.forEach((log: any) => {
+          if (log.message) {
+            console.log(log.message)
+          }
+        })
+      }
+    }
+
+    if (status.status !== "COMPLETED") {
+      throw new Error(`Request failed with status: ${status.status}`)
+    }
+
+    // Get the final result
+    console.log('🔄 Getting final result by request id: ', request_id)
+    console.log('🔄 Selected model: ', selectedModel)
+    const result = await fal.queue.result(selectedModel, {
+      requestId: request_id,
+    })
+    console.log('🔄 Result:', result)
 
     console.log('✅ FAL AI generation completed')
 
@@ -186,7 +242,7 @@ export async function POST(request: NextRequest) {
       videoUrl: finalVideoUrl,
       provider: 'fal',
       model: model,
-      requestId: result.requestId,
+      requestId: request_id,
       message: 'Image-to-video generation completed successfully'
     })
 

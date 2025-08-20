@@ -37,6 +37,9 @@ import {
 // Import modular components
 import { ResearchSearchCard } from './youtube-search/ResearchSearchCard'
 import { VideoSearchCard } from './youtube-search/VideoSearchCard'
+import { ChannelAnalyzer } from './youtube-search/ChannelAnalyzer'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+
 
 // Research interfaces
 interface WebSearchResult {
@@ -446,8 +449,7 @@ export default function YouTubeSearch() {
   const researchSummaries = useSelector(selectResearchSummaries)
   const error = useSelector(selectError)
   
-  // Local state
-  const [activeTab, setActiveTab] = useState<'youtube' | 'research' | 'current-research' | 'history'>('youtube')
+  // Local state (no longer needed as activeTab is handled by Tabs component)
   const [researchHistory, setResearchHistory] = useState<any[]>([])
   const [analysisMode, setAnalysisMode] = useState<'openai' | 'gemini'>('openai')
   const [isAnalyzingBatch, setIsAnalyzingBatch] = useState(false)
@@ -926,7 +928,7 @@ export default function YouTubeSearch() {
           </motion.div>
         </StaggerItem>
 
-        {/* Tab Navigation */}
+        {/* Tabs Navigation and Content */}
         <StaggerItem>
           <motion.div 
             className="mb-6"
@@ -934,133 +936,112 @@ export default function YouTubeSearch() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <div className="border-b border-gray-600">
-              <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab('youtube')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'youtube'
-                    ? 'border-red-500 text-red-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  YouTube Analysis
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('research')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'research'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Brain className="h-4 w-4" />
-                  AI Research
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('current-research')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'current-research'
-                    ? 'border-green-500 text-green-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Current Research
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'history'
-                    ? 'border-purple-500 text-purple-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Research History
-                </div>
-              </button>
-            </nav>
-          </div>
+            <Tabs defaultValue="youtube" className="w-full">
+              <TabsList className="grid w-full grid-cols-5 bg-gray-800/50 border border-gray-600">
+                <TabsTrigger value="youtube" className="text-gray-300 data-[state=active]:text-red-400 data-[state=active]:bg-red-900/20">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">YouTube Analysis</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="research" className="text-gray-300 data-[state=active]:text-blue-400 data-[state=active]:bg-blue-900/20">
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    <span className="hidden sm:inline">AI Research</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="current-research" className="text-gray-300 data-[state=active]:text-green-400 data-[state=active]:bg-green-900/20">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">Current Research</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="history" className="text-gray-300 data-[state=active]:text-purple-400 data-[state=active]:bg-purple-900/20">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span className="hidden sm:inline">Research History</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="channel-analyzer" className="text-gray-300 data-[state=active]:text-yellow-400 data-[state=active]:bg-yellow-900/20">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="hidden sm:inline">Channel Analyzer</span>
+                  </div>
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="mt-6">
+                <TabsContent value="youtube">
+                  <VideoSearchCard
+                    searchForm={searchForm}
+                    searchResults={searchResults}
+                    subtitleGeneration={subtitleGeneration}
+                    analysisMode={analysisMode}
+                    isAnalyzingBatch={isAnalyzingBatch}
+                    batchAnalysisProgress={batchAnalysisProgress}
+                    error={error}
+                    onSearchQueryChange={(query) => dispatch(setSearchQuery(query))}
+                    onChannelUrlChange={(url) => dispatch(setChannelUrl(url))}
+                    onMaxResultsChange={(maxResults) => dispatch(setMaxResults(maxResults))}
+                    onSortOrderChange={(sortOrder) => dispatch(setSortOrder(sortOrder))}
+                    onMinDurationChange={(duration) => dispatch(setMinDuration(duration))}
+                    onSearch={handleSearch}
+                    onVideoSelect={handleVideoSelect}
+                    onSelectAll={handleSelectAll}
+                    onGenerateSubtitles={handleGenerateSubtitles}
+                    onAnalyzeSelectedVideos={handleAnalyzeSelectedVideos}
+                    onAnalysisModeChange={setAnalysisMode}
+                    onClearError={() => dispatch(clearError())}
+                    getSearchInfoText={getSearchInfoText}
+                    getVideosWithSubtitlesCount={getVideosWithSubtitlesCount}
+                    formatDate={formatDate}
+                    formatCount={formatCount}
+                    formatFileSize={formatFileSize}
+                    getStatusDisplay={getStatusDisplay}
+                  />
+                </TabsContent>
+
+                <TabsContent value="research">
+                  <ResearchSearchCard
+                    researchSummaries={researchSummaries}
+                    dispatch={dispatch}
+                  />
+                </TabsContent>
+
+                <TabsContent value="current-research">
+                  <CurrentResearchTab
+                    researchSummaries={researchSummaries}
+                    dispatch={dispatch}
+                    onSaveToHistory={saveToHistory}
+                    editingResearch={editingResearch}
+                    onStartEditing={startEditingResearch}
+                    onSaveEdit={saveEditingResearch}
+                    onCancelEdit={cancelEditingResearch}
+                    onUpdateEdit={updateEditingResearch}
+                    onApplyToScript={applyToScript}
+                  />
+                </TabsContent>
+
+                <TabsContent value="history">
+                  <ResearchHistoryTab
+                    researchHistory={researchHistory}
+                    onClearHistory={clearHistory}
+                    onApplyToScript={applyToScript}
+                    onDeleteFromHistory={deleteFromHistory}
+                    editingResearch={editingResearch}
+                    onStartEditing={startEditingResearch}
+                    onSaveEdit={saveEditingResearch}
+                    onCancelEdit={cancelEditingResearch}
+                    onUpdateEdit={updateEditingResearch}
+                  />
+                </TabsContent>
+
+                <TabsContent value="channel-analyzer">
+                  <ChannelAnalyzer />
+                </TabsContent>
+              </div>
+            </Tabs>
           </motion.div>
-        </StaggerItem>
-
-        {/* Tab Content */}
-        <StaggerItem>
-          <div className="mt-6">
-          {activeTab === 'youtube' && (
-            <VideoSearchCard
-              searchForm={searchForm}
-              searchResults={searchResults}
-              subtitleGeneration={subtitleGeneration}
-              analysisMode={analysisMode}
-              isAnalyzingBatch={isAnalyzingBatch}
-              batchAnalysisProgress={batchAnalysisProgress}
-              error={error}
-              onSearchQueryChange={(query) => dispatch(setSearchQuery(query))}
-              onChannelUrlChange={(url) => dispatch(setChannelUrl(url))}
-              onMaxResultsChange={(maxResults) => dispatch(setMaxResults(maxResults))}
-              onSortOrderChange={(sortOrder) => dispatch(setSortOrder(sortOrder))}
-              onMinDurationChange={(duration) => dispatch(setMinDuration(duration))}
-              onSearch={handleSearch}
-              onVideoSelect={handleVideoSelect}
-              onSelectAll={handleSelectAll}
-              onGenerateSubtitles={handleGenerateSubtitles}
-              onAnalyzeSelectedVideos={handleAnalyzeSelectedVideos}
-              onAnalysisModeChange={setAnalysisMode}
-              onClearError={() => dispatch(clearError())}
-              getSearchInfoText={getSearchInfoText}
-              getVideosWithSubtitlesCount={getVideosWithSubtitlesCount}
-              formatDate={formatDate}
-              formatCount={formatCount}
-              formatFileSize={formatFileSize}
-              getStatusDisplay={getStatusDisplay}
-            />
-          )}
-
-          {activeTab === 'research' && (
-            <ResearchSearchCard
-              researchSummaries={researchSummaries}
-              dispatch={dispatch}
-            />
-          )}
-
-          {activeTab === 'current-research' && (
-            <CurrentResearchTab
-              researchSummaries={researchSummaries}
-              dispatch={dispatch}
-              onSaveToHistory={saveToHistory}
-              editingResearch={editingResearch}
-              onStartEditing={startEditingResearch}
-              onSaveEdit={saveEditingResearch}
-              onCancelEdit={cancelEditingResearch}
-              onUpdateEdit={updateEditingResearch}
-              onApplyToScript={applyToScript}
-            />
-          )}
-
-          {activeTab === 'history' && (
-            <ResearchHistoryTab
-              researchHistory={researchHistory}
-              onClearHistory={clearHistory}
-              onApplyToScript={applyToScript}
-              onDeleteFromHistory={deleteFromHistory}
-              editingResearch={editingResearch}
-              onStartEditing={startEditingResearch}
-              onSaveEdit={saveEditingResearch}
-              onCancelEdit={cancelEditingResearch}
-              onUpdateEdit={updateEditingResearch}
-            />
-          )}
-          </div>
         </StaggerItem>
       </div>
     </StaggerContainer>

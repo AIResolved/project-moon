@@ -538,13 +538,23 @@ export function VideoGenerator() {
         // Simplified video effects
         zoomEffect: settings.zoomEffect || false,
         dustOverlay: settings.dustOverlay || false,
+        snowOverlay: settings.snowOverlay || false,
+        screenDisplacementOverlay: settings.screenDisplacementOverlay || false,
+        fireOverlay: settings.fireOverlay || false,
         // Custom music
         useCustomMusic: settings.useCustomMusic || false,
         customMusicFiles: settings.customMusicFiles || [],
-        selectedMusicTrack: settings.selectedMusicTrack
+        selectedMusicTrack: settings.selectedMusicTrack,
+        selectedMusicTracks: settings.selectedMusicTracks || []
       }
 
       console.log('🎬 Starting video generation with:', requestBody)
+      console.log('🎵 Music settings:', {
+        useCustomMusic: requestBody.useCustomMusic,
+        selectedMusicTrack: requestBody.selectedMusicTrack,
+        selectedMusicTracks: requestBody.selectedMusicTracks,
+        customMusicFiles: requestBody.customMusicFiles?.length || 0
+      })
       showMessage('Starting video generation...', 'info')
 
       // Call video creation API

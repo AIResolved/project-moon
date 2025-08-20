@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { ResearchPreviewModal } from '@/components/script-generator/ResearchPreviewModal'
+import { ScriptUploadModal } from '../ScriptUploadModal'
 
 const PRESET_TOPICS = [
   'Energy Control',
@@ -28,6 +29,8 @@ export function Philosophy2Form() {
   const [model, setModel] = useState('gpt-5')
   const [selectedTopic, setSelectedTopic] = useState<string>('')
   const [title, setTitle] = useState('')
+  const [sectionPrompt, setSectionPrompt] = useState('')
+  const [scriptPrompt, setScriptPrompt] = useState('')
   const [additionalData, setAdditionalData] = useState('')
   const [forbiddenWords, setForbiddenWords] = useState('')
   const [desiredWordCount, setDesiredWordCount] = useState<number>(1000)
@@ -35,6 +38,7 @@ export function Philosophy2Form() {
   const [isGeneratingScript, setIsGeneratingScript] = useState(false)
   const researchSummaries = useAppSelector(state => state.youtube.youtubeResearchSummaries)
   const [isResearchPreviewOpen, setIsResearchPreviewOpen] = useState(false)
+  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false)
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -62,6 +66,7 @@ export function Philosophy2Form() {
         body: JSON.stringify({
           title: finalTitle,
           wordCount: Math.max(800, desiredWordCount || 1000),
+          sectionPrompt,
           additionalPrompt: additionalData,
           forbiddenWords,
           selectedModel: model,
@@ -96,6 +101,7 @@ export function Philosophy2Form() {
           title: finalTitle,
           sections: scriptSections,
           selectedModel: model,
+          scriptPrompt,
           additionalPrompt: additionalData + ((Array.isArray(researchSummaries) && researchSummaries.some(r => r.appliedToScript))
             ? `\n\nRESEARCH CONTEXT:\n${JSON.stringify(researchSummaries).slice(0, 2000)}`
             : ''),
@@ -117,6 +123,17 @@ export function Philosophy2Form() {
     } finally {
       setIsGeneratingScript(false)
     }
+  }
+
+  const handleScriptUpload = (script: string) => {
+    dispatch(setFullScript({
+      scriptWithMarkdown: script,
+      scriptCleaned: script,
+      title: title || "Uploaded Script",
+      theme: selectedTopic,
+      wordCount: script.split(/\s+/).filter(Boolean).length
+    }))
+    setIsScriptUploadOpen(false)
   }
 
   return (
@@ -173,8 +190,30 @@ export function Philosophy2Form() {
           </div>
 
           <div className="space-y-2">
-            <Label>Enter additional data (summary, narrative, etc.):</Label>
-            <Textarea placeholder="Enter additional data" rows={5} value={additionalData} onChange={(e) => setAdditionalData(e.target.value)} />
+            <Label>Section Generation Instructions (Optional)</Label>
+            <Textarea 
+              placeholder="Specific instructions for how the AI should create and structure the script sections/outline" 
+              rows={3} 
+              value={sectionPrompt} 
+              onChange={(e) => setSectionPrompt(e.target.value)} 
+            />
+            <p className="text-xs text-muted-foreground">Controls how the script is divided into sections and the overall structure</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Script Writing Instructions (Optional)</Label>
+            <Textarea 
+              placeholder="Specific instructions for how the AI should write the actual script content" 
+              rows={3} 
+              value={scriptPrompt} 
+              onChange={(e) => setScriptPrompt(e.target.value)} 
+            />
+            <p className="text-xs text-muted-foreground">Controls the writing style, tone, and content approach for the final script</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>General Instructions (Optional)</Label>
+            <Textarea placeholder="Any other general instructions that apply to both section generation and script writing" rows={3} value={additionalData} onChange={(e) => setAdditionalData(e.target.value)} />
           </div>
 
           <div className="space-y-2">
@@ -194,15 +233,28 @@ export function Philosophy2Form() {
             <Button onClick={handleGenerateScript} disabled={isGeneratingScript || !scriptSections.length} className="w-full sm:flex-1">
               {isGeneratingScript ? 'Generating Script...' : 'Generate Full Script'}
             </Button>
+            <Button 
+              variant="outline" 
+              className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+              onClick={() => setIsScriptUploadOpen(true)}
+            >
+              📁 Upload Script
+            </Button>
           </div>
         </CardContent>
       </Card>
-      <ResearchPreviewModal
-        isOpen={isResearchPreviewOpen}
-        onClose={() => setIsResearchPreviewOpen(false)}
-        researchContext={Array.isArray(researchSummaries) && researchSummaries.length > 0 ? JSON.stringify(researchSummaries, null, 2).slice(0, 5000) : ''}
-        appliedResearchCount={Array.isArray(researchSummaries) ? researchSummaries.filter((r:any)=>r.appliedToScript).length : 0}
-      />
+              <ResearchPreviewModal
+          isOpen={isResearchPreviewOpen}
+          onClose={() => setIsResearchPreviewOpen(false)}
+          researchContext={Array.isArray(researchSummaries) && researchSummaries.length > 0 ? JSON.stringify(researchSummaries, null, 2).slice(0, 5000) : ''}
+          appliedResearchCount={Array.isArray(researchSummaries) ? researchSummaries.filter((r:any)=>r.appliedToScript).length : 0}
+        />
+
+        <ScriptUploadModal
+          isOpen={isScriptUploadOpen}
+          onClose={() => setIsScriptUploadOpen(false)}
+          onScriptUpload={handleScriptUpload}
+        />
     </div>
   )
 }

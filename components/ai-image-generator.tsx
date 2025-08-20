@@ -652,11 +652,6 @@ export function AIImageGenerator() {
 
   // Thumbnail generator functions
   const generateThumbnail = async () => {
-    if (!thumbnailPrompt.trim()) {
-      setThumbnailError('Please enter a prompt for thumbnail generation')
-      return
-    }
-
     if (referenceImages.length === 0) {
       setThumbnailError('Please upload at least one reference image')
       return
@@ -666,8 +661,37 @@ export function AIImageGenerator() {
     setThumbnailError(null)
 
     try {
+      // Create final prompt with fallback and style options
+      const getStyledThumbnailPrompt = () => {
+        // Use fallback prompt if no description provided
+        let finalPrompt = thumbnailPrompt.trim() || 'Generate a different variation of this image'
+        
+        // Apply Image Style
+        if (thumbnailImageStyle && thumbnailImageStyle !== 'realistic') {
+          const style = IMAGE_STYLES[thumbnailImageStyle as keyof typeof IMAGE_STYLES]
+          if (style) {
+            finalPrompt = `${style.prefix}${finalPrompt}`
+          }
+        }
+        
+        // Apply Lighting Tone
+        if (thumbnailLightingTone && thumbnailLightingTone !== 'balanced') {
+          const tone = LIGHTING_TONES[thumbnailLightingTone as keyof typeof LIGHTING_TONES]
+          if (tone) {
+            finalPrompt = `${tone.prefix}${finalPrompt}`
+          }
+        }
+        
+        // Apply Custom Style
+        if (thumbnailCustomStyle && thumbnailCustomStyle.trim()) {
+          finalPrompt = `${thumbnailCustomStyle.trim()}, ${finalPrompt}`
+        }
+        
+        return finalPrompt
+      }
+
       const formData = new FormData()
-      formData.append('prompt', thumbnailPrompt)
+      formData.append('prompt', getStyledThumbnailPrompt())
       
       referenceImages.forEach((file, index) => {
         formData.append(`image_${index}`, file)
@@ -793,6 +817,12 @@ export function AIImageGenerator() {
             onUpdateScenePrompt={handleUpdateScenePrompt}
             onAddCustomScene={handleAddCustomScene}
             scriptSourceInfo={scriptSourceInfo}
+            selectedImageStyle={selectedImageStyle}
+            onImageStyleChange={setSelectedImageStyle}
+            selectedLightingTone={selectedLightingTone}
+            onLightingToneChange={setSelectedLightingTone}
+            customStylePrompt={customStylePrompt}
+            onCustomStylePromptChange={setCustomStylePrompt}
           />
 
           {/* Image Style Selector */}

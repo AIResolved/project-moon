@@ -97,7 +97,8 @@ export function ThumbnailGenerator({
 
   // Helper function to combine styles into final prompt
   const getStyledPrompt = () => {
-    let finalPrompt = thumbnailPrompt
+    // Use fallback prompt if no description provided
+    let finalPrompt = thumbnailPrompt.trim() || 'Generate a different variation of this image'
     
     // Apply Image Style
     if (selectedImageStyle && selectedImageStyle !== 'none') {
@@ -247,16 +248,16 @@ export function ThumbnailGenerator({
 
         {/* Thumbnail Prompt */}
         <div className="space-y-3">
-          <Label className="text-base font-medium">Thumbnail Description</Label>
+          <Label className="text-base font-medium">Thumbnail Description (Optional)</Label>
           <Textarea
-            placeholder="Describe your ideal thumbnail (e.g., 'YouTube thumbnail with surprised person pointing at glowing text saying AMAZING DISCOVERY')"
+            placeholder="Describe your ideal thumbnail (e.g., 'YouTube thumbnail with surprised person pointing at glowing text saying AMAZING DISCOVERY'). Leave empty to generate variations of your reference images."
             value={thumbnailPrompt}
             onChange={(e) => onThumbnailPromptChange(e.target.value)}
             disabled={isGeneratingThumbnail}
             rows={4}
             className="text-sm"
           />
-          {(selectedImageStyle !== 'realistic' || selectedLightingTone !== 'balanced' || customStylePrompt) && (
+          {(selectedImageStyle !== 'realistic' || selectedLightingTone !== 'balanced' || customStylePrompt || !thumbnailPrompt.trim()) && (
             <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
               <strong>Final Prompt Preview:</strong> {getStyledPrompt()}
             </div>
@@ -337,7 +338,7 @@ export function ThumbnailGenerator({
         {/* Generate Button */}
         <Button
           onClick={onGenerateThumbnail}
-          disabled={isGeneratingThumbnail || !thumbnailPrompt.trim()}
+          disabled={isGeneratingThumbnail}
           className="w-full"
           size="lg"
         >
@@ -402,7 +403,8 @@ export function ThumbnailGenerator({
             <div className="space-y-2">
               <h4 className="font-medium text-blue-900">Thumbnail Tips</h4>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Use bold, clear descriptions for better results</li>
+                <li>• Description is optional - leave empty to generate variations</li>
+                <li>• Use bold, clear descriptions for better results when provided</li>
                 <li>• Reference images help guide the style and composition</li>
                 <li>• Combine Image Style + Lighting Tone for consistent looks</li>
                 <li>• Include text descriptions like "BIG TEXT saying [your text]"</li>

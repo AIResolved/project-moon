@@ -9,7 +9,23 @@ const PROVIDERS = {
   },
   fal: {
     name: 'FAL AI',
-    models: ['bytedance-seedance-v1-pro', 'pixverse-v4.5', 'wan-v2.2-5b'],
+    models: {
+      'bytedance-seedance-v1-pro': {
+        name: 'ByteDance SeedAnce V1 Pro',
+        supportedDurations: [4, 6, 8, 10],
+        defaultDuration: 6
+      },
+      'pixverse-v4.5': {
+        name: 'Pixverse V4.5',
+        supportedDurations: [4, 8],
+        defaultDuration: 4
+      },
+      'wan-v2.2-5b': {
+        name: 'WAN V2.2-5B',
+        supportedDurations: [4, 6, 8, 10],
+        defaultDuration: 6
+      }
+    },
     endpoint: '/api/image-to-video/providers/fal'
   },
   google: {
@@ -50,7 +66,7 @@ export async function POST(request: NextRequest) {
     const providerEndpoint = selectedProvider.endpoint
     
     // Construct full URL using request origin to ensure it works regardless of domain
-    const baseUrl = "https://project-moon.ngrok.app"
+    const baseUrl = process.env.NEXT_PUBLIC_RAILWAY_URL || "http://localhost:3000"
     const providerUrl = new URL(providerEndpoint, baseUrl).toString()
     
     console.log('🔄 Forwarding to provider:', providerUrl)
@@ -68,11 +84,12 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       throw new Error(result.error || 'Provider request failed')
     }
+    console.log('🔄 Result:', result)
 
     return NextResponse.json(result)
 
   } catch (error) {
-    console.error('❌ Image-to-video dispatcher error:', error)
+    console.error('❌ Image-to-video dispatcher error:', JSON.stringify(error, null, 2))
     
     return NextResponse.json(
       { 

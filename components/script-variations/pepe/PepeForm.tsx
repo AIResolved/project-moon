@@ -8,7 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Zap, RotateCcw } from 'lucide-react'
+import { Loader2, Zap, RotateCcw, Upload } from 'lucide-react'
+import { ScriptUploadModal } from '../ScriptUploadModal'
 
 export function PepeForm() {
   const dispatch = useAppDispatch()
@@ -17,11 +18,14 @@ export function PepeForm() {
   const [title, setTitle] = useState('')
   const [wordCount, setWordCount] = useState(1000)
   const [theme, setTheme] = useState('')
+  const [sectionPrompt, setSectionPrompt] = useState('')
+  const [scriptPrompt, setScriptPrompt] = useState('')
   const [additionalPrompt, setAdditionalPrompt] = useState('')
   const [selectedModel, setSelectedModel] = useState('gpt-5')
 
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false)
   const [isGeneratingAll, setIsGeneratingAll] = useState(false)
+  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false)
 
   const handleGenerateOutline = async () => {
     if (!title.trim()) return
@@ -35,6 +39,7 @@ export function PepeForm() {
           wordCount: Math.max(800, wordCount),
           themeId: '',
           theme,
+          sectionPrompt,
           additionalPrompt,
           forbiddenWords: '',
           selectedModel,
@@ -76,6 +81,7 @@ export function PepeForm() {
           sections: scriptSections,
           selectedModel,
           theme,
+          scriptPrompt,
           forbiddenWords: '',
           additionalPrompt
         })
@@ -99,6 +105,17 @@ export function PepeForm() {
     } finally {
       setIsGeneratingAll(false)
     }
+  }
+
+  const handleScriptUpload = (script: string) => {
+    dispatch(setFullScript({
+      scriptWithMarkdown: script,
+      scriptCleaned: script,
+      title: title || "Uploaded Script",
+      theme,
+      wordCount: script.split(/\s+/).filter(Boolean).length
+    }))
+    setIsScriptUploadOpen(false)
   }
 
   return (
@@ -130,13 +147,33 @@ export function PepeForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>Additional Instructions (Optional)</Label>
-            <Textarea rows={3} value={additionalPrompt} onChange={(e) => setAdditionalPrompt(e.target.value)} placeholder="Add any specific instructions for the AI to follow when generating your script" />
+            <Label>Section Generation Instructions (Optional)</Label>
+            <Textarea rows={3} value={sectionPrompt} onChange={(e) => setSectionPrompt(e.target.value)} placeholder="Specific instructions for how the AI should create and structure the script sections/outline" />
+            <p className="text-xs text-muted-foreground">Controls how the script is divided into sections and the overall structure</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Script Writing Instructions (Optional)</Label>
+            <Textarea rows={3} value={scriptPrompt} onChange={(e) => setScriptPrompt(e.target.value)} placeholder="Specific instructions for how the AI should write the actual script content" />
+            <p className="text-xs text-muted-foreground">Controls the writing style, tone, and content approach for the final script</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>General Instructions (Optional)</Label>
+            <Textarea rows={3} value={additionalPrompt} onChange={(e) => setAdditionalPrompt(e.target.value)} placeholder="Any other general instructions that apply to both section generation and script writing" />
           </div>
 
           <div className="flex items-center gap-2">
             <Button onClick={handleGenerateOutline} disabled={isGeneratingOutline}>
               {isGeneratingOutline ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating...</>) : (<><Zap className="h-4 w-4 mr-2" />Generate Outline</>)}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsScriptUploadOpen(true)}
+              className="gap-2 bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Script
             </Button>
           </div>
         </CardContent>
@@ -164,6 +201,12 @@ export function PepeForm() {
           </CardContent>
         </Card>
       )}
+
+      <ScriptUploadModal
+        isOpen={isScriptUploadOpen}
+        onClose={() => setIsScriptUploadOpen(false)}
+        onScriptUpload={handleScriptUpload}
+      />
     </div>
   )
 }

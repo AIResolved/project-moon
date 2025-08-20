@@ -51,10 +51,17 @@ export interface CreateVideoRequestBody {
   audioDuration?: number
   zoomEffect?: boolean
   dustOverlay?: boolean
+  snowOverlay?: boolean
+  screenDisplacementOverlay?: boolean
+  fireOverlay?: boolean
+  // Volume controls
+  voiceoverVolume?: number
+  musicVolume?: number
   // Custom music properties
   useCustomMusic?: boolean
   customMusicFiles?: CustomMusicFile[]
   selectedMusicTrack?: SelectedMusicTrack
+  selectedMusicTracks?: SelectedMusicTrack[]
 }
 
 export interface CreateVideoResponse {
@@ -102,6 +109,7 @@ export interface SelectedMusicTrack {
   preview_url: string
   download_url?: string
   license_type: string
+  order?: number  // For multiple track ordering
 }
 
 export interface VideoGenerationSettings {
@@ -113,10 +121,17 @@ export interface VideoGenerationSettings {
   videoMode: 'traditional' | 'option1' | 'option2'
   zoomEffect: boolean
   dustOverlay: boolean
+  snowOverlay: boolean
+  screenDisplacementOverlay: boolean
+  fireOverlay: boolean
   introDuration: number
   useEqualIntroDuration: boolean
+  // Volume controls
+  voiceoverVolume: number  // 0-1
+  musicVolume: number      // 0-1
   // Custom music properties
   useCustomMusic: boolean
   customMusicFiles: CustomMusicFile[]
   selectedMusicTrack?: SelectedMusicTrack
+  selectedMusicTracks?: SelectedMusicTrack[]  // Multiple tracks support
 } 

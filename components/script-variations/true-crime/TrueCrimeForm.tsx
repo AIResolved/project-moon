@@ -8,7 +8,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload } from 'lucide-react'
+import { ScriptUploadModal } from '../ScriptUploadModal'
 
 export function TrueCrimeForm() {
   const dispatch = useAppDispatch()
@@ -22,6 +23,7 @@ export function TrueCrimeForm() {
   const [targetSections, setTargetSections] = useState(5)
   const [isLoading, setIsLoading] = useState(false)
   const [isGeneratingScript, setIsGeneratingScript] = useState(false)
+  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false)
 
   const generateOutline = async () => {
     if (!title.trim()) return
@@ -83,6 +85,17 @@ export function TrueCrimeForm() {
     }
   }
 
+  const handleScriptUpload = (script: string) => {
+    dispatch(setFullScript({
+      scriptWithMarkdown: script,
+      scriptCleaned: script,
+      title: title || "Uploaded Script",
+      theme: 'True Crime',
+      wordCount: script.split(/\s+/).filter(Boolean).length
+    }))
+    setIsScriptUploadOpen(false)
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -121,9 +134,24 @@ export function TrueCrimeForm() {
             <Button onClick={generateScript} disabled={isGeneratingScript} className="bg-blue-600 hover:bg-blue-700">
               {isGeneratingScript ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating Script</>) : 'Generate Script'}
             </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setIsScriptUploadOpen(true)}
+              className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Script
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      <ScriptUploadModal
+        isOpen={isScriptUploadOpen}
+        onClose={() => setIsScriptUploadOpen(false)}
+        onScriptUpload={handleScriptUpload}
+      />
     </div>
   )
 }

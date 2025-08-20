@@ -109,7 +109,37 @@ export function VideoSettings({
                   onCheckedChange={(checked) => onSettingsChange({ dustOverlay: checked })}
                   disabled={!hasPrerequisites}
                 />
-                <Label htmlFor="dust-overlay" className="text-sm">Dust overlay effect</Label>
+                <Label htmlFor="dust-overlay" className="text-sm">Dust particles overlay</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="snow-overlay"
+                  checked={settings.snowOverlay || false}
+                  onCheckedChange={(checked) => onSettingsChange({ snowOverlay: checked })}
+                  disabled={!hasPrerequisites}
+                />
+                <Label htmlFor="snow-overlay" className="text-sm">Snow effect overlay</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="screen-displacement-overlay"
+                  checked={settings.screenDisplacementOverlay || false}
+                  onCheckedChange={(checked) => onSettingsChange({ screenDisplacementOverlay: checked })}
+                  disabled={!hasPrerequisites}
+                />
+                <Label htmlFor="screen-displacement-overlay" className="text-sm">Screen displacement effect</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="fire-overlay"
+                  checked={settings.fireOverlay || false}
+                  onCheckedChange={(checked) => onSettingsChange({ fireOverlay: checked })}
+                  disabled={!hasPrerequisites}
+                />
+                <Label htmlFor="fire-overlay" className="text-sm">Fire effect overlay</Label>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -321,6 +351,71 @@ export function VideoSettings({
                   Use uploaded music files
                 </Label>
               </div>
+            </div>
+          </div>
+
+          {/* Volume Controls */}
+          <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Settings className="h-5 w-5 text-blue-600" />
+              <h3 className="font-medium text-blue-900">Audio Volume Controls</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Voiceover Volume */}
+              <div className="space-y-2">
+                <Label className="text-sm">
+                  Voiceover Volume: {Math.round((settings.voiceoverVolume ?? 0.8) * 100)}%
+                </Label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={settings.voiceoverVolume ?? 0.8}
+                  onChange={(e) => onSettingsChange({ 
+                    ...settings, 
+                    voiceoverVolume: parseFloat(e.target.value) 
+                  })}
+                  className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                  disabled={!hasPrerequisites}
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              {/* Music Volume */}
+              <div className="space-y-2">
+                <Label className="text-sm">
+                  Music Volume: {Math.round((settings.musicVolume ?? 0.3) * 100)}%
+                </Label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={settings.musicVolume ?? 0.3}
+                  onChange={(e) => onSettingsChange({ 
+                    ...settings, 
+                    musicVolume: parseFloat(e.target.value) 
+                  })}
+                  className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                  disabled={!hasPrerequisites || !settings.useCustomMusic}
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+                {!settings.useCustomMusic && (
+                  <p className="text-xs text-gray-500">Enable background music to adjust volume</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="text-xs text-blue-700 bg-blue-100 p-2 rounded">
+              💡 <strong>Tips:</strong> Voiceover should be louder (60-100%) while music works well as background (20-40%)
             </div>
           </div>
 

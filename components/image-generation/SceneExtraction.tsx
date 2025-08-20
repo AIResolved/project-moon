@@ -10,8 +10,9 @@ import { Slider } from '../ui/slider'
 import { Checkbox } from '../ui/checkbox'
 import { ScrollArea } from '../ui/scroll-area'
 import { Input } from '../ui/input'
-import { FileText, Sparkles, RefreshCw, Trash2, Edit3, Save, X, Plus } from 'lucide-react'
+import { FileText, Sparkles, RefreshCw, Trash2, Edit3, Save, X, Plus, Palette, Sun, Moon, Zap } from 'lucide-react'
 import type { ExtractedScene } from '@/types/image-generation'
+import { IMAGE_STYLES, LIGHTING_TONES } from '@/data/image'
 
 interface SceneExtractionProps {
   scriptInput: string
@@ -32,6 +33,13 @@ interface SceneExtractionProps {
     count: number
     type: string
   }
+  // Style options
+  selectedImageStyle?: string
+  onImageStyleChange?: (style: string) => void
+  selectedLightingTone?: string
+  onLightingToneChange?: (tone: string) => void
+  customStylePrompt?: string
+  onCustomStylePromptChange?: (prompt: string) => void
 }
 
 export function SceneExtraction({
@@ -48,13 +56,20 @@ export function SceneExtraction({
   onClearError,
   onUpdateScenePrompt,
   onAddCustomScene,
-  scriptSourceInfo
+  scriptSourceInfo,
+  selectedImageStyle = 'realistic',
+  onImageStyleChange,
+  selectedLightingTone = 'balanced',
+  onLightingToneChange,
+  customStylePrompt = '',
+  onCustomStylePromptChange
 }: SceneExtractionProps) {
   const [editingScene, setEditingScene] = useState<number | null>(null)
   const [editPrompt, setEditPrompt] = useState('')
   const [showCustomScene, setShowCustomScene] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('')
   const [customTitle, setCustomTitle] = useState('')
+  const [showStyleOptions, setShowStyleOptions] = useState(false)
 
   const handleStartEdit = (index: number, currentPrompt: string) => {
     setEditingScene(index)
@@ -76,11 +91,61 @@ export function SceneExtraction({
 
   const handleAddCustomScene = () => {
     if (customPrompt.trim() && customTitle.trim() && onAddCustomScene) {
-      onAddCustomScene(customPrompt.trim(), customTitle.trim())
+      // Apply styles to the custom scene prompt
+      const styledPrompt = getStyledPrompt(customPrompt.trim())
+      onAddCustomScene(styledPrompt, customTitle.trim())
       setCustomPrompt('')
       setCustomTitle('')
       setShowCustomScene(false)
     }
+  }
+
+  const getImageStyleIcon = (styleKey: string) => {
+    switch (styleKey) {
+      case 'realistic': return '📸'
+      case 'artistic': return '🎨'
+      case 'cinematic': return '🎬'
+      case 'animation': return '🎭'
+      case 'graphic': return '📊'
+      case 'fantasy': return '🧙‍♂️'
+      default: return '🖼️'
+    }
+  }
+
+  const getLightingIcon = (tone: string) => {
+    switch (tone) {
+      case 'light': return <Sun className="h-4 w-4" />
+      case 'dark': return <Moon className="h-4 w-4" />
+      default: return <Zap className="h-4 w-4" />
+    }
+  }
+
+  // Helper function to combine styles into final prompt
+  const getStyledPrompt = (basePrompt: string) => {
+    let finalPrompt = basePrompt
+    
+    // Apply Image Style
+    if (selectedImageStyle && selectedImageStyle !== 'realistic') {
+      const style = IMAGE_STYLES[selectedImageStyle as keyof typeof IMAGE_STYLES]
+      if (style) {
+        finalPrompt = `${style.prefix}${finalPrompt}`
+      }
+    }
+    
+    // Apply Lighting Tone
+    if (selectedLightingTone && selectedLightingTone !== 'balanced') {
+      const tone = LIGHTING_TONES[selectedLightingTone as keyof typeof LIGHTING_TONES]
+      if (tone) {
+        finalPrompt = `${tone.prefix}${finalPrompt}`
+      }
+    }
+    
+    // Apply Custom Style
+    if (customStylePrompt && customStylePrompt.trim()) {
+      finalPrompt = `${customStylePrompt.trim()}, ${finalPrompt}`
+    }
+    
+    return finalPrompt
   }
   return (
     <Card>
@@ -94,6 +159,116 @@ export function SceneExtraction({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Style Options */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold">Scene Style Options</Label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowStyleOptions(!showStyleOptions)}
+              disabled={isExtractingScenes}
+            >
+              <Palette className="h-4 w-4 mr-2" />
+              {showStyleOptions ? 'Hide' : 'Show'} Styles
+            </Button>
+          </div>
+
+          {showStyleOptions && (
+            <Card className="border-blue-200 bg-blue-50/30">
+              <CardContent className="pt-6 space-y-6">
+                {/* Image Style Section */}
+                {onImageStyleChange && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Palette className="h-4 w-4 text-blue-600" />
+                      <Label className="font-semibold">Image Style</Label>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {Object.entries(IMAGE_STYLES).map(([key, style]) => (
+                        <Button
+                          key={key}
+                          variant={selectedImageStyle === key ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => onImageStyleChange(key)}
+                          disabled={isExtractingScenes}
+                          className="flex flex-col h-auto py-3 px-2 text-center"
+                        >
+                          <span className="text-sm mb-1">{getImageStyleIcon(key)}</span>
+                          <span className="font-medium text-xs">{style.name}</span>
+                          <span className="text-[10px] opacity-70 leading-tight mt-1">{style.description}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Lighting Tone Section */}
+                {onLightingToneChange && (
+                  <div className="space-y-3">
+                    <Label className="font-semibold">Lighting Tone</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {Object.entries(LIGHTING_TONES).map(([key, tone]) => (
+                        <Button
+                          key={key}
+                          variant={selectedLightingTone === key ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => onLightingToneChange(key)}
+                          disabled={isExtractingScenes}
+                          className="flex flex-col h-auto py-3"
+                        >
+                          <div className="mb-1">{getLightingIcon(key)}</div>
+                          <span className="font-medium text-xs">{tone.name}</span>
+                          <span className="text-[10px] opacity-70 text-center leading-tight mt-1">{tone.description}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Style Prompt */}
+                {onCustomStylePromptChange && (
+                  <div className="space-y-3">
+                    <Label className="font-semibold">Custom Style (Optional)</Label>
+                    <Textarea
+                      placeholder="Add custom scene style (e.g., 'dramatic atmosphere, cinematic angles, vibrant colors')"
+                      value={customStylePrompt}
+                      onChange={(e) => onCustomStylePromptChange(e.target.value)}
+                      disabled={isExtractingScenes}
+                      rows={2}
+                      className="text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Style Preview */}
+                {(selectedImageStyle !== 'realistic' || selectedLightingTone !== 'balanced' || customStylePrompt) && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <Label className="text-xs font-medium text-green-800">Active Styles:</Label>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedImageStyle && selectedImageStyle !== 'realistic' && (
+                        <Badge variant="outline" className="text-xs">
+                          {getImageStyleIcon(selectedImageStyle)} {IMAGE_STYLES[selectedImageStyle as keyof typeof IMAGE_STYLES]?.name}
+                        </Badge>
+                      )}
+                      {selectedLightingTone && selectedLightingTone !== 'balanced' && (
+                        <Badge variant="outline" className="text-xs">
+                          {getLightingIcon(selectedLightingTone)} {LIGHTING_TONES[selectedLightingTone as keyof typeof LIGHTING_TONES]?.name}
+                        </Badge>
+                      )}
+                      {customStylePrompt && (
+                        <Badge variant="outline" className="text-xs">
+                          Custom Style
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
         {/* Script Source Information */}
         <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
@@ -141,14 +316,14 @@ export function SceneExtraction({
             value={[numberOfScenesToExtract]}
             onValueChange={(value) => onNumberOfScenesChange(value[0])}
             min={1}
-            max={200}
+            max={1000}
             step={1}
             disabled={isExtractingScenes}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>1 scene</span>
-            <span>100 scenes</span>
+            <span>1000 scenes</span>
           </div>
         </div>
 
@@ -264,6 +439,11 @@ export function SceneExtraction({
                     <p className="text-xs text-blue-600">
                       💡 Tip: Include specific details like age, gender, clothing, setting, lighting, and camera angle for better results
                     </p>
+                    {customPrompt && (selectedImageStyle !== 'realistic' || selectedLightingTone !== 'balanced' || customStylePrompt) && (
+                      <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                        <strong>Styled Prompt Preview:</strong> {getStyledPrompt(customPrompt)}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2">
@@ -347,8 +527,18 @@ export function SceneExtraction({
                           </div>
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
-                          {scene.imagePrompt}
+                        <div className="space-y-2">
+                          <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {getStyledPrompt(scene.imagePrompt)}
+                          </div>
+                          {(selectedImageStyle !== 'realistic' || selectedLightingTone !== 'balanced' || customStylePrompt) && (
+                            <details className="text-xs">
+                              <summary className="cursor-pointer font-medium text-gray-600">View Original Prompt</summary>
+                              <div className="mt-1 p-2 bg-gray-100 rounded text-gray-600">
+                                {scene.imagePrompt}
+                              </div>
+                            </details>
+                          )}
                         </div>
                       )}
                     </div>

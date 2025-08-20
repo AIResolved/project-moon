@@ -54,6 +54,7 @@ import { CTAModal as TrueCrimeCTAModal } from "./script-variations/true-crime/CT
 import { HookModal as TrueCrimeHookModal } from "./script-variations/true-crime/HookModal";
 import { ResearchPreviewModal as TrueCrimeResearchPreviewModal } from "./script-variations/true-crime/ResearchPreviewModal";
 import { LoadCachedDataModal as TrueCrimeLoadCachedDataModal } from "./script-variations/true-crime/LoadCachedDataModal";
+import { ScriptUploadModal } from "./script-variations/ScriptUploadModal";
 
 interface OpenAIModel {
   id: string;
@@ -122,6 +123,7 @@ const ScriptGenerator: React.FC = () => {
 
   // State for load cached data modal
   const [isLoadCachedDataOpen, setIsLoadCachedDataOpen] = useState(false);
+  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false);
 
   // Track IDs for localStorage persistence
   const [currentFormDataId, setCurrentFormDataId] = useState<string | null>(null);
@@ -953,6 +955,17 @@ const ScriptGenerator: React.FC = () => {
     setIsResearchPreviewOpen(true);
   };
 
+  const handleScriptUpload = (script: string) => {
+    dispatch(setFullScript({
+      scriptWithMarkdown: script,
+      scriptCleaned: script,
+      title: title || "Uploaded Script",
+      theme: theme,
+      wordCount: script.split(/\s+/).filter(Boolean).length
+    }));
+    setIsScriptUploadOpen(false);
+  };
+
   // Handlers for loading cached data
   const handleOpenLoadCachedData = () => {
     setIsLoadCachedDataOpen(true);
@@ -1081,6 +1094,7 @@ const ScriptGenerator: React.FC = () => {
               onDownloadDocx={handleDownloadDocx}
               onOpenPromptHistory={handleOpenPromptHistory}
               onOpenLoadCachedData={handleOpenLoadCachedData}
+              onOpenScriptUpload={() => setIsScriptUploadOpen(true)}
               models={models}
               isLoading={isLoading}
               isGeneratingScript={isGeneratingScript}
@@ -1123,6 +1137,7 @@ const ScriptGenerator: React.FC = () => {
             onDownloadDocx={handleDownloadDocx}
             onOpenPromptHistory={handleOpenPromptHistory}
             onOpenLoadCachedData={handleOpenLoadCachedData}
+            onOpenScriptUpload={() => setIsScriptUploadOpen(true)}
             models={models}
             isLoading={isLoading}
             isGeneratingScript={isGeneratingScript}
@@ -1298,12 +1313,20 @@ const ScriptGenerator: React.FC = () => {
           appliedResearchCount={getAppliedResearchCount()}
         />
       ) : (
-        <ResearchPreviewModal
-          isOpen={isResearchPreviewOpen}
-          onClose={() => setIsResearchPreviewOpen(false)}
-          researchContext={researchContext || formatResearchForScript()}
-          appliedResearchCount={getAppliedResearchCount()}
-        />
+        <>
+          <ResearchPreviewModal
+            isOpen={isResearchPreviewOpen}
+            onClose={() => setIsResearchPreviewOpen(false)}
+            researchContext={researchContext || formatResearchForScript()}
+            appliedResearchCount={getAppliedResearchCount()}
+          />
+
+          <ScriptUploadModal
+            isOpen={isScriptUploadOpen}
+            onClose={() => setIsScriptUploadOpen(false)}
+            onScriptUpload={handleScriptUpload}
+          />
+        </>
       )}
 
       {promptVariant === 'true-crime' ? (

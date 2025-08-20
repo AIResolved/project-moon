@@ -489,12 +489,12 @@ export function VideoStatus() {
   const getStatusBadge = (status: VideoRecord['status']) => {
     switch (status) {
       case 'completed':
-        return { variant: 'default' as const, className: 'bg-green-100 text-green-800', icon: CheckCircle }
+        return { variant: 'default' as const, className: 'bg-green-900/50 text-green-200 border-green-700', icon: CheckCircle }
       case 'failed':
-        return { variant: 'destructive' as const, className: 'bg-red-100 text-red-800', icon: AlertCircle }
+        return { variant: 'destructive' as const, className: 'bg-red-900/50 text-red-200 border-red-700', icon: AlertCircle }
       case 'processing':
       default:
-        return { variant: 'secondary' as const, className: 'bg-blue-100 text-blue-800', icon: Loader2 }
+        return { variant: 'secondary' as const, className: 'bg-blue-900/50 text-blue-200 border-blue-700', icon: Loader2 }
     }
   }
 
@@ -539,13 +539,13 @@ export function VideoStatus() {
   }
 
   return (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="flex-1 p-6 space-y-6 bg-gray-950 min-h-screen">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Video Status</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-white">Video Status</h1>
+            <p className="text-gray-300">
               Monitor and manage your video generation jobs
             </p>
           </div>
@@ -563,45 +563,45 @@ export function VideoStatus() {
 
       {/* Google Drive Warning/Status */}
       {isLoggedIn && hasGoogleTokens ? (
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-green-700 bg-green-900/20 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-800">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span className="text-sm text-green-200">
                 Connected to Google as {userEmail} - Upload buttons available for Google Drive and YouTube
               </span>
             </div>
           </CardContent>
         </Card>
       ) : isLoggedIn && hasGoogleTokens === false ? (
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="border-orange-700 bg-orange-900/20 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-orange-600" />
-              <span className="text-sm text-orange-800">
+              <AlertCircle className="h-4 w-4 text-orange-400" />
+              <span className="text-sm text-orange-200">
                 Supabase authenticated as {userEmail}, but Google OAuth required for uploads. 
-                <a href="/api/auth/signin/google" className="underline ml-1 hover:text-orange-900">Sign in with Google</a>
+                <a href="/api/auth/signin/google" className="underline ml-1 hover:text-orange-100 text-orange-300">Sign in with Google</a>
               </span>
             </div>
           </CardContent>
         </Card>
       ) : hasGoogleTokens === null ? (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-blue-700 bg-blue-900/20 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
-              <span className="text-sm text-blue-800">
+              <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
+              <span className="text-sm text-blue-200">
                 Checking Google authentication status...
               </span>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <Card className="border-amber-200 bg-amber-50">
+        <Card className="border-amber-700 bg-amber-900/20 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <span className="text-sm text-amber-800">
+              <AlertCircle className="h-4 w-4 text-amber-400" />
+              <span className="text-sm text-amber-200">
                 Sign in with Google in the navbar to upload videos to Google Drive and YouTube
               </span>
             </div>
@@ -611,47 +611,48 @@ export function VideoStatus() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-white shadow-sm border border-gray-200">
+        <Card className="bg-gray-900/50 shadow-lg border border-gray-700 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Videos</p>
-                <p className="text-2xl font-bold">{allVideos.length}</p>
+                <p className="text-sm text-gray-300">Total Videos</p>
+                <p className="text-2xl font-bold text-white">{allVideos.length}</p>
               </div>
-              <VideoIcon className="h-8 w-8 text-gray-400" />
+              <VideoIcon className="h-8 w-8 text-gray-500" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-blue-50 shadow-sm border border-blue-200">
+        <Card className="bg-blue-900/30 shadow-lg border border-blue-700 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600">Processing</p>
-                <p className="text-2xl font-bold text-blue-800">{processingCount}</p>
+                <p className="text-sm text-blue-300">Processing</p>
+                <p className="text-2xl font-bold text-blue-100">{processingCount}</p>
               </div>
+              <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-green-50 shadow-sm border border-green-200">
+        <Card className="bg-green-900/30 shadow-lg border border-green-700 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600">Completed</p>
-                <p className="text-2xl font-bold text-green-800">{completedCount}</p>
+                <p className="text-sm text-green-300">Completed</p>
+                <p className="text-2xl font-bold text-green-100">{completedCount}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-red-50 shadow-sm border border-red-200">
+        <Card className="bg-red-900/30 shadow-lg border border-red-700 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-red-600">Failed</p>
-                <p className="text-2xl font-bold text-red-800">{failedCount}</p>
+                <p className="text-sm text-red-300">Failed</p>
+                <p className="text-2xl font-bold text-red-100">{failedCount}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-red-400" />
             </div>
@@ -661,23 +662,23 @@ export function VideoStatus() {
 
       {/* Video List */}
       {isInitialLoading ? (
-        <Card className="bg-white shadow-sm border border-gray-200">
+        <Card className="bg-gray-900/50 shadow-lg border border-gray-700 backdrop-blur-sm">
           <CardContent className="pt-6 text-center py-12">
             <Loader2 className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-spin" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading Videos</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-medium text-white mb-2">Loading Videos</h3>
+            <p className="text-gray-300">
               Fetching your video generation history...
             </p>
           </CardContent>
         </Card>
       ) : allVideos.length > 0 ? (
-        <Card className="bg-white shadow-sm border border-gray-200">
+        <Card className="bg-gray-900/50 shadow-lg border border-gray-700 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               <VideoIcon className="h-5 w-5" />
               Video Generation History
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-300">
               All video generations sorted by creation date
             </CardDescription>
           </CardHeader>
@@ -690,20 +691,20 @@ export function VideoStatus() {
                 return (
                   <div 
                     key={video.id} 
-                    className={`p-4 rounded-lg border ${
+                    className={`p-4 rounded-lg border backdrop-blur-sm ${
                       video.isCurrent 
-                        ? 'border-purple-200 bg-purple-50' 
-                        : 'border-gray-200 bg-gray-50'
+                        ? 'border-purple-600 bg-purple-900/30' 
+                        : 'border-gray-600 bg-gray-800/50'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-gray-900">
+                          <h3 className="font-medium text-white">
                             Video {video.id.slice(0, 8)}
                           </h3>
                           {video.isCurrent && (
-                            <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800">
+                            <Badge variant="outline" className="text-xs bg-purple-900/50 text-purple-200 border-purple-600">
                               Current
                             </Badge>
                           )}
@@ -716,7 +717,7 @@ export function VideoStatus() {
                           </Badge>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600 mb-2">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-300 mb-2">
                           <div>
                             <span className="font-medium">Type:</span> {video.metadata?.type || 'traditional'}
                           </div>
@@ -736,7 +737,7 @@ export function VideoStatus() {
                         </div>
 
                         {video.subtitles_url && (
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-400">
                             ✓ Includes subtitles
                           </div>
                         )}
@@ -773,7 +774,7 @@ export function VideoStatus() {
                                   size="sm"
                                   variant="outline"
                                   disabled={uploadingVideos.has(video.id)}
-                                  className="border-blue-300 bg-white hover:bg-blue-50 text-blue-600 hover:text-blue-700 shadow-sm transition-all duration-200 hover:shadow-md"
+                                  className="border-blue-600 bg-gray-800 hover:bg-blue-900/50 text-blue-300 hover:text-blue-200 shadow-sm transition-all duration-200 hover:shadow-md"
                                 >
                                   {uploadingVideos.has(video.id) ? (
                                     <>
@@ -794,7 +795,7 @@ export function VideoStatus() {
                                       value={uploadProgress[video.id]} 
                                       className="h-1.5 w-full"
                                     />
-                                    <div className="text-xs text-blue-600 mt-0.5 text-center">
+                                    <div className="text-xs text-blue-300 mt-0.5 text-center">
                                       {uploadProgress[video.id]}% uploaded
                                     </div>
                                   </div>
@@ -805,7 +806,7 @@ export function VideoStatus() {
                                 size="sm"
                                 variant="outline"
                                 disabled
-                                className="border-gray-300 bg-gray-50 text-gray-400 opacity-60"
+                                className="border-gray-600 bg-gray-800 text-gray-500 opacity-60"
                                 title={
                                   !isLoggedIn ? "Sign in with Supabase first" :
                                   hasGoogleTokens === false ? "Sign in with Google required" :
@@ -827,7 +828,7 @@ export function VideoStatus() {
                                 size="sm"
                                 variant="outline"
                                 disabled={uploadingToYouTube.has(video.id)}
-                                className="border-red-300 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 shadow-sm transition-all duration-200 hover:shadow-md"
+                                className="border-red-600 bg-gray-800 hover:bg-red-900/50 text-red-300 hover:text-red-200 shadow-sm transition-all duration-200 hover:shadow-md"
                               >
                                 {uploadingToYouTube.has(video.id) ? (
                                   <>
@@ -846,7 +847,7 @@ export function VideoStatus() {
                                 size="sm"
                                 variant="outline"
                                 disabled
-                                className="border-gray-300 bg-gray-50 text-gray-400 opacity-60"
+                                className="border-gray-600 bg-gray-800 text-gray-500 opacity-60"
                                 title={
                                   !isLoggedIn ? "Sign in with Supabase first" :
                                   hasGoogleTokens === false ? "Sign in with Google required" :
@@ -877,13 +878,13 @@ export function VideoStatus() {
                     {video.status === 'processing' && (
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-blue-600">
+                          <span className="text-blue-300">
                             {isCheckingStatus ? 'Checking with Shotstack...' : 'Processing with Shotstack...'}
                           </span>
-                          <span className="text-blue-600">Estimated: 2-5 minutes</span>
+                          <span className="text-blue-300">Estimated: 2-5 minutes</span>
                         </div>
                         <Progress value={undefined} className="h-2" />
-                        <div className="text-xs text-blue-500">
+                        <div className="text-xs text-blue-400">
                           {isCheckingStatus 
                             ? 'Verifying render status with Shotstack API...'
                             : 'Video is being rendered. Status will update automatically.'
@@ -908,7 +909,7 @@ export function VideoStatus() {
 
                     {/* Error Message */}
                     {video.status === 'failed' && video.error_message && (
-                      <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                      <div className="mt-3 p-2 bg-red-900/30 border border-red-700 rounded text-sm text-red-200">
                         <strong>Error:</strong> {video.error_message}
                       </div>
                     )}
@@ -919,14 +920,14 @@ export function VideoStatus() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-gray-50 border border-gray-200">
+        <Card className="bg-gray-900/50 border border-gray-700 backdrop-blur-sm">
           <CardContent className="pt-6 text-center py-12">
-            <VideoIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Video Generations Yet</h3>
-            <p className="text-gray-600 mb-4">
+            <VideoIcon className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No Video Generations Yet</h3>
+            <p className="text-gray-300 mb-4">
               Start creating videos from your images and audio
             </p>
-            <Badge variant="outline">
+            <Badge variant="outline" className="border-gray-600 text-gray-300">
               Go to Video Generator to get started
             </Badge>
           </CardContent>
@@ -935,20 +936,20 @@ export function VideoStatus() {
 
       {/* Status Message */}
       {message && (
-        <Card className={`border ${
-          messageType === 'success' ? 'border-green-200 bg-green-50' :
-          messageType === 'error' ? 'border-red-200 bg-red-50' :
-          'border-blue-200 bg-blue-50'
+        <Card className={`border backdrop-blur-sm ${
+          messageType === 'success' ? 'border-green-700 bg-green-900/20' :
+          messageType === 'error' ? 'border-red-700 bg-red-900/20' :
+          'border-blue-700 bg-blue-900/20'
         }`}>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
-              {messageType === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
-              {messageType === 'error' && <AlertCircle className="h-4 w-4 text-red-600" />}
-              {messageType === 'info' && <VideoIcon className="h-4 w-4 text-blue-600" />}
+              {messageType === 'success' && <CheckCircle className="h-4 w-4 text-green-400" />}
+              {messageType === 'error' && <AlertCircle className="h-4 w-4 text-red-400" />}
+              {messageType === 'info' && <VideoIcon className="h-4 w-4 text-blue-400" />}
               <span className={`text-sm ${
-                messageType === 'success' ? 'text-green-800' :
-                messageType === 'error' ? 'text-red-800' :
-                'text-blue-800'
+                messageType === 'success' ? 'text-green-200' :
+                messageType === 'error' ? 'text-red-200' :
+                'text-blue-200'
               }`}>
                 {message}
               </span>
