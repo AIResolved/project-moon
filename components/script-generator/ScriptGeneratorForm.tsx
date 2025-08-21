@@ -56,7 +56,7 @@ interface ScriptGeneratorFormProps {
   onDownloadDocx: () => void
   onOpenPromptHistory: () => void
   onOpenLoadCachedData: () => void
-  onOpenScriptUpload: () => void
+  onOpenScriptUpload?: () => void
   
   // State
   models: OpenAIModel[]
@@ -136,16 +136,7 @@ export function ScriptGeneratorForm({
                 Load Cached Data
               </Button>
             </ScaleOnHover>
-            <ScaleOnHover>
-              <Button
-                variant="outline"
-                onClick={onOpenScriptUpload}
-                className="gap-2 bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
-              >
-                <Upload className="h-4 w-4" />
-                Upload Script
-              </Button>
-            </ScaleOnHover>
+            
             {/* <ScaleOnHover>
               <Button
                 variant="outline"

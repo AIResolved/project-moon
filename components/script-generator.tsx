@@ -34,6 +34,7 @@ import { PepeScriptGenerator } from "./script-variations/pepe/index";
 import { InvestigationForm } from "./script-variations/investigation";
 import { OptionsGenerator } from "./script-variations/investigation-1";
 import { Philosophy2Form } from "./script-variations/philosophy-2";
+import { ScriptUpload } from "./script-variations/upload";
 
 // True-crime uses the same UI as original; only the full-script route differs
 import { 
@@ -54,7 +55,7 @@ import { CTAModal as TrueCrimeCTAModal } from "./script-variations/true-crime/CT
 import { HookModal as TrueCrimeHookModal } from "./script-variations/true-crime/HookModal";
 import { ResearchPreviewModal as TrueCrimeResearchPreviewModal } from "./script-variations/true-crime/ResearchPreviewModal";
 import { LoadCachedDataModal as TrueCrimeLoadCachedDataModal } from "./script-variations/true-crime/LoadCachedDataModal";
-import { ScriptUploadModal } from "./script-variations/ScriptUploadModal";
+
 
 interface OpenAIModel {
   id: string;
@@ -109,7 +110,7 @@ const ScriptGenerator: React.FC = () => {
   const [povSelection, setPovSelection] = useState<string>("3rd Person");
   const [scriptFormat, setScriptFormat] = useState<string>("Story");
   const [audience, setAudience] = useState<string>("");
-  const [promptVariant, setPromptVariant] = useState<'original' | 'pepe' | 'investigation' | 'true-crime' | 'options' | 'philosophy-1' | 'philosophy-2'>('original');
+  const [promptVariant, setPromptVariant] = useState<'original' | 'pepe' | 'investigation' | 'true-crime' | 'options' | 'philosophy-1' | 'philosophy-2' | 'upload'>('original');
 
   // State for prompt history sidebar
   const [isPromptHistoryOpen, setIsPromptHistoryOpen] = useState(false);
@@ -123,7 +124,6 @@ const ScriptGenerator: React.FC = () => {
 
   // State for load cached data modal
   const [isLoadCachedDataOpen, setIsLoadCachedDataOpen] = useState(false);
-  const [isScriptUploadOpen, setIsScriptUploadOpen] = useState(false);
 
   // Track IDs for localStorage persistence
   const [currentFormDataId, setCurrentFormDataId] = useState<string | null>(null);
@@ -955,16 +955,7 @@ const ScriptGenerator: React.FC = () => {
     setIsResearchPreviewOpen(true);
   };
 
-  const handleScriptUpload = (script: string) => {
-    dispatch(setFullScript({
-      scriptWithMarkdown: script,
-      scriptCleaned: script,
-      title: title || "Uploaded Script",
-      theme: theme,
-      wordCount: script.split(/\s+/).filter(Boolean).length
-    }));
-    setIsScriptUploadOpen(false);
-  };
+
 
   // Handlers for loading cached data
   const handleOpenLoadCachedData = () => {
@@ -1049,6 +1040,7 @@ const ScriptGenerator: React.FC = () => {
                 <option value="true-crime">True Crime Niche</option>
                 <option value="philosophy-1">Philosophy Story Niche</option>
                 <option value="philosophy-2">Philosophy Niche 2</option>
+                <option value="upload">Upload Script</option>
               </select>
             </div>
             {getAppliedResearchCount() > 0 && (
@@ -1094,7 +1086,6 @@ const ScriptGenerator: React.FC = () => {
               onDownloadDocx={handleDownloadDocx}
               onOpenPromptHistory={handleOpenPromptHistory}
               onOpenLoadCachedData={handleOpenLoadCachedData}
-              onOpenScriptUpload={() => setIsScriptUploadOpen(true)}
               models={models}
               isLoading={isLoading}
               isGeneratingScript={isGeneratingScript}
@@ -1106,6 +1097,21 @@ const ScriptGenerator: React.FC = () => {
             <OptionsGenerator />
           ) : (promptVariant === 'philosophy-2') ? (
             <Philosophy2Form />
+          ) : promptVariant === 'upload' ? (
+            <ScriptUpload 
+              onFileUpload={handleFileUpload}
+              uploadedScript={uploadedScript}
+              onManualEntry={(script: string) => {
+                setUploadedScript(script);
+                dispatch(setFullScript({
+                  scriptWithMarkdown: script,
+                  scriptCleaned: script,
+                  title: title || "Uploaded Script",
+                  theme: theme,
+                  wordCount: script.trim().split(/\s+/).filter(Boolean).length
+                }));
+              }}
+            />
           ) : (
             <ScriptGeneratorForm
             title={title}
@@ -1137,7 +1143,6 @@ const ScriptGenerator: React.FC = () => {
             onDownloadDocx={handleDownloadDocx}
             onOpenPromptHistory={handleOpenPromptHistory}
             onOpenLoadCachedData={handleOpenLoadCachedData}
-            onOpenScriptUpload={() => setIsScriptUploadOpen(true)}
             models={models}
             isLoading={isLoading}
             isGeneratingScript={isGeneratingScript}
@@ -1321,11 +1326,7 @@ const ScriptGenerator: React.FC = () => {
             appliedResearchCount={getAppliedResearchCount()}
           />
 
-          <ScriptUploadModal
-            isOpen={isScriptUploadOpen}
-            onClose={() => setIsScriptUploadOpen(false)}
-            onScriptUpload={handleScriptUpload}
-          />
+
         </>
       )}
 

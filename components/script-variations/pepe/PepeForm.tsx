@@ -167,14 +167,6 @@ export function PepeForm() {
             <Button onClick={handleGenerateOutline} disabled={isGeneratingOutline}>
               {isGeneratingOutline ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating...</>) : (<><Zap className="h-4 w-4 mr-2" />Generate Outline</>)}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsScriptUploadOpen(true)}
-              className="gap-2 bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
-            >
-              <Upload className="h-4 w-4" />
-              Upload Script
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -201,12 +193,6 @@ export function PepeForm() {
           </CardContent>
         </Card>
       )}
-
-      <ScriptUploadModal
-        isOpen={isScriptUploadOpen}
-        onClose={() => setIsScriptUploadOpen(false)}
-        onScriptUpload={handleScriptUpload}
-      />
     </div>
   )
 }

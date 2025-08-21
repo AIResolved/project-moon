@@ -412,14 +412,7 @@ export function OptionsGenerator() {
               <Button onClick={handleGenerateFullScript} disabled={isGeneratingScript || scriptSections.length === 0} className="w-full sm:flex-1">
                 {isGeneratingScript ? 'Generating Script...' : 'Generate Full Script'}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsScriptUploadOpen(true)}
-                className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
-              >
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Upload Script
-              </Button>
+          
             </div>
 
             {fullScript?.scriptWithMarkdown && (

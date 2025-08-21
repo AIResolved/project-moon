@@ -338,6 +338,18 @@ export function UnifiedAnimationGenerator() {
     setEditingPromptText('')
   }
 
+  const handleUpdatePrompt = (id: string, updatedPrompt: string, updatedTitle?: string) => {
+    setAllPrompts(prev => prev.map(prompt => 
+      prompt.id === id 
+        ? { 
+            ...prompt, 
+            prompt: updatedPrompt,
+            title: updatedTitle || prompt.title
+          }
+        : prompt
+    ))
+  }
+
   // Helper function to combine styles into final prompt
   const getStyledPrompt = (basePrompt: string) => {
     let finalPrompt = basePrompt
@@ -379,10 +391,26 @@ export function UnifiedAnimationGenerator() {
   }
 
   // Batch generation function with frontend progress tracking and Redux persistence
-  const handleBatchGenerate = async () => {
-    if (selectedPrompts.length === 0 || referenceImages.length === 0) return
+  const handleBatchGenerate = async (promptIds?: string[]) => {
+    const idsToUse = promptIds || selectedPrompts
+    console.log('🎬 handleBatchGenerate called:', { 
+      promptIds: promptIds?.length, 
+      selectedPrompts: selectedPrompts.length, 
+      idsToUse: idsToUse.length, 
+      referenceImages: referenceImages.length 
+    })
     
-    const promptsToGenerate = allPrompts.filter(prompt => selectedPrompts.includes(prompt.id))
+    if (idsToUse.length === 0) {
+      console.error('❌ No prompts selected for batch generation')
+      return
+    }
+    
+    if (referenceImages.length === 0) {
+      console.error('❌ No reference images uploaded for batch generation')
+      return
+    }
+    
+    const promptsToGenerate = allPrompts.filter(prompt => idsToUse.includes(prompt.id))
     
     try {
       setIsBatchGenerating(true)
@@ -670,6 +698,7 @@ export function UnifiedAnimationGenerator() {
                 allPrompts={allPrompts}
                 onExtractScenes={handleExtractScenes}
                 onClearAllPrompts={handleClearAllPrompts}
+                onUpdatePrompt={handleUpdatePrompt}
                 getScriptSourceInfo={getScriptSourceInfo}
                 
                 // Generation
@@ -697,13 +726,12 @@ export function UnifiedAnimationGenerator() {
                 }))}
                 isBatchGenerating={isBatchGenerating}
                 batchProgress={batchProgress}
-                onBatchGenerate={(prompts) => {
-                  // Convert prompts to selected prompt IDs
-                  const promptIds = allPrompts
-                    .filter(p => prompts.includes(p.prompt))
-                    .map(p => p.id)
+                onBatchGenerate={(promptIds) => {
+                  console.log('🎯 onBatchGenerate called with promptIds:', promptIds.length)
+                  console.log('📝 Available allPrompts:', allPrompts.length)
+                  
                   setSelectedPrompts(promptIds)
-                  handleBatchGenerate()
+                  handleBatchGenerate(promptIds)
                 }}
                 onClearBatch={handleClearAllResults}
               />

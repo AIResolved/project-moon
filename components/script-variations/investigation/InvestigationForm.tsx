@@ -158,24 +158,9 @@ export function InvestigationForm() {
             <Button onClick={handleGenerateScript} disabled={isGeneratingScript} className="bg-blue-600 hover:bg-blue-700">
               {isGeneratingScript ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating Script</>) : 'Generate Script'}
             </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => setIsScriptUploadOpen(true)}
-              className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Script
-            </Button>
           </div>
         </CardContent>
       </Card>
-
-      <ScriptUploadModal
-        isOpen={isScriptUploadOpen}
-        onClose={() => setIsScriptUploadOpen(false)}
-        onScriptUpload={handleScriptUpload}
-      />
     </div>
   )
 }

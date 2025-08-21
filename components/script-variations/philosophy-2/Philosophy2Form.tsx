@@ -233,28 +233,15 @@ export function Philosophy2Form() {
             <Button onClick={handleGenerateScript} disabled={isGeneratingScript || !scriptSections.length} className="w-full sm:flex-1">
               {isGeneratingScript ? 'Generating Script...' : 'Generate Full Script'}
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full bg-blue-900/20 border-blue-600 text-blue-300 hover:bg-blue-900/40"
-              onClick={() => setIsScriptUploadOpen(true)}
-            >
-              📁 Upload Script
-            </Button>
           </div>
         </CardContent>
       </Card>
-              <ResearchPreviewModal
-          isOpen={isResearchPreviewOpen}
-          onClose={() => setIsResearchPreviewOpen(false)}
-          researchContext={Array.isArray(researchSummaries) && researchSummaries.length > 0 ? JSON.stringify(researchSummaries, null, 2).slice(0, 5000) : ''}
-          appliedResearchCount={Array.isArray(researchSummaries) ? researchSummaries.filter((r:any)=>r.appliedToScript).length : 0}
-        />
-
-        <ScriptUploadModal
-          isOpen={isScriptUploadOpen}
-          onClose={() => setIsScriptUploadOpen(false)}
-          onScriptUpload={handleScriptUpload}
-        />
+      <ResearchPreviewModal
+        isOpen={isResearchPreviewOpen}
+        onClose={() => setIsResearchPreviewOpen(false)}
+        researchContext={Array.isArray(researchSummaries) && researchSummaries.length > 0 ? JSON.stringify(researchSummaries, null, 2).slice(0, 5000) : ''}
+        appliedResearchCount={Array.isArray(researchSummaries) ? researchSummaries.filter((r:any)=>r.appliedToScript).length : 0}
+      />
     </div>
   )
 }

@@ -25,8 +25,10 @@ import {
   Square,
   Download,
   Grid,
-  Upload
+  Upload,
+  Eye
 } from 'lucide-react'
+import { PromptPreviewModal } from './PromptPreviewModal'
 
 interface ExtractedAnimationScene {
   id: string
@@ -55,6 +57,7 @@ interface UnifiedAnimationTabProps {
   allPrompts: ExtractedAnimationScene[]
   onExtractScenes: () => void
   onClearAllPrompts: () => void
+  onUpdatePrompt?: (id: string, updatedPrompt: string, updatedTitle?: string) => void
   getScriptSourceInfo: () => { source: string; count: number; type: string }
   
   // Generation
@@ -74,7 +77,7 @@ interface UnifiedAnimationTabProps {
   batchResults: BatchGenerationResult[]
   isBatchGenerating: boolean
   batchProgress: { current: number; total: number }
-  onBatchGenerate: (prompts: string[]) => void
+  onBatchGenerate: (promptIds: string[]) => void
   onClearBatch: () => void
 }
 
@@ -88,6 +91,7 @@ export function UnifiedAnimationTab({
   allPrompts,
   onExtractScenes,
   onClearAllPrompts,
+  onUpdatePrompt,
   getScriptSourceInfo,
   animationPrompt,
   setAnimationPrompt,
@@ -105,18 +109,30 @@ export function UnifiedAnimationTab({
   onClearBatch
 }: UnifiedAnimationTabProps) {
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([])
+  const [selectedPromptIds, setSelectedPromptIds] = useState<string[]>([])
   const [customPrompt, setCustomPrompt] = useState('')
   const [showCustomInput, setShowCustomInput] = useState(false)
+  
+  // Prompt preview modal state
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
+  const [selectedPromptForPreview, setSelectedPromptForPreview] = useState<ExtractedAnimationScene | null>(null)
 
   const scriptSourceInfo = getScriptSourceInfo()
 
   // Handle prompt selection for batch generation
   const togglePromptSelection = (prompt: string) => {
-    setSelectedPrompts(prev => 
-      prev.includes(prompt) 
-        ? prev.filter(p => p !== prompt)
-        : [...prev, prompt]
-    )
+    const scene = allPrompts.find(p => p.prompt === prompt)
+    if (!scene) return
+    
+    const isSelected = selectedPrompts.includes(prompt)
+    
+    if (isSelected) {
+      setSelectedPrompts(prev => prev.filter(p => p !== prompt))
+      setSelectedPromptIds(prev => prev.filter(id => id !== scene.id))
+    } else {
+      setSelectedPrompts(prev => [...prev, prompt])
+      setSelectedPromptIds(prev => [...prev, scene.id])
+    }
   }
 
   const addCustomPrompt = () => {
@@ -125,6 +141,20 @@ export function UnifiedAnimationTab({
       setCustomPrompt('')
       setShowCustomInput(false)
     }
+  }
+
+  // Handle prompt preview modal
+  const openPromptModal = (scene: ExtractedAnimationScene) => {
+    setSelectedPromptForPreview(scene)
+    setIsPromptModalOpen(true)
+  }
+
+  const handlePromptSave = (updatedPrompt: string, updatedTitle?: string) => {
+    if (selectedPromptForPreview && onUpdatePrompt) {
+      onUpdatePrompt(selectedPromptForPreview.id, updatedPrompt, updatedTitle)
+    }
+    setIsPromptModalOpen(false)
+    setSelectedPromptForPreview(null)
   }
 
   // Reference image upload handlers
@@ -446,7 +476,10 @@ export function UnifiedAnimationTab({
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setSelectedPrompts(allPrompts.map(p => p.prompt))}
+                      onClick={() => {
+                        setSelectedPrompts(allPrompts.map(p => p.prompt))
+                        setSelectedPromptIds(allPrompts.map(p => p.id))
+                      }}
                       disabled={selectedPrompts.length === allPrompts.length}
                     >
                       Select All
@@ -454,7 +487,10 @@ export function UnifiedAnimationTab({
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setSelectedPrompts([])}
+                      onClick={() => {
+                        setSelectedPrompts([])
+                        setSelectedPromptIds([])
+                      }}
                       disabled={selectedPrompts.length === 0}
                     >
                       Clear
@@ -467,26 +503,45 @@ export function UnifiedAnimationTab({
                   {allPrompts.map((scene) => (
                     <div 
                       key={scene.id} 
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      className={`p-3 border rounded-lg transition-colors ${
                         selectedPrompts.includes(scene.prompt) 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
                       }`}
-                      onClick={() => togglePromptSelection(scene.prompt)}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm truncate">{scene.title}</h4>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        <div 
+                          className="flex-1 min-w-0 cursor-pointer"
+                          onClick={() => togglePromptSelection(scene.prompt)}
+                        >
+                          <h4 className="font-medium text-sm text-foreground truncate">{scene.title}</h4>
+                          <p className="text-sm text-foreground/80 mt-1 line-clamp-2 leading-relaxed">
                             {scene.prompt}
                           </p>
                         </div>
-                        <div className="flex-shrink-0">
-                          {selectedPrompts.includes(scene.prompt) ? (
-                            <Check className="h-4 w-4 text-blue-600" />
-                          ) : (
-                            <div className="h-4 w-4 border border-gray-300 rounded" />
-                          )}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openPromptModal(scene)
+                            }}
+                            className="h-8 w-8 p-0"
+                            title="Preview/Edit prompt"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <div 
+                            className="cursor-pointer p-1"
+                            onClick={() => togglePromptSelection(scene.prompt)}
+                          >
+                            {selectedPrompts.includes(scene.prompt) ? (
+                              <Check className="h-4 w-4 text-blue-600" />
+                            ) : (
+                              <div className="h-4 w-4 border border-gray-300 dark:border-gray-600 rounded" />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -548,8 +603,8 @@ export function UnifiedAnimationTab({
                   </Label>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {selectedPrompts.map((prompt, index) => (
-                      <div key={index} className="flex items-center gap-2 text-xs bg-gray-50 p-2 rounded">
-                        <span className="flex-1 truncate">
+                      <div key={index} className="flex items-center gap-2 text-sm bg-muted p-3 rounded border">
+                        <span className="flex-1 text-foreground leading-relaxed">
                           {referenceImageDescription.trim() ? getPromptWithReference(prompt) : prompt}
                         </span>
                         <Button 
@@ -590,7 +645,7 @@ export function UnifiedAnimationTab({
 
                 <div className="flex gap-2">
                   <Button 
-                    onClick={() => onBatchGenerate(selectedPrompts.map(prompt => getPromptWithReference(prompt)))}
+                    onClick={() => onBatchGenerate(selectedPromptIds)}
                     disabled={isBatchGenerating || selectedPrompts.length === 0 || referenceImages.length === 0}
                     className="flex-1"
                   >
@@ -669,6 +724,19 @@ export function UnifiedAnimationTab({
           )}
         </div>
       </div>
+
+      {/* Prompt Preview Modal */}
+      <PromptPreviewModal
+        isOpen={isPromptModalOpen}
+        onClose={() => {
+          setIsPromptModalOpen(false)
+          setSelectedPromptForPreview(null)
+        }}
+        prompt={selectedPromptForPreview?.prompt || ''}
+        title={selectedPromptForPreview?.title}
+        onSave={onUpdatePrompt ? handlePromptSave : undefined}
+        readOnly={!onUpdatePrompt}
+      />
     </div>
   )
 }
