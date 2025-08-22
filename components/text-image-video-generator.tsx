@@ -31,6 +31,7 @@ import { TextToVideoTab } from './text-image-video/TextToVideoTab'
 import { ImageToVideoTab } from './text-image-video/ImageToVideoTab'
 import { VideoGenerationDisplay } from './text-image-video/VideoGenerationDisplay'
 import { VideoHistoryTab } from './text-image-video/VideoHistoryTab'
+import { VideoSearchModal } from './text-image-video/VideoSearchModal'
 
 export function TextImageVideoGenerator() {
   const dispatch = useAppDispatch()
@@ -51,6 +52,10 @@ export function TextImageVideoGenerator() {
   
   // Local state for batch processing
   const [currentBatchRequests, setCurrentBatchRequests] = useState<(TextToVideoRequest | ImageToVideoRequest)[]>([])
+  
+  // Search modal state
+  const [isVideoSearchModalOpen, setIsVideoSearchModalOpen] = useState(false)
+  const [videoSearchScenes, setVideoSearchScenes] = useState<any[]>([])
 
   // Background function to upload video to Supabase
   const uploadVideoToSupabaseBackground = async (videoUrl: string, video: GeneratedVideo) => {
@@ -355,6 +360,20 @@ export function TextImageVideoGenerator() {
 
   // Handle text-to-video generation
   const handleTextToVideo = useCallback(async (prompts: string[], duration: 5 | 10) => {
+    // If search provider is selected, open the search modal
+    if (selectedProvider === 'search') {
+      const searchScenes = prompts.map((prompt, index) => ({
+        chunkIndex: index,
+        originalText: prompt,
+        videoPrompt: prompt,
+        searchQuery: prompt.length > 50 ? prompt.substring(0, 47) + '...' : prompt,
+        summary: `Prompt ${index + 1}`,
+      }))
+      setVideoSearchScenes(searchScenes)
+      setIsVideoSearchModalOpen(true)
+      return
+    }
+
     const requests: TextToVideoRequest[] = prompts.map(prompt => ({
       prompt,
       duration,
@@ -364,6 +383,40 @@ export function TextImageVideoGenerator() {
 
     await handleGenerateVideos(requests)
   }, [selectedProvider, selectedModel])
+
+  // Handle video search modal results
+  const handleVideoSearchResults = (results: any[]) => {
+    // Create generated videos from search results
+    const generationId = uuidv4()
+    const generatedVideos: GeneratedVideo[] = results.map((result, index) => ({
+      id: `search-${generationId}-${index}`,
+      type: 'text-to-video' as const,
+      prompt: `Stock video: ${result.query}`,
+      duration: 10, // Default duration for stock videos
+      videoUrl: result.url,
+      provider: 'search' as any,
+      model: 'pexels-pixabay-search',
+      generatedAt: new Date().toISOString(),
+      status: 'completed' as const
+    }))
+
+    // Start a new batch for search results
+    dispatch(startBatchGeneration({
+      id: generationId,
+      requests: []
+    }))
+
+    // Add each video to the batch
+    generatedVideos.forEach(video => {
+      dispatch(addVideoToBatch(video))
+    })
+
+    // Complete the batch generation
+    dispatch(completeBatchGeneration())
+
+    // Note: Search results don't need to be saved to localStorage 
+    // as they're stock videos already accessible via URL
+  }
 
   // Handle image-to-video generation
   const handleImageToVideo = useCallback(async (
@@ -479,6 +532,14 @@ export function TextImageVideoGenerator() {
         </TabsContent>
       </Tabs>
         </StaggerItem>
+
+        {/* Video Search Modal */}
+        <VideoSearchModal
+          isOpen={isVideoSearchModalOpen}
+          onClose={() => setIsVideoSearchModalOpen(false)}
+          scenes={videoSearchScenes}
+          onSelectResults={handleVideoSearchResults}
+        />
     </StaggerContainer>
   )
 } 

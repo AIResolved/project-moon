@@ -57,49 +57,77 @@ export async function POST(request: NextRequest) {
       try {
         const chunkText = chunk.pageContent;
         
-        // Generate detailed image prompt for this chunk
+        // Generate both detailed image prompt and search query for this chunk
         const promptResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
-              content: `You are an expert visual scene designer creating detailed image prompts for AI generation. Your prompts must be HIGHLY SPECIFIC and include precise character details to prevent AI defaults (like generating males instead of females).
+              content: `You are an expert visual scene designer creating both AI image prompts and web search queries. You need to generate two things:
+1. A detailed AI image prompt with HIGHLY SPECIFIC character details
+2. A concise search query for finding stock photos/videos on Pexels/Pixabay
 
 CRITICAL REQUIREMENTS:
-- Always specify character's gender, age, and physical description
+- Always specify character's gender, age, and physical description in AI prompts
 - Include specific clothing, posture, and facial expressions
 - Describe exact setting details, lighting, and atmosphere
 - Mention camera angle and composition
-- Keep under 200 words but be as descriptive as possible
-- Focus on visual accuracy over brevity`
+- Keep AI prompts under 200 words but be as descriptive as possible
+- Keep search queries under 50 characters and focus on core visual elements`
             },
             {
               role: "user",
               content: `
-Convert this story chunk into a DETAILED, specific image prompt (max 200 words).
+Convert this story chunk into TWO outputs:
 
+1. DETAILED AI IMAGE PROMPT (max 200 words):
 MANDATORY DETAILS TO INCLUDE:
-1. Character specifics: age, gender, physical appearance, clothing, posture
-2. Setting: specific location, time of day, weather, objects
-3. Action: exact body position, facial expression, what they're doing
-4. Atmosphere: lighting type, mood, shadows, colors
-5. Camera: angle, distance, focus point
-6. Style: realistic, cinematic, photographic
+- Character specifics: age, gender, physical appearance, clothing, posture
+- Setting: specific location, time of day, weather, objects
+- Action: exact body position, facial expression, what they're doing
+- Atmosphere: lighting type, mood, shadows, colors
+- Camera: angle, distance, focus point
+- Style: realistic, cinematic, photographic
+
+2. SEARCH QUERY (max 50 characters):
+Simple keywords for stock photo search (e.g., "woman office laptop", "sunset beach", "city street night")
 
 Story chunk:
 ${chunkText}
 
-Example format: "A [specific age] year old [gender] with [hair/features] wearing [specific clothing], [specific posture/action] in [detailed setting], [specific lighting], [camera angle], [artistic style]"
+FORMAT YOUR RESPONSE AS:
+AI_PROMPT: [detailed prompt here]
+SEARCH_QUERY: [simple keywords here]
 
-Be extremely specific about gender, age, and physical details to ensure accurate AI generation.
+Be extremely specific about gender, age, and physical details in the AI prompt.
               `
             }
           ],
       
         });
 
-        let promptText = promptResponse.choices[0]?.message.content?.trim() || 
-          `A detailed scene depicting: ${chunkText.substring(0, 100)}...`;
+        let responseText = promptResponse.choices[0]?.message.content?.trim() || 
+          `AI_PROMPT: A detailed scene depicting: ${chunkText.substring(0, 100)}...\nSEARCH_QUERY: scene story`;
+
+        // Parse the AI response to extract both prompt and search query
+        let promptText = '';
+        let searchQuery = '';
+        
+        const aiPromptMatch = responseText.match(/AI_PROMPT:\s*([\s\S]*?)(?=\nSEARCH_QUERY:|$)/);
+        const searchQueryMatch = responseText.match(/SEARCH_QUERY:\s*(.*?)$/m);
+        
+        if (aiPromptMatch && searchQueryMatch) {
+          promptText = aiPromptMatch[1].trim();
+          searchQuery = searchQueryMatch[1].trim();
+        } else {
+          // Fallback if parsing fails
+          promptText = responseText.includes('AI_PROMPT:') ? 
+            responseText.split('AI_PROMPT:')[1].split('SEARCH_QUERY:')[0].trim() : 
+            responseText;
+          searchQuery = responseText.includes('SEARCH_QUERY:') ? 
+            responseText.split('SEARCH_QUERY:')[1].trim() : 
+            `scene ${index + 1}`;
+        }
 
         // Ensure prompt is under 200 words and 1000 characters for detailed descriptions
         const words = promptText.split(' ');
@@ -117,10 +145,16 @@ Be extremely specific about gender, age, and physical details to ensure accurate
           }
         }
 
+        // Ensure search query is under 50 characters
+        if (searchQuery.length > 50) {
+          searchQuery = searchQuery.substring(0, 47) + '...';
+        }
+
         return {
           chunkIndex: index,
           originalText: chunkText,
           imagePrompt: promptText,
+          searchQuery: searchQuery,
           summary: `Scene ${index + 1}`,
         };
       } catch (error: any) {
@@ -131,6 +165,7 @@ Be extremely specific about gender, age, and physical details to ensure accurate
           chunkIndex: index,
           originalText: chunk.pageContent,
           imagePrompt: `A scene from the story, section ${index + 1}`,
+          searchQuery: `scene ${index + 1}`,
           summary: `Scene ${index + 1}`,
           error: error.message || 'Unknown error'
         };

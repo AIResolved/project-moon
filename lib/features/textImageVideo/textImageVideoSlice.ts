@@ -358,6 +358,7 @@ export const textImageVideoSlice = createSlice({
         chunkIndex: state.scriptBasedPrompts.extractedScenes.length,
         originalText: title,
         videoPrompt: prompt,
+        searchQuery: prompt.length > 50 ? prompt.substring(0, 47) + '...' : prompt,
         summary: title
       }
       

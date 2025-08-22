@@ -2,7 +2,7 @@
 
 import { Badge } from '../ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import { Cpu, Info, Clock } from 'lucide-react'
+import { Cpu, Info, Clock, Search } from 'lucide-react'
 import { ImageProvider } from '@/types/image-generation'
 import { MODEL_INFO } from '@/data/image'
 
@@ -21,10 +21,10 @@ export function ModelSelection({ selectedModel, onModelChange, selectedScenes }:
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Cpu className="h-5 w-5 text-purple-400" />
-          AI Model Selection
+          Image Source Selection
         </CardTitle>
         <CardDescription className="text-gray-300">
-          Choose your preferred AI model for image generation. Each model processes images in optimized batches.
+          Choose your preferred source for images: AI generation models or stock photo search. Each option processes images in optimized batches.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -34,16 +34,19 @@ export function ModelSelection({ selectedModel, onModelChange, selectedScenes }:
               key={key}
               className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                 selectedModel === key
-                  ? 'border-purple-500 bg-purple-900/20'
-                  : 'border-gray-700 hover:border-gray-600 bg-gray-800'
+                  ? (key === 'search' ? 'border-blue-500 bg-blue-900/20' : 'border-purple-500 bg-purple-900/20')
+                  : (key === 'search' ? 'border-blue-700/50 hover:border-blue-600 bg-gray-800' : 'border-gray-700 hover:border-gray-600 bg-gray-800')
               }`}
               onClick={() => onModelChange(key as ImageProvider)}
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{info.name}</h3>
+                  <div className="flex items-center gap-2">
+                    {key === 'search' && <Search className="h-4 w-4 text-blue-400" />}
+                    <h3 className="font-semibold">{info.name}</h3>
+                  </div>
                   {selectedModel === key && (
-                    <Badge className="bg-purple-600">Selected</Badge>
+                    <Badge className={key === 'search' ? 'bg-blue-600' : 'bg-purple-600'}>Selected</Badge>
                   )}
                 </div>
                 <p className="text-sm text-gray-300">{info.description}</p>

@@ -23,6 +23,7 @@ import {
   removeImageSet,
   setSelectedImagesOrder,
   clearSelectedImagesOrder,
+  setConfirmedImageSelection,
   updateImageInSet,
   loadImageSets,
   loadConfirmedImageSelection,
@@ -47,6 +48,7 @@ import { ImageGenerationControls } from './image-generation/ImageGenerationContr
 import { GeneratedImageDisplay } from './image-generation/GeneratedImageDisplay'
 import { ThumbnailGenerator } from './image-generation/ThumbnailGenerator'
 import { VideoSelectionConfirmation } from './image-generation/VideoSelectionConfirmation'
+import { SearchModal } from './image-generation/SearchModal'
 
 export function AIImageGenerator() {
   const dispatch = useAppDispatch()
@@ -87,6 +89,10 @@ export function AIImageGenerator() {
   const [thumbnailImageStyle, setThumbnailImageStyle] = useState<string>('realistic')
   const [thumbnailLightingTone, setThumbnailLightingTone] = useState<string>('balanced')
   const [thumbnailCustomStyle, setThumbnailCustomStyle] = useState<string>('')
+  
+  // Search modal state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [searchResults, setSearchResults] = useState<any[]>([])
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -208,9 +214,50 @@ export function AIImageGenerator() {
       chunkIndex: extractedScenes.length,
       originalText: `Custom scene: ${title}`,
       imagePrompt: prompt,
+      searchQuery: '',
       summary: title,
     }
     dispatch(addCustomScene(customScene))
+  }
+
+  // Handle search modal results
+  const handleSearchResults = (results: any[]) => {
+    setSearchResults(results)
+    
+    // Create a new image set from the search results
+    const generationId = uuidv4()
+    const imageUrls = results.map(result => result.url)
+    const prompts = results.map(result => `Stock image: ${result.query}`)
+    
+    const newImageSet: GeneratedImageSet = {
+      id: generationId,
+      originalPrompt: 'Search Results',
+      finalPrompts: prompts,
+      imageUrls: imageUrls,
+      imageData: [], // Empty for search results
+      provider: 'search',
+      generatedAt: new Date().toISOString(),
+      aspectRatio: aspectRatio,
+      imageStyle: selectedImageStyle
+    }
+    
+    // Start generation state for proper UI handling
+    dispatch(startGeneration({ 
+      id: generationId,
+      prompt: 'Search Results',
+      finalPrompts: prompts,
+      numberOfImages: results.length,
+      imageStyle: selectedImageStyle
+    }))
+    
+    // Complete generation with search results
+    dispatch(completeGeneration({ imageUrls: imageUrls }))
+    
+    // Save to localStorage - this creates a proper image set
+    saveImageSetToLocalStorage(newImageSet)
+    
+    // Reset selected scenes after successful search
+    setSelectedScenes([])
   }
 
   // Helper function to apply image style to prompt
@@ -284,6 +331,14 @@ export function AIImageGenerator() {
 
   const handleGenerateFromScenes = async () => {
     if (selectedScenes.length === 0) return
+
+    // If search provider is selected, open the search modal
+    if (selectedModel === 'search') {
+      const selectedScenesData = selectedScenes.map(index => extractedScenes[index]).filter(Boolean)
+      if (selectedScenesData.length === 0) return
+      setIsSearchModalOpen(true)
+      return
+    }
 
     const selectedPrompts = selectedScenes.map(index => extractedScenes[index]?.imagePrompt).filter(Boolean)
     
@@ -747,9 +802,12 @@ export function AIImageGenerator() {
 
   // Video selection confirmation handlers
   const handleConfirmVideoSelection = () => {
-    // Navigate to video generator tab or trigger navigation
-    console.log('Confirmed video selection:', selectedImagesOrder)
-    // This could trigger navigation to video generator
+    // Confirm the current selection for video generation
+    dispatch(setConfirmedImageSelection(selectedImagesOrder))
+    console.log('Confirmed video selection for video generation:', selectedImagesOrder)
+    
+    // Show success message or notification
+    alert(`✅ ${selectedImagesOrder.length} images confirmed for video generation! You can now go to the Video Generator tab to create your video.`)
   }
 
   const handlePreviewVideoSelection = () => {
@@ -917,6 +975,15 @@ export function AIImageGenerator() {
         </TabsContent>
       </Tabs>
         </StaggerItem>
+
+        {/* Search Modal */}
+        <SearchModal
+          isOpen={isSearchModalOpen}
+          onClose={() => setIsSearchModalOpen(false)}
+          scenes={selectedScenes.map(index => extractedScenes[index]).filter(Boolean)}
+          mode="image"
+          onSelectResults={handleSearchResults}
+        />
     </StaggerContainer>
   )
 } 

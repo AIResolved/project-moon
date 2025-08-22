@@ -76,7 +76,13 @@ export const MODEL_INFO: Record<ImageProvider, {
     //   rateLimit: '10/min per batch',
     //   features: ['High quality', 'Realism', 'Enhanced quality', 'Base64 output']
     // }
-    
+    'search': {
+      name: 'Search Stock Images',
+      description: 'Search Pexels and Pixabay for stock photos using AI-generated queries',
+      batchSize: 20,
+      rateLimit: '100/min per batch',
+      features: ['Stock photos', 'Multiple sources', 'Fast results', 'High quality', 'Commercial use']
+    }
   }
 
 // Image Style Categories

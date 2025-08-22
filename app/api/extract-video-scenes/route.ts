@@ -69,13 +69,13 @@ export async function POST(request: NextRequest) {
       try {
         const chunkText = chunk.pageContent;
         
-        // Generate detailed video prompt for this chunk with script context
+        // Generate detailed video prompt and search query for this chunk with script context
         const promptResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
-              content: `You are an expert video prompt creator for AI video generation. Your task is to create highly detailed, specific video prompts based on script chunks that will work well with text-to-video AI models.
+              content: `You are an expert video prompt creator for AI video generation and stock video search. Your task is to create both detailed AI video prompts and simple search queries for finding stock videos.
 
 STORY CONTEXT:
 - Story Summary: ${scriptSummary.storySummary}
@@ -83,61 +83,90 @@ STORY CONTEXT:
 - Setting: ${scriptSummary.setting}
 - Tone & Atmosphere: ${scriptSummary.tone}
 
-Create a video prompt that:
-1. Is 20-35 words long for detailed descriptions
-2. Includes SPECIFIC character details (age, gender, appearance, clothing)
-3. Describes precise actions and movements
-4. Mentions camera work (close-up, wide shot, panning, tracking, etc.)
-5. Details lighting and atmosphere
-6. Maintains consistency with the overall story context
-7. Uses cinematic language suitable for video generation
-8. Focuses on visual motion and dynamic elements
-9. Be very specific about physical characteristics and visual details
+You need to generate TWO outputs:
 
-Examples of highly detailed video prompts:
-- "Close-up of a 25-year-old brunette woman in white dress slowly turning toward camera, tears in blue eyes, soft morning light streaming through window, cinematic"
-- "Wide shot of a 30-year-old bearded man in dark coat walking through busy city street at golden sunset, camera tracking alongside, shallow depth of field"
-- "Dramatic low-angle shot of weathered hands of 60-year-old reaching toward stormy sky, rain falling, lightning illuminating face, slow motion, dark atmospheric lighting"
-- "Medium shot of 20-year-old blonde woman in red jacket running through autumn forest, leaves falling around her, camera following behind, warm afternoon light"
+1. DETAILED AI VIDEO PROMPT (20-35 words):
+- Includes SPECIFIC character details (age, gender, appearance, clothing)
+- Describes precise actions and movements
+- Mentions camera work (close-up, wide shot, panning, tracking, etc.)
+- Details lighting and atmosphere
+- Maintains consistency with the overall story context
+- Uses cinematic language suitable for video generation
+- Focuses on visual motion and dynamic elements
 
-CRITICAL: Always include specific age, gender, physical appearance details, clothing descriptions, and environmental specifics. Be as descriptive as possible while maintaining focus on movement and action.
+2. SEARCH QUERY (max 50 characters):
+Simple keywords for stock video search (e.g., "woman walking city", "sunset beach", "office meeting")
+
+Examples:
+- AI Prompt: "Close-up of a 25-year-old brunette woman in white dress slowly turning toward camera, tears in blue eyes, soft morning light streaming through window, cinematic"
+- Search Query: "woman turning sad window light"
 
 Remember: This is for VIDEO generation, not images. Focus on movement, action, and cinematic elements with very detailed character and environment descriptions.`
             },
             {
               role: "user", 
-              content: `Based on the story context above, create a cinematic video prompt for this script section (Scene ${index + 1} of ${numberOfScenes}):
+              content: `Based on the story context above, create both outputs for this script section (Scene ${index + 1} of ${numberOfScenes}):
 
 ${chunkText}
 
-Generate a detailed video prompt that captures the essence of this scene while maintaining story consistency.`
+FORMAT YOUR RESPONSE AS:
+VIDEO_PROMPT: [detailed video prompt here]
+SEARCH_QUERY: [simple keywords here]
+
+Generate content that captures the essence of this scene while maintaining story consistency.`
             }
           ],
         });
 
-        let promptText = promptResponse.choices[0]?.message.content?.trim() || 
-          `A cinematic scene depicting: ${chunkText.substring(0, 100)}...`;
+        let responseText = promptResponse.choices[0]?.message.content?.trim() || 
+          `VIDEO_PROMPT: A cinematic scene depicting: ${chunkText.substring(0, 100)}...\nSEARCH_QUERY: scene video`;
 
-        // Ensure prompt is detailed but manageable (20-35 words ideal for detailed video generation)
-        const words = promptText.split(' ');
+        // Parse the AI response to extract both video prompt and search query
+        let videoPrompt = '';
+        let searchQuery = '';
+        
+        const videoPromptMatch = responseText.match(/VIDEO_PROMPT:\s*([\s\S]*?)(?=\nSEARCH_QUERY:|$)/);
+        const searchQueryMatch = responseText.match(/SEARCH_QUERY:\s*(.*?)$/m);
+        
+        if (videoPromptMatch && searchQueryMatch) {
+          videoPrompt = videoPromptMatch[1].trim();
+          searchQuery = searchQueryMatch[1].trim();
+        } else {
+          // Fallback if parsing fails
+          videoPrompt = responseText.includes('VIDEO_PROMPT:') ? 
+            responseText.split('VIDEO_PROMPT:')[1].split('SEARCH_QUERY:')[0].trim() : 
+            responseText;
+          searchQuery = responseText.includes('SEARCH_QUERY:') ? 
+            responseText.split('SEARCH_QUERY:')[1].trim() : 
+            `video scene ${index + 1}`;
+        }
+
+        // Ensure video prompt is detailed but manageable (20-35 words ideal for detailed video generation)
+        const words = videoPrompt.split(' ');
         if (words.length > 50) {
-          promptText = words.slice(0, 50).join(' ');
+          videoPrompt = words.slice(0, 50).join(' ');
         }
         
         // Increased character limit for detailed video prompts (detailed descriptions need more space)
-        if (promptText.length > 400) {
-          promptText = promptText.substring(0, 400).trim();
+        if (videoPrompt.length > 400) {
+          videoPrompt = videoPrompt.substring(0, 400).trim();
           // Ensure we don't cut off mid-word
-          const lastSpace = promptText.lastIndexOf(' ');
+          const lastSpace = videoPrompt.lastIndexOf(' ');
           if (lastSpace > 350) {
-            promptText = promptText.substring(0, lastSpace);
+            videoPrompt = videoPrompt.substring(0, lastSpace);
           }
+        }
+
+        // Ensure search query is under 50 characters
+        if (searchQuery.length > 50) {
+          searchQuery = searchQuery.substring(0, 47) + '...';
         }
 
         return {
           chunkIndex: index,
           originalText: chunkText,
-          videoPrompt: promptText,
+          videoPrompt: videoPrompt,
+          searchQuery: searchQuery,
           summary: `Scene ${index + 1}`,
         };
       } catch (error: any) {
@@ -148,6 +177,7 @@ Generate a detailed video prompt that captures the essence of this scene while m
           chunkIndex: index,
           originalText: chunk.pageContent,
           videoPrompt: `A cinematic scene from the story, section ${index + 1}`,
+          searchQuery: `video scene ${index + 1}`,
           summary: `Scene ${index + 1}`,
           error: error.message || 'Unknown error'
         };

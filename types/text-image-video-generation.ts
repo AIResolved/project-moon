@@ -56,6 +56,7 @@ export interface ExtractedVideoScene {
   chunkIndex: number
   originalText: string
   videoPrompt: string
+  searchQuery: string
   summary: string
   error?: string
 }
@@ -203,6 +204,22 @@ export const VIDEO_PROVIDERS = {
         description: 'Google Veo preview model',
         maxDuration: 10,
         supportedDurations: [5, 10],
+        supportedAspectRatios: ['16:9', '9:16', '1:1']
+      }
+    },
+    imageToVideoModels: {}
+  },
+  search: {
+    name: 'Search Stock Videos',
+    description: 'Search Pexels and Pixabay for stock videos using AI-generated queries',
+    batchSize: 20,
+    rateLimitPerMinute: 100,
+    textToVideoModels: {
+      'pexels-pixabay-search': {
+        name: 'Stock Video Search',
+        description: 'Search for stock videos from Pexels and Pixabay',
+        maxDuration: 30,
+        supportedDurations: [5, 10, 15, 30],
         supportedAspectRatios: ['16:9', '9:16', '1:1']
       }
     },

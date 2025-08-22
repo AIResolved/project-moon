@@ -102,6 +102,15 @@ export function VideoSelectionConfirmation({
         {/* Action buttons */}
         <div className="flex flex-wrap gap-3">
           <Button
+            onClick={onConfirmSelection}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <ArrowRight className="h-4 w-4 mr-2" />
+            Confirm for Video
+          </Button>
+          
+          <Button
             onClick={onPreviewSelection}
             variant="outline"
             size="sm"

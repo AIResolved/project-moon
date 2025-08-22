@@ -8,6 +8,7 @@ export type ImageProvider =
   | 'gpt-image-1'
   | 'leonardo-phoenix'
   | 'ideogram-v3'
+  | 'search'
   // | 'minimax-image-01';
 
 export interface GenerateImageRequestBody {
@@ -43,6 +44,7 @@ export interface ExtractedScene {
   chunkIndex: number
   originalText: string
   imagePrompt: string
+  searchQuery: string
   summary: string
   error?: string
 }
