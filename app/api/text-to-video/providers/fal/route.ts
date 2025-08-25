@@ -11,7 +11,8 @@ fal.config({
 // Available FAL AI models for text-to-video
 const FAL_MODELS = {
   'hailuo-02-pro': 'fal-ai/minimax/hailuo-02/pro/text-to-video',
-  'kling-v2.1-master': 'fal-ai/kling-video/v2.1/master/text-to-video'
+  'kling-v2.1-master': 'fal-ai/kling-video/v2.1/master/text-to-video',
+  'veo3': 'fal-ai/veo3'
 }
 
 export async function POST(request: NextRequest) {
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!FAL_MODELS[model as keyof typeof FAL_MODELS]) {
+      console.log('🔴 Invalid model. Available models: ', Object.keys(FAL_MODELS))
       return NextResponse.json(
         { error: `Invalid model. Available models: ${Object.keys(FAL_MODELS).join(', ')}` },
         { status: 400 }

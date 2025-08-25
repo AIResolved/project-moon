@@ -16,11 +16,19 @@ import {
   updateImageInSet,
   loadImageSets,
   loadConfirmedImageSelection,
-  loadSelectedImagesOrder
+  loadSelectedImagesOrder,
+  setSelectedAnimationImages,
+  clearSelectedAnimationImages,
+  toggleAnimationImageSelection,
+  loadSelectedAnimationImages
 } from '@/lib/features/imageGeneration/imageGenerationSlice'
 
 import { Sun, Moon, Zap, Grid, Download, RefreshCw, AlertCircle, Trash2 } from 'lucide-react'
 import { Button } from './ui/button'
+import { 
+  saveSelectedAnimationImagesToLocalStorage, 
+  getSelectedAnimationImagesFromLocalStorage 
+} from '@/utils/image-storage-utils'
 
 interface ExtractedAnimationScene {
   id: string
@@ -81,6 +89,12 @@ export function UnifiedAnimationGenerator() {
   // Single generation results to merge with batch results
   const [singleResults, setSingleResults] = useState<BatchGenerationResult[]>([])
   
+  // New tab results from UnifiedAnimationTab
+  const [newTabResults, setNewTabResults] = useState<BatchGenerationResult[]>([])
+  
+  // Use Redux state for animation image selection (persists across tab navigation)
+  const { selectedAnimationImages } = useAppSelector(state => state.imageGeneration)
+  
   // Edit prompt state
   const [editingPromptId, setEditingPromptId] = useState<string | null>(null)
   const [editingPromptText, setEditingPromptText] = useState('')
@@ -100,6 +114,27 @@ export function UnifiedAnimationGenerator() {
       setScriptInput(combinedScript)
     }
   }, [fullScript, scriptSections, scriptInput])
+
+  // Load selected animation images from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedSelectedAnimationImages = getSelectedAnimationImagesFromLocalStorage()
+      if (storedSelectedAnimationImages.length > 0) {
+        dispatch(loadSelectedAnimationImages(storedSelectedAnimationImages))
+        console.log(`🎨 [Animation Generator] Loaded ${storedSelectedAnimationImages.length} selected animation images from localStorage`)
+      }
+    }
+  }, [dispatch])
+
+  // Save selected animation images to localStorage whenever they change
+  useEffect(() => {
+    saveSelectedAnimationImagesToLocalStorage(selectedAnimationImages)
+    if (selectedAnimationImages.length > 0) {
+      console.log(`🎨 [Animation Generator] Saved ${selectedAnimationImages.length} selected animation images to localStorage`)
+    } else {
+      console.log(`🎨 [Animation Generator] Cleared selected animation images from localStorage`)
+    }
+  }, [selectedAnimationImages])
 
   // Get script source info
   const getScriptSourceInfo = () => {
@@ -556,9 +591,23 @@ export function UnifiedAnimationGenerator() {
     }
   }
 
-  // Helper function to get all results (batch + single)
+  // Handler for new images generated from UnifiedAnimationTab
+  const handleImageGenerated = (result: { id: string; url: string; prompt: string; sceneTitle: string; sceneId: string }) => {
+    const newResult: BatchGenerationResult = {
+      id: result.id,
+      url: result.url,
+      prompt: result.prompt,
+      sceneId: result.sceneId,
+      sceneTitle: result.sceneTitle
+    }
+    
+    setNewTabResults(prev => [newResult, ...prev])
+    console.log('✅ New animation image added to gallery:', result.sceneTitle)
+  }
+
+  // Helper function to get all results (batch + single + new tab)
   const getAllResults = () => {
-    return [...singleResults, ...batchResults]
+    return [...singleResults, ...batchResults, ...newTabResults]
   }
 
   const handleClearBatchResults = () => {
@@ -574,8 +623,66 @@ export function UnifiedAnimationGenerator() {
   const handleClearAllResults = () => {
     setBatchResults([])
     setSingleResults([])
+    setNewTabResults([])
+    dispatch(clearSelectedAnimationImages())
     setBatchProgress({ current: 0, total: 0 })
     setBatchError(null)
+  }
+
+  // Image selection handlers for video generator integration
+  const handleImageSelection = (imageId: string) => {
+    dispatch(toggleAnimationImageSelection(imageId))
+  }
+
+  const handleSelectAllImages = () => {
+    const allImageIds = getAllResults().map(result => result.id)
+    dispatch(setSelectedAnimationImages(allImageIds))
+  }
+
+  const handleDeselectAllImages = () => {
+    dispatch(clearSelectedAnimationImages())
+  }
+
+  const handleSendToVideoGenerator = () => {
+    const selectedResults = getAllResults().filter(result => selectedAnimationImages.includes(result.id))
+    
+    if (selectedResults.length === 0) {
+      alert('Please select at least one image to send to the video generator.')
+      return
+    }
+
+    // Dispatch selected images to the image generation Redux store for video generator use
+    selectedResults.forEach(result => {
+      const existingAnimationSet = imageSets.find(set => set.id === 'selected-for-video')
+      
+      if (existingAnimationSet) {
+        // Update existing "selected for video" set
+        const updatedSet = {
+          ...existingAnimationSet,
+          finalPrompts: [...existingAnimationSet.finalPrompts, result.prompt],
+          imageUrls: [...existingAnimationSet.imageUrls, result.url],
+          generatedAt: new Date().toISOString()
+        }
+        dispatch(addImageSet(updatedSet))
+      } else {
+        // Create new "selected for video" set
+        const videoSet = {
+          id: 'selected-for-video',
+          originalPrompt: 'Selected for Video Generation',
+          finalPrompts: [result.prompt],
+          imageUrls: [result.url],
+          imageData: [],
+          provider: 'gpt-image-1' as const,
+          generatedAt: new Date().toISOString(),
+          aspectRatio: '1:1' as const,
+          imageStyle: undefined
+        }
+        dispatch(addImageSet(videoSet))
+      }
+    })
+
+    alert(`Successfully sent ${selectedResults.length} images to the video generator! Check the "Image to Video" tab.`)
+    dispatch(clearSelectedAnimationImages()) // Clear selection after sending
   }
 
 
@@ -687,54 +794,7 @@ export function UnifiedAnimationGenerator() {
 
             {/* Generation Tab */}
             <TabsContent value="generate">
-              <UnifiedAnimationTab
-                // Script extraction
-                scriptInput={scriptInput}
-                setScriptInput={setScriptInput}
-                numberOfScenesToExtract={numberOfScenesToExtract}
-                setNumberOfScenesToExtract={setNumberOfScenesToExtract}
-                isExtractingScenes={isExtractingScenes}
-                sceneExtractionError={sceneExtractionError}
-                allPrompts={allPrompts}
-                onExtractScenes={handleExtractScenes}
-                onClearAllPrompts={handleClearAllPrompts}
-                onUpdatePrompt={handleUpdatePrompt}
-                getScriptSourceInfo={getScriptSourceInfo}
-                
-                // Generation
-                animationPrompt={animationPrompt}
-                setAnimationPrompt={setAnimationPrompt}
-                isGenerating={isGeneratingAnimation}
-                generationError={animationError}
-                onGenerate={(prompt) => {
-                  setAnimationPrompt(prompt)
-                  handleGenerateAnimation()
-                }}
-                
-                // Reference images
-                referenceImages={referenceImages}
-                setReferenceImages={setReferenceImages}
-                referenceImageDescription={referenceImageDescription}
-                setReferenceImageDescription={setReferenceImageDescription}
-                
-                // Batch generation  
-                batchResults={getAllResults().map(result => ({
-                  id: result.id,
-                  prompt: result.prompt,
-                  videoUrl: result.url,
-                  status: 'completed' as const
-                }))}
-                isBatchGenerating={isBatchGenerating}
-                batchProgress={batchProgress}
-                onBatchGenerate={(promptIds) => {
-                  console.log('🎯 onBatchGenerate called with promptIds:', promptIds.length)
-                  console.log('📝 Available allPrompts:', allPrompts.length)
-                  
-                  setSelectedPrompts(promptIds)
-                  handleBatchGenerate(promptIds)
-                }}
-                onClearBatch={handleClearAllResults}
-              />
+              <UnifiedAnimationTab onImageGenerated={handleImageGenerated} />
             </TabsContent>
 
             {/* Gallery Tab */}
@@ -746,14 +806,25 @@ export function UnifiedAnimationGenerator() {
                     <h2 className="text-2xl font-bold text-gray-900">Generated Gallery</h2>
                     <p className="text-gray-600">
                       View and manage all your generated animations ({getAllResults().length} total)
+                      {selectedAnimationImages.length > 0 && ` • ${selectedAnimationImages.length} selected`}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     {getAllResults().length > 0 && (
-                      <Button variant="outline" onClick={handleClearAllResults}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Clear All
-                      </Button>
+                      <>
+                        {selectedAnimationImages.length > 0 && (
+                          <Button onClick={handleSendToVideoGenerator} className="bg-blue-600 hover:bg-blue-700">
+                            Send to Video Generator ({selectedAnimationImages.length})
+                          </Button>
+                        )}
+                        <Button variant="outline" onClick={selectedAnimationImages.length === getAllResults().length ? handleDeselectAllImages : handleSelectAllImages}>
+                          {selectedAnimationImages.length === getAllResults().length ? 'Deselect All' : 'Select All'}
+                        </Button>
+                        <Button variant="outline" onClick={handleClearAllResults}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Clear All
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -762,13 +833,24 @@ export function UnifiedAnimationGenerator() {
                 {getAllResults().length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {getAllResults().map((result) => (
-                      <div key={result.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                      <div key={result.id} className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all ${selectedAnimationImages.includes(result.id) ? 'ring-2 ring-blue-500' : ''}`}>
                         <div className="aspect-video bg-gray-100 relative group">
+                          {/* Selection Checkbox */}
+                          <div className="absolute top-2 left-2 z-10">
+                            <input
+                              type="checkbox"
+                              checked={selectedAnimationImages.includes(result.id)}
+                              onChange={() => handleImageSelection(result.id)}
+                              className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
+                            />
+                          </div>
+                          
                           {/* Animation/Image Display */}
                           <img
                             src={result.url}
                             alt={result.sceneTitle}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover cursor-pointer"
+                            onClick={() => handleImageSelection(result.id)}
                             onError={(e) => {
                               // Fallback for broken images
                               const target = e.target as HTMLImageElement;
@@ -851,18 +933,9 @@ export function UnifiedAnimationGenerator() {
                     <Grid className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No animations generated yet</h3>
                     <p className="text-gray-600 mb-4">
-                      Start by generating some animations in the Generation tab
+                      Generate images from the "Animation Generation" tab to see them here.<br />
+                      You can then select images and send them to the video generator.
                     </p>
-                    <Button 
-                      onClick={() => {
-                        // Switch to generation tab (this will need to be implemented)
-                        const tabTrigger = document.querySelector('[value="generate"]') as HTMLButtonElement;
-                        if (tabTrigger) tabTrigger.click();
-                      }}
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      Start Generating
-                    </Button>
                   </div>
                 )}
 
@@ -887,9 +960,9 @@ export function UnifiedAnimationGenerator() {
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-orange-600">
-                        {allPrompts.length}
+                        {newTabResults.length}
                       </div>
-                      <div className="text-sm text-gray-600">Extracted Scenes</div>
+                      <div className="text-sm text-gray-600">Scene-Based</div>
                     </div>
                   </div>
                 )}

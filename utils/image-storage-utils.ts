@@ -94,6 +94,31 @@ export function saveSelectedImagesOrderToLocalStorage(imageIds: string[]) {
 }
 
 /**
+ * Save selected animation images to localStorage
+ */
+export function saveSelectedAnimationImagesToLocalStorage(imageIds: string[]) {
+  try {
+    localStorage.setItem('selected-animation-images', JSON.stringify(imageIds))
+    console.log('🎨 Selected animation images saved to localStorage')
+  } catch (error) {
+    console.error('❌ Failed to save selected animation images:', error)
+  }
+}
+
+/**
+ * Get selected animation images from localStorage
+ */
+export function getSelectedAnimationImagesFromLocalStorage(): string[] {
+  try {
+    const stored = localStorage.getItem('selected-animation-images')
+    return stored ? JSON.parse(stored) : []
+  } catch (error) {
+    console.error('❌ Failed to load selected animation images:', error)
+    return []
+  }
+}
+
+/**
  * Get selected images order from localStorage
  */
 export function getSelectedImagesOrderFromLocalStorage(): string[] {

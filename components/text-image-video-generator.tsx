@@ -427,7 +427,7 @@ export function TextImageVideoGenerator() {
     try {
       let requests: ImageToVideoRequest[] = []
 
-      if (selectedProvider === 'fal' || selectedProvider === 'google') {
+      if (selectedProvider === 'fal') {
         // Upload images to Supabase to obtain public URLs for FAL image_url
         const imageUrls = await Promise.all(images.map((file, i) => uploadImageToSupabase(file, i)))
         requests = prompts.map((prompt, index) => {

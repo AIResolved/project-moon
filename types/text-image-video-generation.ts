@@ -167,6 +167,14 @@ export const VIDEO_PROVIDERS = {
         maxDuration: 10,
         supportedDurations: [5, 10],
         supportedAspectRatios: ['16:9', '9:16', '1:1']
+      },
+      'veo3': {
+        name: 'Veo 3',
+        description: 'Google Veo 3 model via FAL AI - highest quality video generation',
+        maxDuration: 10,
+        supportedDurations: [5, 8],
+        supportedAspectRatios: ['16:9', '9:16', '1:1'],
+        defaultDuration: 5
       }
     },
     imageToVideoModels: {
@@ -192,22 +200,6 @@ export const VIDEO_PROVIDERS = {
         defaultDuration: 5
       }
     }
-  },
-  google: {
-    name: 'Google GenAI (Veo)',
-    description: 'Google Veo for text and image to video',
-    batchSize: 1,
-    rateLimitPerMinute: 2,
-    textToVideoModels: {
-      'veo-3.0-generate-preview': {
-        name: 'Veo 3.0 Preview',
-        description: 'Google Veo preview model',
-        maxDuration: 10,
-        supportedDurations: [5, 10],
-        supportedAspectRatios: ['16:9', '9:16', '1:1']
-      }
-    },
-    imageToVideoModels: {}
   },
   search: {
     name: 'Search Stock Videos',

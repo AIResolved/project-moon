@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI, { toFile } from 'openai'
 import { createClient } from '@supabase/supabase-js'
 import { v4 as uuidv4 } from 'uuid'
+import sharp from 'sharp'
+import fs from 'fs'
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -39,38 +41,42 @@ export async function POST(request: NextRequest) {
 
     console.log(`🎬 Processing ${imageFiles.length} reference images for animation generation`)
 
-    // Convert files to OpenAI format
+    // Convert uploaded image files to OpenAI file objects (PNG)
     const images = await Promise.all(
       imageFiles.map(async (file) => {
+        // Convert File to Buffer
         const buffer = Buffer.from(await file.arrayBuffer())
-        return await toFile(buffer, file.name, {
-          type: file.type,
+        // Use toFile to create OpenAI-compatible file object
+        return await toFile(buffer, file.name.replace(/\.[^/.]+$/, '.png'), {
+          type: "image/png",
         })
       })
     )
 
-    console.log(`📝 Generating animation with prompt: "${prompt.substring(0, 100)}..."`)
+    // Compose a detailed, specific prompt for OpenAI
+    // (You may want to further customize this based on your app's needs)
+    const openaiPrompt = `
+Generate a photorealistic animation frame based on the following prompt: "${prompt}".
+Use all the visual details and context from the provided reference images.
+Ensure the resulting image is highly detailed, realistic, and matches the described scene.
+`;
 
-    // Placeholder: Use OpenAI's image editing API as a stand-in for animation generation
-    // In production, replace this with actual video generation API integration
+    // Call OpenAI's image editing API with all reference images and the prompt
     const response = await client.images.edit({
       model: "gpt-image-1",
       image: images,
-      prompt: prompt,
-      size: "1536x1024"
+      prompt: openaiPrompt,
     })
 
-    if (!response.data || response.data.length === 0) {
+    // Save the generated image to disk (for debugging or local use)
+    const image_base64 = response.data?.[0]?.b64_json
+    if (!image_base64) {
       throw new Error('No image data returned from OpenAI')
     }
+    const image_bytes = Buffer.from(image_base64, "base64")
+    fs.writeFileSync("animation-frame.png", image_bytes)
 
-    const imageBase64 = response.data[0].b64_json
-
-    if (!imageBase64) {
-      throw new Error('No base64 image data returned')
-    }
-
-    // Upload to Supabase and return public URL
+    // Upload generated image to Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     if (!supabaseUrl || !supabaseServiceKey) {
@@ -79,8 +85,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const animationId = uuidv4()
-    const filePath = `animation-images/${animationId}.png`
-    const buffer = Buffer.from(imageBase64, 'base64')
+    // Use consistent path structure like other image generators
+    const sanitizedPrompt = prompt.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')
+    const filePath = `images/gpt-image-1/${Date.now()}-${sanitizedPrompt}.png`
+    const buffer = Buffer.from(image_base64, 'base64')
 
     const { error: uploadError } = await supabase.storage
       .from('audio')
@@ -108,7 +116,8 @@ export async function POST(request: NextRequest) {
       referenceCount: imageFiles.length,
       duration: 5,
       format: 'image',
-      resolution: '1536x1024'
+      resolution: '1024x1024',
+      model: 'openai-dall-e'
     })
 
   } catch (error) {

@@ -82,6 +82,8 @@ export interface ImageGenerationState {
   // Image selection for video generation
   confirmedImageSelection: string[]
   selectedImagesOrder: string[]
+  // Animation image selection persistence (for gallery tab navigation)
+  selectedAnimationImages: string[]
   // Mixed content sequence from mixed content generator
   mixedContentSequence: MixedContentItem[]
 } 

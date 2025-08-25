@@ -22,6 +22,8 @@ const initialState: ImageGenerationState = {
   // Image selection for video generation
   confirmedImageSelection: [],
   selectedImagesOrder: [],
+  // Animation image selection persistence (for gallery tab navigation)
+  selectedAnimationImages: [],
   // Mixed content sequence from mixed content generator
   mixedContentSequence: []
 }
@@ -197,6 +199,26 @@ export const imageGenerationSlice = createSlice({
     clearSelectedImagesOrder: (state) => {
       state.selectedImagesOrder = []
     },
+
+    // Animation image selection for gallery persistence
+    setSelectedAnimationImages: (state, action: PayloadAction<string[]>) => {
+      state.selectedAnimationImages = action.payload
+    },
+    clearSelectedAnimationImages: (state) => {
+      state.selectedAnimationImages = []
+    },
+    toggleAnimationImageSelection: (state, action: PayloadAction<string>) => {
+      const imageId = action.payload
+      const currentIndex = state.selectedAnimationImages.indexOf(imageId)
+      
+      if (currentIndex === -1) {
+        // Add to selection
+        state.selectedAnimationImages.push(imageId)
+      } else {
+        // Remove from selection
+        state.selectedAnimationImages.splice(currentIndex, 1)
+      }
+    },
     
     // Load from localStorage
     loadImageSets: (state, action: PayloadAction<GeneratedImageSet[]>) => {
@@ -209,6 +231,10 @@ export const imageGenerationSlice = createSlice({
     
     loadSelectedImagesOrder: (state, action: PayloadAction<string[]>) => {
       state.selectedImagesOrder = action.payload
+    },
+
+    loadSelectedAnimationImages: (state, action: PayloadAction<string[]>) => {
+      state.selectedAnimationImages = action.payload
     },
 
     // Mixed content sequence management
@@ -247,9 +273,13 @@ export const {
   clearConfirmedImageSelection,
   setSelectedImagesOrder,
   clearSelectedImagesOrder,
+  setSelectedAnimationImages,
+  clearSelectedAnimationImages,
+  toggleAnimationImageSelection,
   loadImageSets,
   loadConfirmedImageSelection,
   loadSelectedImagesOrder,
+  loadSelectedAnimationImages,
   setMixedContentSequence,
   clearMixedContentSequence
 } = imageGenerationSlice.actions

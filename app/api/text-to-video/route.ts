@@ -9,13 +9,8 @@ const PROVIDERS = {
   },
   fal: {
     name: 'FAL AI',
-    models: ['hailuo-02-pro', 'kling-v2.1-master'],
+    models: ['hailuo-02-pro', 'kling-v2.1-master', 'veo3'],
     endpoint: '/api/text-to-video/providers/fal'
-  },
-  google: {
-    name: 'Google GenAI (Veo)',
-    models: ['veo-3.0-generate-preview'],
-    endpoint: '/api/text-to-video/providers/google'
   }
 }
 
@@ -35,6 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Validate provider
     if (!PROVIDERS[provider as keyof typeof PROVIDERS]) {
+      
       return NextResponse.json(
         { 
           error: `Invalid provider. Available providers: ${Object.keys(PROVIDERS).join(', ')}`,

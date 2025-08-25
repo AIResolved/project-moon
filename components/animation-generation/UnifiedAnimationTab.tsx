@@ -7,8 +7,6 @@ import { Label } from '../ui/label'
 import { Textarea } from '../ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
-import { Slider } from '../ui/slider'
-import { Separator } from '../ui/separator'
 import { Progress } from '../ui/progress'
 import {
   FileText,
@@ -16,727 +14,773 @@ import {
   RefreshCw,
   AlertCircle,
   Zap,
-  Plus,
-  Trash2,
-  X,
-  Edit,
-  Check,
-  Play,
-  Square,
-  Download,
-  Grid,
   Upload,
-  Eye
+  Image as ImageIcon,
+  Users,
+  Play,
+  Download,
+  Eye,
+  X
 } from 'lucide-react'
-import { PromptPreviewModal } from './PromptPreviewModal'
+import { useAppSelector, useAppDispatch } from '@/lib/hooks'
+import { addImageSet } from '@/lib/features/imageGeneration/imageGenerationSlice'
 
 interface ExtractedAnimationScene {
   id: string
   title: string
   prompt: string
+  characterVariation?: string
   duration?: number
-  effects?: string[]
 }
 
-interface BatchGenerationResult {
+interface ImageResult {
   id: string
+  sceneId: string
   prompt: string
-  videoUrl?: string
+  imageUrl?: string
   status: 'pending' | 'generating' | 'completed' | 'failed'
   error?: string
 }
 
 interface UnifiedAnimationTabProps {
-  // Script extraction
-  scriptInput: string
-  setScriptInput: (script: string) => void
-  numberOfScenesToExtract: number
-  setNumberOfScenesToExtract: (count: number) => void
-  isExtractingScenes: boolean
-  sceneExtractionError: string | null
-  allPrompts: ExtractedAnimationScene[]
-  onExtractScenes: () => void
-  onClearAllPrompts: () => void
-  onUpdatePrompt?: (id: string, updatedPrompt: string, updatedTitle?: string) => void
-  getScriptSourceInfo: () => { source: string; count: number; type: string }
-  
-  // Generation
-  animationPrompt: string
-  setAnimationPrompt: (prompt: string) => void
-  isGenerating: boolean
-  generationError: string | null
-  onGenerate: (prompt: string) => void
-  
-  // Reference images
-  referenceImages: File[]
-  setReferenceImages: (images: File[]) => void
-  referenceImageDescription: string
-  setReferenceImageDescription: (description: string) => void
-  
-  // Batch generation
-  batchResults: BatchGenerationResult[]
-  isBatchGenerating: boolean
-  batchProgress: { current: number; total: number }
-  onBatchGenerate: (promptIds: string[]) => void
-  onClearBatch: () => void
+  // Callback to send generated images to parent gallery
+  onImageGenerated?: (result: { id: string; url: string; prompt: string; sceneTitle: string; sceneId: string }) => void
 }
 
-export function UnifiedAnimationTab({
-  scriptInput,
-  setScriptInput,
-  numberOfScenesToExtract,
-  setNumberOfScenesToExtract,
-  isExtractingScenes,
-  sceneExtractionError,
-  allPrompts,
-  onExtractScenes,
-  onClearAllPrompts,
-  onUpdatePrompt,
-  getScriptSourceInfo,
-  animationPrompt,
-  setAnimationPrompt,
-  isGenerating,
-  generationError,
-  onGenerate,
-  referenceImages,
-  setReferenceImages,
-  referenceImageDescription,
-  setReferenceImageDescription,
-  batchResults,
-  isBatchGenerating,
-  batchProgress,
-  onBatchGenerate,
-  onClearBatch
-}: UnifiedAnimationTabProps) {
-  const [selectedPrompts, setSelectedPrompts] = useState<string[]>([])
-  const [selectedPromptIds, setSelectedPromptIds] = useState<string[]>([])
-  const [customPrompt, setCustomPrompt] = useState('')
-  const [showCustomInput, setShowCustomInput] = useState(false)
+export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabProps) {
+  // Get script from Redux state and image sets for gallery integration
+  const { fullScript } = useAppSelector(state => state.scripts)
+  const { imageSets } = useAppSelector(state => state.imageGeneration)
+  const dispatch = useAppDispatch()
   
-  // Prompt preview modal state
-  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
-  const [selectedPromptForPreview, setSelectedPromptForPreview] = useState<ExtractedAnimationScene | null>(null)
+  // State for reference image
+  const [referenceImage, setReferenceImage] = useState<File | null>(null)
+  const [referenceImageUrl, setReferenceImageUrl] = useState<string>('')
+  
+  // State for scene extraction
+  const [numberOfScenes, setNumberOfScenes] = useState(10) // User-selectable scene count
+  const [extractedScenes, setExtractedScenes] = useState<ExtractedAnimationScene[]>([])
+  const [selectedScenes, setSelectedScenes] = useState<number[]>([])
+  const [isExtractingScenes, setIsExtractingScenes] = useState(false)
+  const [extractionError, setExtractionError] = useState<string | null>(null)
+  
+  // State for image generation
+  const [imageResults, setImageResults] = useState<ImageResult[]>([])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generationProgress, setGenerationProgress] = useState(0)
+  const [generationError, setGenerationError] = useState<string | null>(null)
 
-  const scriptSourceInfo = getScriptSourceInfo()
+  // Handle reference image upload
+  const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setReferenceImage(file)
+      const url = URL.createObjectURL(file)
+      setReferenceImageUrl(url)
+    }
+  }
 
-  // Handle prompt selection for batch generation
-  const togglePromptSelection = (prompt: string) => {
-    const scene = allPrompts.find(p => p.prompt === prompt)
+  // Extract animation scenes from script with character variations
+  const handleExtractScenes = async () => {
+    if (!fullScript?.scriptWithMarkdown) {
+      setExtractionError('Please generate a script first')
+      return
+    }
+
+    if (!referenceImage) {
+      setExtractionError('Please upload a reference image first')
+      return
+    }
+
+    setIsExtractingScenes(true)
+    setExtractionError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('script', fullScript.scriptWithMarkdown)
+      formData.append('numberOfScenes', numberOfScenes.toString())
+      formData.append('referenceImage', referenceImage)
+
+      const response = await fetch('/api/extract-animation-scenes', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to extract scenes: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setExtractedScenes(data.scenes || [])
+      // Auto-select all extracted scenes
+      setSelectedScenes(data.scenes ? data.scenes.map((_: any, index: number) => index) : [])
+
+    } catch (error) {
+      console.error('Error extracting animation scenes:', error)
+      setExtractionError(error instanceof Error ? error.message : 'Failed to extract scenes')
+    } finally {
+      setIsExtractingScenes(false)
+    }
+  }
+
+  // Generate animations for selected scenes
+  const handleGenerateAnimations = async () => {
+    if (selectedScenes.length === 0) {
+      setGenerationError('Please select at least one scene to animate')
+      return
+    }
+
+    setIsGenerating(true)
+    setGenerationError(null)
+    setGenerationProgress(0)
+
+    try {
+      const scenesToGenerate = selectedScenes.map(index => extractedScenes[index])
+      const totalScenes = scenesToGenerate.length
+      
+      // Initialize results
+      const initialResults: ImageResult[] = scenesToGenerate.map(scene => ({
+        id: `img-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        sceneId: scene.id,
+        prompt: scene.prompt,
+        status: 'pending' as const
+      }))
+      
+      setImageResults(initialResults)
+
+      // Process in batches of 5 with 1-minute delays
+      const BATCH_SIZE = 5
+      const DELAY_BETWEEN_BATCHES = 60000 // 1 minute in milliseconds
+
+      for (let batchStart = 0; batchStart < scenesToGenerate.length; batchStart += BATCH_SIZE) {
+        const batchEnd = Math.min(batchStart + BATCH_SIZE, scenesToGenerate.length)
+        const batch = scenesToGenerate.slice(batchStart, batchEnd)
+        
+        console.log(`🎬 Processing batch ${Math.floor(batchStart / BATCH_SIZE) + 1} (scenes ${batchStart + 1}-${batchEnd})`)
+
+        // Process all scenes in current batch simultaneously
+        const batchPromises = batch.map(async (scene, batchIndex) => {
+          const globalIndex = batchStart + batchIndex
+          const resultId = initialResults[globalIndex].id
+
+          try {
+            // Update status to generating
+            setImageResults(prev => prev.map(result => 
+              result.id === resultId 
+                ? { ...result, status: 'generating' as const }
+                : result
+            ))
+
+            // Create FormData with prompt and reference image
+            const formData = new FormData()
+            formData.append('prompt', scene.prompt)
+            
+            // Add the reference image
+            if (referenceImage) {
+              formData.append('referenceImage0', referenceImage)
+            }
+
+            const response = await fetch('/api/generate-animation', {
+              method: 'POST',
+              body: formData
+            })
+
+            if (!response.ok) {
+              throw new Error(`Animation generation failed: ${response.status}`)
+            }
+
+            const result = await response.json()
+            
+            // Update with completed result
+            setImageResults(prev => prev.map(imageResult => 
+              imageResult.id === resultId 
+                ? { 
+                    ...imageResult, 
+                    status: 'completed' as const, 
+                    imageUrl: result.animationUrl 
+                  }
+                : imageResult
+            ))
+
+            // Send to parent gallery
+            if (onImageGenerated) {
+              onImageGenerated({
+                id: resultId,
+                url: result.animationUrl,
+                prompt: scene.prompt,
+                sceneTitle: scene.title,
+                sceneId: scene.id
+              })
+            }
+
+            // Add to gallery: update the "all-animation-results" image set in Redux
+            const existingAnimationSet = imageSets.find(set => set.id === 'all-animation-results')
+            
+            if (existingAnimationSet) {
+              // Update existing set by adding new image
+              const updatedSet = {
+                ...existingAnimationSet,
+                finalPrompts: [...existingAnimationSet.finalPrompts, scene.prompt],
+                imageUrls: [...existingAnimationSet.imageUrls, result.animationUrl],
+                generatedAt: new Date().toISOString() // Update timestamp
+              }
+              dispatch(addImageSet(updatedSet))
+            } else {
+              // Create new "all-animation-results" set
+              const animationSet = {
+                id: 'all-animation-results',
+                originalPrompt: 'All Animation Results',
+                finalPrompts: [scene.prompt],
+                imageUrls: [result.animationUrl],
+                imageData: [],
+                provider: 'gpt-image-1' as const,
+                generatedAt: new Date().toISOString(),
+                aspectRatio: '1:1' as const,
+                imageStyle: undefined
+              }
+              dispatch(addImageSet(animationSet))
+            }
+
+          } catch (error) {
+            console.error(`Error generating animation for scene ${scene.id}:`, error)
+            
+            // Update with error
+            setImageResults(prev => prev.map(result => 
+              result.id === resultId 
+                ? { 
+                    ...result, 
+                    status: 'failed' as const, 
+                    error: error instanceof Error ? error.message : 'Generation failed' 
+                  }
+                : result
+            ))
+          }
+
+          // Update progress
+          setGenerationProgress(((globalIndex + 1) / totalScenes) * 100)
+        })
+
+        // Wait for all requests in the current batch to complete
+        await Promise.all(batchPromises)
+
+        // Add delay before next batch (except for the last batch)
+        if (batchEnd < scenesToGenerate.length) {
+          console.log(`⏱️ Waiting 1 minute before next batch...`)
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES))
+        }
+      }
+
+    } catch (error) {
+      console.error('Error in animation generation process:', error)
+      setGenerationError(error instanceof Error ? error.message : 'Failed to generate animations')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // Toggle scene selection
+  const toggleSceneSelection = (index: number) => {
+    setSelectedScenes(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    )
+  }
+
+  // Regenerate a single image
+  const handleRegenerateImage = async (resultId: string) => {
+    const result = imageResults.find(r => r.id === resultId)
+    if (!result) return
+
+    const scene = extractedScenes.find(s => s.id === result.sceneId)
     if (!scene) return
-    
-    const isSelected = selectedPrompts.includes(prompt)
-    
-    if (isSelected) {
-      setSelectedPrompts(prev => prev.filter(p => p !== prompt))
-      setSelectedPromptIds(prev => prev.filter(id => id !== scene.id))
-    } else {
-      setSelectedPrompts(prev => [...prev, prompt])
-      setSelectedPromptIds(prev => [...prev, scene.id])
+
+    try {
+      // Update status to generating
+      setImageResults(prev => prev.map(r => 
+        r.id === resultId 
+          ? { ...r, status: 'generating' as const, error: undefined }
+          : r
+      ))
+
+      // Create FormData with prompt and reference image
+      const formData = new FormData()
+      formData.append('prompt', scene.prompt)
+      
+      if (referenceImage) {
+        formData.append('referenceImage0', referenceImage)
+      }
+
+      const response = await fetch('/api/generate-animation', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error(`Regeneration failed: ${response.status}`)
+      }
+
+      const apiResult = await response.json()
+      
+      // Update with completed result
+      setImageResults(prev => prev.map(r => 
+        r.id === resultId 
+          ? { 
+              ...r, 
+              status: 'completed' as const, 
+              imageUrl: apiResult.animationUrl 
+            }
+          : r
+      ))
+
+      // Send regenerated image to parent gallery
+      if (onImageGenerated) {
+        const newId = `${resultId}_regen_${Date.now()}`
+        onImageGenerated({
+          id: newId,
+          url: apiResult.animationUrl,
+          prompt: scene.prompt,
+          sceneTitle: scene.title,
+          sceneId: scene.id
+        })
+      }
+
+      // Add regenerated image to gallery: update the "all-animation-results" image set in Redux
+      const existingAnimationSet = imageSets.find(set => set.id === 'all-animation-results')
+      
+      if (existingAnimationSet) {
+        // Update existing set by adding regenerated image
+        const updatedSet = {
+          ...existingAnimationSet,
+          finalPrompts: [...existingAnimationSet.finalPrompts, scene.prompt],
+          imageUrls: [...existingAnimationSet.imageUrls, apiResult.animationUrl],
+          generatedAt: new Date().toISOString() // Update timestamp
+        }
+        dispatch(addImageSet(updatedSet))
+      } else {
+        // Create new "all-animation-results" set
+        const animationSet = {
+          id: 'all-animation-results',
+          originalPrompt: 'All Animation Results',
+          finalPrompts: [scene.prompt],
+          imageUrls: [apiResult.animationUrl],
+          imageData: [],
+          provider: 'gpt-image-1' as const,
+          generatedAt: new Date().toISOString(),
+          aspectRatio: '1:1' as const,
+          imageStyle: undefined
+        }
+        dispatch(addImageSet(animationSet))
+      }
+
+    } catch (error) {
+      console.error(`Error regenerating image ${resultId}:`, error)
+      
+      // Update with error
+      setImageResults(prev => prev.map(r => 
+        r.id === resultId 
+          ? { 
+              ...r, 
+              status: 'failed' as const, 
+              error: error instanceof Error ? error.message : 'Regeneration failed' 
+            }
+          : r
+      ))
     }
   }
 
-  const addCustomPrompt = () => {
-    if (customPrompt.trim()) {
-      setSelectedPrompts(prev => [...prev, customPrompt.trim()])
-      setCustomPrompt('')
-      setShowCustomInput(false)
-    }
+  // Clear all selections and results
+  const handleClear = () => {
+    setExtractedScenes([])
+    setSelectedScenes([])
+    setImageResults([])
+    setExtractionError(null)
+    setGenerationError(null)
+    setGenerationProgress(0)
   }
 
-  // Handle prompt preview modal
-  const openPromptModal = (scene: ExtractedAnimationScene) => {
-    setSelectedPromptForPreview(scene)
-    setIsPromptModalOpen(true)
-  }
-
-  const handlePromptSave = (updatedPrompt: string, updatedTitle?: string) => {
-    if (selectedPromptForPreview && onUpdatePrompt) {
-      onUpdatePrompt(selectedPromptForPreview.id, updatedPrompt, updatedTitle)
-    }
-    setIsPromptModalOpen(false)
-    setSelectedPromptForPreview(null)
-  }
-
-  // Reference image upload handlers
-  const handleReferenceImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || [])
-    setReferenceImages([...referenceImages, ...files])
-  }
-
-  const removeReferenceImage = (index: number) => {
-    const newImages = referenceImages.filter((_, i) => i !== index)
-    setReferenceImages(newImages)
-  }
-
-  // Helper function to combine reference description with scene prompts
-  const getPromptWithReference = (basePrompt: string) => {
-    if (!referenceImageDescription.trim()) {
-      return basePrompt
-    }
-    
-    // If the prompt already mentions the subject, don't duplicate
-    const description = referenceImageDescription.trim()
-    const lowerPrompt = basePrompt.toLowerCase()
-    const lowerDescription = description.toLowerCase()
-    
-    if (lowerPrompt.includes(lowerDescription)) {
-      return basePrompt
-    }
-    
-    // Add reference description to the beginning of the prompt
-    return `${description} ${basePrompt}`
-  }
+  // Check if we have prerequisites
+  const hasScript = fullScript?.scriptWithMarkdown?.trim()
+  const hasReferenceImage = referenceImage !== null
+  const canExtractScenes = hasScript && hasReferenceImage
+  const canGenerateAnimations = extractedScenes.length > 0 && selectedScenes.length > 0
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card>
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold text-white">Image Generation from Reference</h2>
+        <p className="text-gray-300">Upload a reference image and generate new images based on your script scenes with consistent styling</p>
+      </div>
+
+      {/* Reference Image Upload */}
+      <Card className="bg-gray-900 border-gray-700 text-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-purple-600" />
-            Animation Generation
+            <Upload className="h-5 w-5 text-blue-400" />
+            Upload Reference Image
           </CardTitle>
-          <CardDescription>
-            Extract scenes from script, generate single animations, or batch process multiple prompts
+          <CardDescription className="text-gray-300">
+            Upload an image to define the visual style that will be applied to all characters and scenes
           </CardDescription>
         </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="reference-image" className="text-sm font-medium">
+                Reference Image
+              </Label>
+              <Input
+                id="reference-image"
+                type="file"
+                accept="image/*"
+                onChange={handleReferenceImageUpload}
+                className="bg-gray-800 border-gray-600 text-white mt-1"
+              />
+            </div>
+
+            {referenceImageUrl && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Preview</Label>
+                <div className="relative w-full max-w-md">
+                  <img
+                    src={referenceImageUrl}
+                    alt="Reference"
+                    className="w-full h-auto rounded-lg border border-gray-600"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setReferenceImage(null)
+                      setReferenceImageUrl('')
+                      URL.revokeObjectURL(referenceImageUrl)
+                    }}
+                    className="absolute top-2 right-2 bg-black/50 border-gray-600 hover:bg-black/70"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Script & Scene Extraction */}
-        <div className="space-y-6">
-          {/* Script Source Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileText className="h-4 w-4 text-blue-600" />
-                Script Source
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {scriptSourceInfo.source !== 'none' ? (
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    <span className="font-medium">{scriptSourceInfo.type}</span> 
-                    <span className="text-muted-foreground"> ({scriptSourceInfo.count.toLocaleString()} characters)</span>
-                  </p>
-                  {scriptSourceInfo.source === 'sections' && (
-                    <p className="text-xs text-blue-600">Using prompts from script sections</p>
-                  )}
-                </div>
+
+
+      {/* Extract Scenes from Script */}
+      <Card className="bg-gray-900 border-gray-700 text-white">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-purple-400" />
+            Extract Image Scenes
+          </CardTitle>
+          <CardDescription className="text-gray-300">
+            Analyze your script and apply the uploaded image style to all characters and scenes in the generated images
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Number of Scenes Selector */}
+          <div className="space-y-2">
+            <Label htmlFor="numberOfScenes" className="text-sm font-medium text-gray-300">
+              Number of Scenes to Extract (1-1000)
+            </Label>
+            <Input
+              id="numberOfScenes"
+              type="number"
+              min="1"
+              max="1000"
+              value={numberOfScenes}
+              onChange={(e) => setNumberOfScenes(Math.min(1000, Math.max(1, parseInt(e.target.value) || 10)))}
+              className="bg-gray-800 border-gray-600 text-white"
+              placeholder="Enter number of scenes (1-1000)"
+            />
+            <p className="text-xs text-gray-400">
+              Choose how many scenes/prompts to extract from your script
+            </p>
+          </div>
+
+          {/* Prerequisites Check */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`p-3 rounded-lg border ${hasScript ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'}`}>
+              <div className="flex items-center gap-2">
+                <FileText className={`h-4 w-4 ${hasScript ? 'text-green-400' : 'text-red-400'}`} />
+                <span className="text-sm font-medium">Script Available</span>
+              </div>
+              <p className="text-xs text-gray-300 mt-1">
+                {hasScript ? 'Script is ready for scene extraction' : 'Please generate a script first'}
+              </p>
+            </div>
+
+            <div className={`p-3 rounded-lg border ${hasReferenceImage ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'}`}>
+              <div className="flex items-center gap-2">
+                <ImageIcon className={`h-4 w-4 ${hasReferenceImage ? 'text-green-400' : 'text-red-400'}`} />
+                <span className="text-sm font-medium">Reference Image</span>
+              </div>
+              <p className="text-xs text-gray-300 mt-1">
+                {hasReferenceImage ? 'Reference image uploaded' : 'Please upload a reference image'}
+              </p>
+            </div>
+          </div>
+
+          {/* Extract Button */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handleExtractScenes}
+              disabled={!canExtractScenes || isExtractingScenes}
+              className="flex-1 bg-purple-600 hover:bg-purple-700"
+            >
+              {isExtractingScenes ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Extracting Scenes...
+                </>
               ) : (
-                <p className="text-sm text-amber-700">No script detected. Add custom script below.</p>
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Extract Image Scenes
+                </>
               )}
-            </CardContent>
-          </Card>
+            </Button>
 
-          {/* Script Input & Extraction */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Extract Animation Scenes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="script-input">Custom Script</Label>
-                <Textarea
-                  id="script-input"
-                  placeholder="Paste your script here..."
-                  value={scriptInput}
-                  onChange={(e) => setScriptInput(e.target.value)}
-                  disabled={isExtractingScenes}
-                  rows={4}
-                  className="text-sm"
-                />
+            {extractedScenes.length > 0 && (
+              <Button variant="outline" onClick={handleClear}>
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Extraction Error */}
+          {extractionError && (
+            <div className="p-3 bg-red-900/20 border border-red-700 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <span className="text-red-400 font-medium">Extraction Error</span>
               </div>
+              <p className="text-sm text-red-300 mt-1">{extractionError}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-              {/* Number of Scenes Slider */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Number of Scenes</Label>
-                  <Badge variant="outline">{numberOfScenesToExtract}</Badge>
-                </div>
-                <Slider
-                  value={[numberOfScenesToExtract]}
-                  onValueChange={(value) => setNumberOfScenesToExtract(value[0])}
-                  min={1}
-                  max={1000}
-                  step={1}
-                  disabled={isExtractingScenes}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1 scene</span>
-                  <span>1000 scenes</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  onClick={onExtractScenes}
-                  disabled={isExtractingScenes || !scriptInput.trim()}
-                  className="flex-1"
+      {/* Extracted Scenes */}
+      {extractedScenes.length > 0 && (
+        <Card className="bg-gray-900 border-gray-700 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-yellow-400" />
+              Extracted Image Scenes
+              <Badge variant="outline" className="ml-2">
+                {extractedScenes.length} scenes
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-gray-300">
+              Select scenes to generate images. Each scene is tailored to your reference image.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Scene Selection */}
+            <div className="space-y-3">
+              {extractedScenes.map((scene, index) => (
+                <div
+                  key={scene.id}
+                  className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                    selectedScenes.includes(index)
+                      ? 'bg-blue-900/20 border-blue-600'
+                      : 'bg-gray-800 border-gray-600 hover:border-gray-500'
+                  }`}
+                  onClick={() => toggleSceneSelection(index)}
                 >
-                  {isExtractingScenes ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Extracting...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Extract {numberOfScenesToExtract} Scenes
-                    </>
-                  )}
-                </Button>
-                {allPrompts.length > 0 && (
-                  <Button variant="outline" onClick={onClearAllPrompts}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-
-              {sceneExtractionError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                    <p className="text-sm text-red-700">{sceneExtractionError}</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Reference Images Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Upload className="h-4 w-4 text-blue-600" />
-                Reference Images
-              </CardTitle>
-              <CardDescription>
-                Upload images to animate (required for generation)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                <div className="text-center">
-                  <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <div className="space-y-2">
-                    <Label htmlFor="reference-upload" className="cursor-pointer">
-                      <div className="text-lg font-medium text-gray-900">Upload Reference Images</div>
-                      <div className="text-sm text-gray-500">PNG, JPG up to 10MB each</div>
-                    </Label>
-                    <Input
-                      id="reference-upload"
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleReferenceImageUpload}
-                      className="hidden"
-                      disabled={isGenerating || isBatchGenerating}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Reference Images Preview */}
-              {referenceImages.length > 0 && (
-                <div className="space-y-4">
-                  <Label className="text-sm font-medium text-gray-700">
-                    Reference Images ({referenceImages.length})
-                  </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {referenceImages.map((file, index) => (
-                      <div key={index} className="relative group">
-                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`Reference ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeReferenceImage(index)}
-                          disabled={isGenerating || isBatchGenerating}
-                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Reference Image Description */}
-                  <div className="space-y-2">
-                    <Label htmlFor="reference-description" className="text-sm font-medium">
-                      What's in the reference image? <span className="text-gray-500">(Optional)</span>
-                    </Label>
-                    <Input
-                      id="reference-description"
-                      placeholder="e.g., 'a stickman', 'a cartoon character', 'a person in a red shirt'"
-                      value={referenceImageDescription}
-                      onChange={(e) => setReferenceImageDescription(e.target.value)}
-                      disabled={isGenerating || isBatchGenerating}
-                      className="text-sm"
-                    />
-                    <p className="text-xs text-gray-500">
-                      This description will be automatically added to all animation prompts to ensure consistency. Leave blank to use prompts as-is.
-                    </p>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mt-0.5 ${
+                      selectedScenes.includes(index)
+                        ? 'bg-blue-600 border-blue-600'
+                        : 'border-gray-400'
+                    }`}>
+                      {selectedScenes.includes(index) && (
+                        <div className="w-2 h-2 bg-white rounded-sm" />
+                      )}
+                    </div>
                     
-                    {/* Preview of how prompts will look */}
-                    {referenceImageDescription.trim() && animationPrompt.trim() && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <Label className="text-xs font-medium text-blue-800">Prompt Preview:</Label>
-                        <p className="text-sm text-blue-700 mt-1">
-                          "{getPromptWithReference(animationPrompt)}"
-                        </p>
-                      </div>
-                    )}
+                    <div className="flex-1 space-y-2">
+                      <h4 className="font-medium text-white">{scene.title}</h4>
+                      <p className="text-sm text-gray-300 leading-relaxed">{scene.prompt}</p>
+                      {scene.characterVariation && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            Character Variation: {scene.characterVariation}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              ))}
+            </div>
 
-          {/* Single Animation Generation */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Quick Single Generation</CardTitle>
-              <CardDescription>
-                Generate a single animation from uploaded reference images
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="animation-prompt">Animation Description</Label>
-                <Textarea
-                  id="animation-prompt"
-                  placeholder="Describe how you want the reference image to animate (e.g., 'slow zoom in with particles floating around, gentle camera movement from left to right')"
-                  value={animationPrompt}
-                  onChange={(e) => setAnimationPrompt(e.target.value)}
-                  disabled={isGenerating}
-                  rows={3}
-                  className="text-sm"
-                />
-              </div>
-
-              <Button 
-                onClick={() => onGenerate(getPromptWithReference(animationPrompt))}
-                disabled={isGenerating || !animationPrompt.trim() || referenceImages.length === 0}
-                className="w-full"
+            {/* Generate Animations Button */}
+            <div className="pt-4 border-t border-gray-700">
+              <Button
+                onClick={handleGenerateAnimations}
+                disabled={!canGenerateAnimations || isGenerating}
+                className="w-full bg-yellow-600 hover:bg-yellow-700 h-12"
               >
                 {isGenerating ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
+                    Generating Images... ({generationProgress.toFixed(0)}%)
                   </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 mr-2" />
-                    Generate Animation
-                  </>
-                )}
+                              ) : (
+                <>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Generate Images ({selectedScenes.length} scenes)
+                </>
+              )}
               </Button>
 
-              {referenceImages.length === 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <p className="text-sm text-amber-700">Please upload reference images to enable generation</p>
+              {isGenerating && (
+                <div className="mt-3">
+                  <Progress value={generationProgress} className="w-full" />
                 </div>
               )}
+            </div>
 
-              {referenceImages.length > 0 && !referenceImageDescription.trim() && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-700">💡 Tip: Describe what's in your reference image (e.g., "a stickman") for more consistent animations</p>
+            {/* Generation Error */}
+            {generationError && (
+              <div className="p-3 bg-red-900/20 border border-red-700 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <span className="text-red-400 font-medium">Generation Error</span>
                 </div>
-              )}
+                <p className="text-sm text-red-300 mt-1">{generationError}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
-              {generationError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm text-red-700">{generationError}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column: Extracted Scenes & Batch Generation */}
-        <div className="space-y-6">
-          {/* Extracted Scenes */}
-          {allPrompts.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Grid className="h-4 w-4 text-green-600" />
-                    Extracted Scenes ({allPrompts.length})
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPrompts(allPrompts.map(p => p.prompt))
-                        setSelectedPromptIds(allPrompts.map(p => p.id))
-                      }}
-                      disabled={selectedPrompts.length === allPrompts.length}
-                    >
-                      Select All
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPrompts([])
-                        setSelectedPromptIds([])
-                      }}
-                      disabled={selectedPrompts.length === 0}
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-64 overflow-y-auto space-y-2">
-                  {allPrompts.map((scene) => (
-                    <div 
-                      key={scene.id} 
-                      className={`p-3 border rounded-lg transition-colors ${
-                        selectedPrompts.includes(scene.prompt) 
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div 
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={() => togglePromptSelection(scene.prompt)}
-                        >
-                          <h4 className="font-medium text-sm text-foreground truncate">{scene.title}</h4>
-                          <p className="text-sm text-foreground/80 mt-1 line-clamp-2 leading-relaxed">
-                            {scene.prompt}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              openPromptModal(scene)
-                            }}
-                            className="h-8 w-8 p-0"
-                            title="Preview/Edit prompt"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <div 
-                            className="cursor-pointer p-1"
-                            onClick={() => togglePromptSelection(scene.prompt)}
-                          >
-                            {selectedPrompts.includes(scene.prompt) ? (
-                              <Check className="h-4 w-4 text-blue-600" />
-                            ) : (
-                              <div className="h-4 w-4 border border-gray-300 dark:border-gray-600 rounded" />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Custom Prompt Addition */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Custom Prompts</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!showCustomInput ? (
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowCustomInput(true)}
-                  className="w-full"
+      {/* Generated Images Results */}
+      {imageResults.length > 0 && (
+        <Card className="bg-gray-900 border-gray-700 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5 text-green-400" />
+              Generated Images
+              <Badge variant="outline" className="ml-2">
+                {imageResults.filter(r => r.status === 'completed').length} / {imageResults.length} completed
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {imageResults.map((result) => (
+                <div
+                  key={result.id}
+                  className="p-4 bg-gray-800 rounded-lg border border-gray-600"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Custom Prompt
-                </Button>
-              ) : (
-                <div className="space-y-3">
-                  <Textarea
-                    placeholder="Enter custom animation prompt..."
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    rows={2}
-                    className="text-sm"
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={addCustomPrompt} disabled={!customPrompt.trim()}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        setShowCustomInput(false)
-                        setCustomPrompt('')
-                      }}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-white truncate">
+                        {extractedScenes.find(s => s.id === result.sceneId)?.title || 'Scene'}
+                      </h4>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          result.status === 'completed' ? 'text-green-400 border-green-600' :
+                          result.status === 'generating' ? 'text-yellow-400 border-yellow-600' :
+                          result.status === 'failed' ? 'text-red-400 border-red-600' :
+                          'text-gray-400 border-gray-600'
+                        }`}
+                      >
+                        {result.status}
+                      </Badge>
+                    </div>
 
-              {/* Selected prompts display */}
-              {selectedPrompts.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    Selected for Batch ({selectedPrompts.length})
-                  </Label>
-                  <div className="max-h-32 overflow-y-auto space-y-1">
-                    {selectedPrompts.map((prompt, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm bg-muted p-3 rounded border">
-                        <span className="flex-1 text-foreground leading-relaxed">
-                          {referenceImageDescription.trim() ? getPromptWithReference(prompt) : prompt}
-                        </span>
-                        <Button 
-                          variant="ghost" 
+                    <div className="text-sm text-gray-300 whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+                      {result.prompt}
+                    </div>
+
+                    {result.status === 'generating' && (
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="h-4 w-4 animate-spin text-yellow-400" />
+                        <span className="text-sm text-yellow-400">Generating...</span>
+                      </div>
+                    )}
+
+                    {result.status === 'failed' && (
+                      <div className="space-y-2">
+                        {result.error && (
+                          <div className="p-2 bg-red-900/20 border border-red-700 rounded text-sm text-red-300">
+                            {result.error}
+                          </div>
+                        )}
+                        <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => setSelectedPrompts(prev => prev.filter(p => p !== prompt))}
-                          className="h-6 w-6 p-0"
+                          onClick={() => handleRegenerateImage(result.id)}
+                          className="text-purple-400 border-purple-600 hover:bg-purple-900/20"
                         >
-                          <X className="h-3 w-3" />
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          Retry Generation
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Batch Generation */}
-          {selectedPrompts.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Batch Generation</CardTitle>
-                <CardDescription>
-                  Generate animations for {selectedPrompts.length} selected prompts
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isBatchGenerating && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress: {batchProgress.current}/{batchProgress.total}</span>
-                      <span>{Math.round((batchProgress.current / batchProgress.total) * 100)}%</span>
-                    </div>
-                    <Progress value={(batchProgress.current / batchProgress.total) * 100} />
-                  </div>
-                )}
-
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => onBatchGenerate(selectedPromptIds)}
-                    disabled={isBatchGenerating || selectedPrompts.length === 0 || referenceImages.length === 0}
-                    className="flex-1"
-                  >
-                    {isBatchGenerating ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Generating Batch...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Generate {selectedPrompts.length} Animations
-                      </>
                     )}
-                  </Button>
-                  {batchResults.length > 0 && (
-                    <Button variant="outline" onClick={onClearBatch}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
 
-                {selectedPrompts.length > 0 && (
-                  <>
-                    {referenceImages.length === 0 && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                        <p className="text-sm text-amber-700">Please upload reference images to enable batch generation</p>
-                      </div>
-                    )}
-                    
-                    {referenceImages.length > 0 && !referenceImageDescription.trim() && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p className="text-sm text-blue-700">💡 Tip: Add a reference description above for more consistent batch results</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Batch Results */}
-          {batchResults.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Batch Results ({batchResults.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-64 overflow-y-auto space-y-2">
-                  {batchResults.map((result) => (
-                    <div key={result.id} className="flex items-center gap-3 p-2 border rounded">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">{result.prompt}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Status: {result.status}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0">
-                        {result.status === 'completed' && result.videoUrl && (
-                          <Button size="sm" variant="outline">
-                            <Download className="h-3 w-3" />
+                    {result.status === 'completed' && result.imageUrl && (
+                      <div className="space-y-2">
+                        <img
+                          src={result.imageUrl}
+                          alt={`Generated image: ${extractedScenes.find(s => s.id === result.sceneId)?.title || 'Scene'}`}
+                          className="w-full rounded border border-gray-600"
+                          style={{ maxHeight: '300px', objectFit: 'contain' }}
+                        />
+                        <div className="flex gap-2 flex-wrap">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(result.imageUrl, '_blank')}
+                            className="text-blue-400 border-blue-600 hover:bg-blue-900/20"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Full
                           </Button>
-                        )}
-                        {result.status === 'generating' && (
-                          <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
-                        )}
-                        {result.status === 'failed' && (
-                          <AlertCircle className="h-4 w-4 text-red-600" />
-                        )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const a = document.createElement('a')
+                              a.href = result.imageUrl!
+                              a.download = `image-${result.id}.png`
+                              a.click()
+                            }}
+                            className="text-green-400 border-green-600 hover:bg-green-900/20"
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRegenerateImage(result.id)}
+                            className="text-purple-400 border-purple-600 hover:bg-purple-900/20"
+                          >
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            Regenerate
+                          </Button>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          🎨 Generated with OpenAI image-1
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
-
-      {/* Prompt Preview Modal */}
-      <PromptPreviewModal
-        isOpen={isPromptModalOpen}
-        onClose={() => {
-          setIsPromptModalOpen(false)
-          setSelectedPromptForPreview(null)
-        }}
-        prompt={selectedPromptForPreview?.prompt || ''}
-        title={selectedPromptForPreview?.title}
-        onSave={onUpdatePrompt ? handlePromptSave : undefined}
-        readOnly={!onUpdatePrompt}
-      />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

@@ -27,11 +27,6 @@ const PROVIDERS = {
       }
     },
     endpoint: '/api/image-to-video/providers/fal'
-  },
-  google: {
-    name: 'Google GenAI (Veo)',
-    models: ['veo-3.0-generate-preview'],
-    endpoint: '/api/image-to-video/providers/google'
   }
 }
 

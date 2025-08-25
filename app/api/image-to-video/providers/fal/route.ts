@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     const modelConfig = FAL_MODELS[model as keyof typeof FAL_MODELS]
+    console.log('🔴 modelConfig: ', modelConfig)
     if (!modelConfig) {
       return NextResponse.json(
         { error: `Invalid model. Available models: ${Object.keys(FAL_MODELS).join(', ')}` },

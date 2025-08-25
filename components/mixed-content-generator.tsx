@@ -42,7 +42,7 @@ export function MixedContentGenerator() {
   const dispatch = useAppDispatch()
   
   // Get content from all generators
-  const { imageSets } = useAppSelector(state => state.imageGeneration)
+  const { imageSets, selectedAnimationImages } = useAppSelector(state => state.imageGeneration)
   const { currentBatch: videoBatch, videoHistory } = useAppSelector(state => state.textImageVideo)
   
   const [contentItems, setContentItems] = useState<ContentItem[]>([])
@@ -99,19 +99,24 @@ export function MixedContentGenerator() {
     const items: ContentItem[] = []
     let orderCounter = 0
 
-    // Add animation results (from all-animation-results set)
+    // Add animation results (only selected ones from all-animation-results set)
     const animationSet = imageSets.find(set => set.id === 'all-animation-results')
-    if (animationSet) {
+    if (animationSet && selectedAnimationImages.length > 0) {
       animationSet.imageUrls.forEach((imageUrl, index) => {
-        items.push({
-          id: `animation-${animationSet.id}-${index}`,
-          type: 'animation',
-          title: animationSet.finalPrompts?.[index] || animationSet.originalPrompt || 'Animation',
-          url: imageUrl,
-          thumbnail: imageUrl,
-          order: orderCounter++,
-          source: 'Animation Generator'
-        })
+        const imageId = `animation-${animationSet.id}-${index}`
+        
+        // Only include images that are selected in the animation gallery
+        if (selectedAnimationImages.includes(imageId)) {
+          items.push({
+            id: imageId,
+            type: 'animation',
+            title: animationSet.finalPrompts?.[index] || animationSet.originalPrompt || 'Animation',
+            url: imageUrl,
+            thumbnail: imageUrl,
+            order: orderCounter++,
+            source: 'Animation Generator'
+          })
+        }
       })
     }
 
@@ -177,7 +182,7 @@ export function MixedContentGenerator() {
         setHasCustomOrder(true)
       }
     }
-  }, [imageSets, videoBatch, videoHistory])
+  }, [imageSets, videoBatch, videoHistory, selectedAnimationImages])
 
   const handleReorder = (fromIndex: number, toIndex: number) => {
     const newItems = [...contentItems]
