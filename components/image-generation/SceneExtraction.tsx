@@ -270,10 +270,10 @@ export function SceneExtraction({
         </div>
 
         {/* Script Source Information */}
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="p-4 border border-gray-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <FileText className="h-4 w-4 text-gray-600" />
-            <span className="font-medium text-gray-800">Script Source</span>
+            <span className="font-medium text-gray-200">Script Source</span>
           </div>
           {scriptSourceInfo.source !== 'none' ? (
             <div className="space-y-1">

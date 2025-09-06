@@ -11,6 +11,12 @@ import {
   saveVideoToHistory,
   setIsGeneratingVideo
 } from '../lib/features/video/videoSlice'
+import {
+  clearSelectedImagesOrder,
+  clearConfirmedImageSelection,
+  clearSelectedAnimationImages,
+  clearMixedContentSequence
+} from '../lib/features/imageGeneration/imageGenerationSlice'
 import { CreateVideoRequestBody, VideoRecord, SegmentTiming, IntroImageConfig, IntroVideoConfig } from '@/types/video-generation'
 
 // Type for segment items that can be reordered
@@ -604,6 +610,14 @@ export function VideoGenerator() {
         
         // Reset generating state since the request was successful
         dispatch(setIsGeneratingVideo(false))
+        
+        // Clear images after successful video generation start
+        dispatch(clearSelectedImagesOrder())
+        dispatch(clearConfirmedImageSelection())
+        dispatch(clearSelectedAnimationImages())
+        dispatch(clearMixedContentSequence())
+        
+        console.log('✅ Cleared image selections after video generation start')
 
         // Additional detailed message after a short delay
         setTimeout(() => {

@@ -20,7 +20,8 @@ import {
   Play,
   Download,
   Eye,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '@/lib/hooks'
 import { addImageSet } from '@/lib/features/imageGeneration/imageGenerationSlice'
@@ -33,10 +34,24 @@ interface ExtractedAnimationScene {
   duration?: number
 }
 
+interface ReferenceAnalysis {
+  artStyle: string
+  characterDesign: string
+  colorPalette: string
+  proportions: string
+  technique: string
+  visualElements: string
+  atmosphere: string
+  composition: string
+  sceneGuidance: string
+  fullAnalysis: string
+}
+
 interface ImageResult {
   id: string
   sceneId: string
   prompt: string
+  originalPrompt?: string // Store original prompt for reference
   imageUrl?: string
   status: 'pending' | 'generating' | 'completed' | 'failed'
   error?: string
@@ -69,16 +84,74 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationProgress, setGenerationProgress] = useState(0)
   const [generationError, setGenerationError] = useState<string | null>(null)
+  
+  // State for editing prompts
+  const [editingPromptId, setEditingPromptId] = useState<string | null>(null)
+  const [editedPrompt, setEditedPrompt] = useState<string>('')
+  
+  // State for paste feedback
+  const [pasteSuccess, setPasteSuccess] = useState(false)
+  
+  // State for reference analysis
+  const [referenceAnalysis, setReferenceAnalysis] = useState<ReferenceAnalysis | null>(null)
 
   // Handle reference image upload
   const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setReferenceImage(file)
-      const url = URL.createObjectURL(file)
-      setReferenceImageUrl(url)
+      setReferenceImageFromFile(file)
     }
   }
+
+  // Handle reference image from file object (shared logic)
+  const setReferenceImageFromFile = (file: File, fromPaste: boolean = false) => {
+    setReferenceImage(file)
+    const url = URL.createObjectURL(file)
+    setReferenceImageUrl(url)
+    console.log('📋 Reference image set:', file.name, file.type)
+    
+    if (fromPaste) {
+      setPasteSuccess(true)
+      setTimeout(() => setPasteSuccess(false), 3000) // Hide after 3 seconds
+    }
+  }
+
+  // Handle paste event for image upload
+  const handlePaste = async (e: ClipboardEvent) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      
+      if (item.type.startsWith('image/')) {
+        e.preventDefault()
+        const blob = item.getAsFile()
+        
+        if (blob) {
+          // Convert blob to File with proper name and type
+          const file = new File([blob], `pasted-image-${Date.now()}.${item.type.split('/')[1]}`, {
+            type: item.type
+          })
+          
+          setReferenceImageFromFile(file, true) // fromPaste = true
+          console.log('✅ Image pasted successfully from clipboard')
+          break
+        }
+      }
+    }
+  }
+
+  // Add paste event listener
+  useEffect(() => {
+    const handleGlobalPaste = (e: ClipboardEvent) => handlePaste(e)
+    
+    document.addEventListener('paste', handleGlobalPaste)
+    
+    return () => {
+      document.removeEventListener('paste', handleGlobalPaste)
+    }
+  }, [])
 
   // Extract animation scenes from script with character variations
   const handleExtractScenes = async () => {
@@ -112,8 +185,13 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
 
       const data = await response.json()
       setExtractedScenes(data.scenes || [])
+      setReferenceAnalysis(data.referenceAnalysis || null)
       // Auto-select all extracted scenes
       setSelectedScenes(data.scenes ? data.scenes.map((_: any, index: number) => index) : [])
+      
+      if (data.referenceAnalysis) {
+        console.log('🎨 Reference analysis completed with enhanced prompts')
+      }
 
     } catch (error) {
       console.error('Error extracting animation scenes:', error)
@@ -143,6 +221,7 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
         id: `img-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         sceneId: scene.id,
         prompt: scene.prompt,
+        originalPrompt: scene.prompt, // Store original prompt for reference
         status: 'pending' as const
       }))
       
@@ -287,6 +366,40 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
     )
   }
 
+  // Start editing a prompt
+  const handleStartEditingPrompt = (resultId: string) => {
+    const result = imageResults.find(r => r.id === resultId)
+    if (result) {
+      setEditingPromptId(resultId)
+      setEditedPrompt(result.prompt)
+    }
+  }
+
+  // Save edited prompt and regenerate
+  const handleSaveEditedPrompt = async (resultId: string) => {
+    if (!editedPrompt.trim()) return
+    
+    // Update the prompt in the result
+    setImageResults(prev => prev.map(result => 
+      result.id === resultId 
+        ? { ...result, prompt: editedPrompt.trim() }
+        : result
+    ))
+    
+    // Clear editing state
+    setEditingPromptId(null)
+    setEditedPrompt('')
+    
+    // Regenerate with new prompt
+    await handleRegenerateImage(resultId)
+  }
+
+  // Cancel editing prompt
+  const handleCancelEditingPrompt = () => {
+    setEditingPromptId(null)
+    setEditedPrompt('')
+  }
+
   // Regenerate a single image
   const handleRegenerateImage = async (resultId: string) => {
     const result = imageResults.find(r => r.id === resultId)
@@ -394,6 +507,7 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
     setExtractedScenes([])
     setSelectedScenes([])
     setImageResults([])
+    setReferenceAnalysis(null)
     setExtractionError(null)
     setGenerationError(null)
     setGenerationProgress(0)
@@ -421,14 +535,18 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
             Upload Reference Image
           </CardTitle>
           <CardDescription className="text-gray-300">
-            Upload an image to define the visual style that will be applied to all characters and scenes
+            Upload an image to define the visual style that will be applied to all characters and scenes. 
+            <span className="text-blue-400">You can also paste images directly (Ctrl+V / Cmd+V)</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="reference-image" className="text-sm font-medium">
+              <Label htmlFor="reference-image" className="text-sm font-medium flex items-center gap-2">
                 Reference Image
+                <Badge variant="secondary" className="text-xs bg-blue-900/20 text-blue-400 border-blue-600">
+                  📋 Paste Enabled
+                </Badge>
               </Label>
               <Input
                 id="reference-image"
@@ -436,7 +554,16 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
                 accept="image/*"
                 onChange={handleReferenceImageUpload}
                 className="bg-gray-800 border-gray-600 text-white mt-1"
+                placeholder="Choose file or paste image (Ctrl+V / Cmd+V)"
               />
+              
+              {/* Paste Success Feedback */}
+              {pasteSuccess && (
+                <div className="flex items-center gap-2 p-2 bg-green-900/20 border border-green-600 rounded text-green-300 text-sm mt-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Image pasted successfully from clipboard!
+                </div>
+              )}
             </div>
 
             {referenceImageUrl && (
@@ -564,6 +691,50 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
         </CardContent>
       </Card>
 
+      {/* Reference Analysis Results */}
+      {extractedScenes.length > 0 && referenceAnalysis && (
+        <Card className="bg-gray-900 border-gray-700 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-400" />
+              Reference Style Analysis
+              <Badge variant="secondary" className="ml-2 bg-blue-900/20 text-blue-400 border-blue-600">
+                AI Analysis Complete
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-gray-300">
+              Your reference image has been comprehensively analyzed for consistent style application.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {referenceAnalysis.artStyle && (
+                <div className="p-3 bg-gray-800 border border-gray-700 rounded-lg">
+                  <h4 className="text-sm font-semibold text-blue-400 mb-1">🎨 Art Style</h4>
+                  <p className="text-xs text-gray-300">{referenceAnalysis.artStyle.substring(0, 80)}...</p>
+                </div>
+              )}
+              {referenceAnalysis.characterDesign && (
+                <div className="p-3 bg-gray-800 border border-gray-700 rounded-lg">
+                  <h4 className="text-sm font-semibold text-green-400 mb-1">👤 Character Design</h4>
+                  <p className="text-xs text-gray-300">{referenceAnalysis.characterDesign.substring(0, 80)}...</p>
+                </div>
+              )}
+              {referenceAnalysis.colorPalette && (
+                <div className="p-3 bg-gray-800 border border-gray-700 rounded-lg">
+                  <h4 className="text-sm font-semibold text-yellow-400 mb-1">🌈 Color Palette</h4>
+                  <p className="text-xs text-gray-300">{referenceAnalysis.colorPalette.substring(0, 80)}...</p>
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-blue-900/10 border border-blue-700 rounded-lg">
+              <h4 className="text-sm font-semibold text-blue-300 mb-2">📋 Scene Guidance</h4>
+              <p className="text-sm text-gray-300">{referenceAnalysis.sceneGuidance || "Style consistency will be applied across all scenes."}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Extracted Scenes */}
       {extractedScenes.length > 0 && (
         <Card className="bg-gray-900 border-gray-700 text-white">
@@ -574,9 +745,14 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
               <Badge variant="outline" className="ml-2">
                 {extractedScenes.length} scenes
               </Badge>
+              {referenceAnalysis && (
+                <Badge variant="secondary" className="ml-2 bg-green-900/20 text-green-400 border-green-600">
+                  Style-Enhanced
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription className="text-gray-300">
-              Select scenes to generate images. Each scene is tailored to your reference image.
+              Select scenes to generate images. {referenceAnalysis ? 'Each scene uses your comprehensive reference analysis.' : 'Each scene is tailored to your reference image.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -735,42 +911,89 @@ export function UnifiedAnimationTab({ onImageGenerated }: UnifiedAnimationTabPro
                           className="w-full rounded border border-gray-600"
                           style={{ maxHeight: '300px', objectFit: 'contain' }}
                         />
-                        <div className="flex gap-2 flex-wrap">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(result.imageUrl, '_blank')}
-                            className="text-blue-400 border-blue-600 hover:bg-blue-900/20"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View Full
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const a = document.createElement('a')
-                              a.href = result.imageUrl!
-                              a.download = `image-${result.id}.png`
-                              a.click()
-                            }}
-                            className="text-green-400 border-green-600 hover:bg-green-900/20"
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            Download
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleRegenerateImage(result.id)}
-                            className="text-purple-400 border-purple-600 hover:bg-purple-900/20"
-                          >
-                            <RefreshCw className="h-4 w-4 mr-1" />
-                            Regenerate
-                          </Button>
-                        </div>
+                        
+                        {/* Prompt editing interface */}
+                        {editingPromptId === result.id ? (
+                          <div className="space-y-2 p-3 bg-blue-900/20 border border-blue-600 rounded">
+                            <Label className="text-blue-300 text-sm font-medium">Edit Prompt:</Label>
+                            <Textarea
+                              value={editedPrompt}
+                              onChange={(e) => setEditedPrompt(e.target.value)}
+                              placeholder="Edit the prompt for regeneration..."
+                              className="bg-gray-800 border-gray-600 text-white min-h-[100px]"
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleSaveEditedPrompt(result.id)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={!editedPrompt.trim()}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Regenerate with Edit
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleCancelEditingPrompt}
+                                className="text-gray-300 border-gray-600 hover:bg-gray-800"
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 flex-wrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(result.imageUrl, '_blank')}
+                              className="text-blue-400 border-blue-600 hover:bg-blue-900/20"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Full
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const a = document.createElement('a')
+                                a.href = result.imageUrl!
+                                a.download = `animation-${result.id}.png`
+                                a.click()
+                              }}
+                              className="text-green-400 border-green-600 hover:bg-green-900/20"
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleStartEditingPrompt(result.id)}
+                              className="text-orange-400 border-orange-600 hover:bg-orange-900/20"
+                            >
+                              <Sparkles className="h-4 w-4 mr-1" />
+                              Edit Prompt
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRegenerateImage(result.id)}
+                              className="text-purple-400 border-purple-600 hover:bg-purple-900/20"
+                            >
+                              <RefreshCw className="h-4 w-4 mr-1" />
+                              Regenerate
+                            </Button>
+                          </div>
+                        )}
+                        
                         <div className="text-xs text-gray-400">
-                          🎨 Generated with OpenAI image-1
+                          🎨 Generated with GPT-Image-1 • Landscape (16:9)
+                          {result.originalPrompt && result.prompt !== result.originalPrompt && (
+                            <span className="ml-2 text-orange-400">• Prompt edited</span>
+                          )}
                         </div>
                       </div>
                     )}

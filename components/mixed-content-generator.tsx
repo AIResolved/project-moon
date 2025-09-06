@@ -24,7 +24,7 @@ import {
   X,
   RefreshCw
 } from 'lucide-react'
-import { setSelectedImagesOrder, setMixedContentSequence } from '@/lib/features/imageGeneration/imageGenerationSlice'
+import { setSelectedImagesOrder, setMixedContentSequence, clearMixedContentSequence } from '@/lib/features/imageGeneration/imageGenerationSlice'
 import { clearSelectedVideosForGenerator, toggleVideoForGenerator } from '@/lib/features/textImageVideo/textImageVideoSlice'
 
 interface ContentItem {
@@ -137,35 +137,55 @@ export function MixedContentGenerator() {
         })
       })
 
-    // Add generated videos
+    // Add generated videos from current batch and history, avoiding duplicates
+    const addedVideoIds = new Set<string>()
+    
+    // First, add videos from current batch (these are the most recent)
     if (videoBatch) {
       videoBatch.videos.forEach((video) => {
-        items.push({
-          id: `video-${video.id}`,
-          type: 'video',
-          title: video.prompt || 'Generated Video',
-          url: video.videoUrl || '',
-          thumbnail: video.videoUrl, // Use video URL as thumbnail for now
-          duration: video.duration,
-          order: orderCounter++,
-          source: 'Text/Image to Video Generator'
-        })
+        if (video.videoUrl && !addedVideoIds.has(video.id)) {
+          items.push({
+            id: `video-${video.id}`,
+            type: 'video',
+            title: video.prompt || 'Generated Video',
+            url: video.videoUrl,
+            thumbnail: video.videoUrl,
+            duration: video.duration,
+            order: orderCounter++,
+            source: 'Text/Image to Video Generator'
+          })
+          addedVideoIds.add(video.id)
+          console.log(`➕ Added video from current batch: ${video.id}`)
+        } else if (addedVideoIds.has(video.id)) {
+          console.log(`⚠️ Skipped duplicate video from current batch: ${video.id}`)
+        }
       })
     }
 
-    // Add video history items
+    // Then add video history items, but skip any that are already added
+    let historySkipped = 0
     videoHistory.forEach((video, videoIndex) => {
-      items.push({
-        id: `history-video-${videoIndex}`,
-        type: 'video',
-        title: video.prompt || 'Historical Video',
-        url: video.videoUrl || '',
-        thumbnail: video.videoUrl, // Use video URL as thumbnail for now
-        duration: video.duration,
-        order: orderCounter++,
-        source: 'Video History'
-      })
+      if (video.videoUrl && !addedVideoIds.has(video.id)) {
+        items.push({
+          id: `video-${video.id}`, // Use consistent ID format based on video.id
+          type: 'video',
+          title: video.prompt || 'Historical Video',
+          url: video.videoUrl,
+          thumbnail: video.videoUrl,
+          duration: video.duration,
+          order: orderCounter++,
+          source: 'Video History'
+        })
+        addedVideoIds.add(video.id)
+        console.log(`➕ Added video from history: ${video.id}`)
+      } else if (addedVideoIds.has(video.id)) {
+        historySkipped++
+      }
     })
+    
+    if (historySkipped > 0) {
+      console.log(`⚠️ Skipped ${historySkipped} duplicate videos from history to avoid duplicates`)
+    }
 
     // Check if we should apply custom order
     const customOrder = loadCustomOrder()
@@ -301,9 +321,11 @@ export function MixedContentGenerator() {
   const handleClearAll = () => {
     setContentItems([])
     dispatch(setSelectedImagesOrder([]))
+    dispatch(clearMixedContentSequence())
     // Clear saved custom order
     localStorage.removeItem('mixed-content-custom-order')
     setHasCustomOrder(false)
+    console.log('🧹 Cleared all mixed content items')
   }
 
   // Drag and drop handlers

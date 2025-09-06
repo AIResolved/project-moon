@@ -18,8 +18,9 @@ export async function POST(request: NextRequest) {
   try {
     // Handle both FormData (with image) and JSON (legacy support)
     let script: string;
-    let hasReferenceImage: boolean = false;
+    let referenceImage: File | null = null;
     let numberOfScenes: number = 5;
+    let referenceAnalysis: any = null;
 
     const contentType = request.headers.get('content-type');
     
@@ -27,18 +28,88 @@ export async function POST(request: NextRequest) {
       // New FormData approach with reference image
       const formData = await request.formData();
       script = formData.get('script') as string;
-      const referenceImage = formData.get('referenceImage') as File;
+      referenceImage = formData.get('referenceImage') as File;
       const numberOfScenesStr = formData.get('numberOfScenes') as string;
       numberOfScenes = numberOfScenesStr ? parseInt(numberOfScenesStr) : 10;
-      hasReferenceImage = referenceImage !== null;
       
-      console.log(`🖼️ Reference image provided: ${hasReferenceImage}`);
+      console.log(`🖼️ Reference image provided: ${referenceImage !== null}`);
       console.log(`🎯 Number of scenes requested: ${numberOfScenes}`);
+      
+      // Perform comprehensive reference image analysis
+      if (referenceImage) {
+        console.log("🔍 Starting comprehensive reference image analysis for scene extraction...");
+        try {
+          const buffer = Buffer.from(await referenceImage.arrayBuffer());
+          const base64Image = buffer.toString('base64');
+          
+          const visionResponse = await client.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: `Analyze this reference image for UI display. Provide a brief breakdown:
+
+ART_STYLE: [Brief description of the artistic style]
+CHARACTER_DESIGN: [Brief character design description]
+COLOR_PALETTE: [Main colors used]
+TECHNIQUE: [Drawing technique used]
+
+Keep each section to 1-2 sentences.`
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:${referenceImage.type};base64,${base64Image}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 300
+          });
+          
+          const analysisText = visionResponse.choices[0]?.message?.content || "";
+          
+          // Parse the simplified structured response
+          referenceAnalysis = {
+            artStyle: extractSection(analysisText, 'ART_STYLE'),
+            characterDesign: extractSection(analysisText, 'CHARACTER_DESIGN'),
+            colorPalette: extractSection(analysisText, 'COLOR_PALETTE'),
+            proportions: "Match reference proportions",
+            technique: extractSection(analysisText, 'TECHNIQUE'),
+            visualElements: "Use reference visual elements",
+            atmosphere: "Create reference atmosphere",
+            composition: "Apply reference composition",
+            sceneGuidance: "Apply consistent reference styling across all scenes",
+            fullAnalysis: analysisText
+          };
+          
+          console.log("📝 Reference analysis for scenes completed:");
+          console.log("🎨 Art Style:", referenceAnalysis.artStyle?.substring(0, 100) + "...");
+          console.log("📋 Scene Guidance:", referenceAnalysis.sceneGuidance?.substring(0, 100) + "...");
+          
+        } catch (error) {
+          console.warn("⚠️ Could not analyze reference image for scenes:", error);
+          referenceAnalysis = {
+            sceneGuidance: "Apply the reference image style consistently across all scenes"
+          };
+        }
+      }
     } else {
       // Legacy JSON approach
       const data = await request.json();
       script = data.script;
       numberOfScenes = data.numberOfScenes || 5;
+    }
+
+    // Helper function to extract sections from analysis
+    function extractSection(text: string, sectionName: string): string {
+      const regex = new RegExp(`${sectionName}:\\s*([\\s\\S]*?)(?=\\n\\n|\\n[A-Z_]+:|$)`);
+      const match = text.match(regex);
+      return match?.[1]?.trim() || `Apply ${sectionName.toLowerCase()} from reference image`;
     }
 
     if (!script || script.trim().length === 0) {
@@ -54,30 +125,61 @@ export async function POST(request: NextRequest) {
     // Analyze script for character mentions to create variations
     const characterAnalysis = await analyzeScriptCharacters(script, numberOfScenes);
     
-    const systemPrompt = `You are an expert animation director specializing in character-based video content. Your task is to analyze a script and create animation scenes that apply the uploaded reference image style to all characters and scenes.
+    // Create system prompt based on whether we have reference analysis
+    let systemPrompt: string;
+    
+    if (referenceAnalysis) {
+      // Create concise summaries for the prompt
+      const artStyleSummary = referenceAnalysis.artStyle.substring(0, 80) + (referenceAnalysis.artStyle.length > 80 ? "..." : "")
+      const characterSummary = referenceAnalysis.characterDesign.substring(0, 60) + (referenceAnalysis.characterDesign.length > 60 ? "..." : "")
+      const colorSummary = referenceAnalysis.colorPalette.substring(0, 50) + (referenceAnalysis.colorPalette.length > 50 ? "..." : "")
+      const techniqueSummary = referenceAnalysis.technique.substring(0, 60) + (referenceAnalysis.technique.length > 60 ? "..." : "")
+      
+      systemPrompt = `You are an expert animation director. Create animation scenes using this REFERENCE STYLE ANALYSIS:
+
+STYLE TO APPLY:
+• Art: ${artStyleSummary}
+• Characters: ${characterSummary}
+• Colors: ${colorSummary}
+• Technique: ${techniqueSummary}
+
+CHARACTER STRATEGY:
+${characterAnalysis.characters.length > 1 ? `
+DETECTED: ${characterAnalysis.characters.join(', ')}
+- Apply analyzed style to ALL characters consistently
+- Each character follows same artistic approach but remains distinguishable
+- Maintain visual consistency across all scenes
+` : `
+- Apply analyzed style consistently to all visual elements
+- Maintain complete stylistic coherence
+`}`;
+    } else {
+      systemPrompt = `You are an expert animation director specializing in character-based video content. Your task is to analyze a script and create animation scenes that apply consistent visual styling.
 
 STYLE APPLICATION INSTRUCTION:
-"Refer to the image attached and apply the same style to characters/scene to all characters if applies."
+"Create consistent visual styling across all animation scenes."
 
 CHARACTER VARIATION STRATEGY:
 ${characterAnalysis.characters.length > 1 ? `
-The script mentions these characters/entities: ${characterAnalysis.characters.join(', ')}
-For each scene, apply the uploaded image style to represent different characters:
-- Use the exact same art style and visual approach as the reference image
-- Adapt the style for different poses, expressions, or character roles
-- Maintain complete consistency with the reference image's aesthetic
-- If the reference is a stickman, make ALL characters stickman style
-- If the reference is cartoon, make ALL characters cartoon style
+DETECTED CHARACTERS: ${characterAnalysis.characters.join(', ')}
+- Maintain consistent artistic approach across all characters
+- Each character should be distinguishable but follow the same visual style
+- Apply consistent styling to clothing, features, and proportions
 ` : `
-Apply the uploaded image style consistently to all scenes and characters.
-`}
+Apply consistent visual styling to all scenes and characters.
+`}`;
+    }
+
+    systemPrompt += `
 
 For each scene, provide:
 1. A descriptive title
-2. A detailed animation prompt that:
-   - Starts with "Refer to the image attached and apply the same style to characters/scene if applies"
-   - Describes how the scene applies the reference image style
-   - Includes camera movements and cinematic effects
+2. A detailed animation prompt that:${referenceAnalysis ? `
+   - Incorporates the analyzed style elements
+   - Applies consistent character design and colors` : `
+   - Creates consistent visual styling
+   - Applies coherent character design`}
+   - Includes dynamic camera movements and cinematic effects
    - Specifies motion, lighting, and atmosphere
 3. Character variation description
 4. Duration (5-10 seconds)
@@ -88,24 +190,24 @@ Return a JSON array with exactly ${Math.max(characterAnalysis.suggestedScenes, 3
   {
     "id": "scene_1",
     "title": "Scene Title",
-    "prompt": "Refer to the image attached and apply the same style to characters/scene if applies. [describe scene action with camera movements, lighting, effects]",
+    "prompt": "${referenceAnalysis ? `Apply reference style consistently. [describe scene action with camera movements, lighting, effects]` : `Create scene with consistent styling. [describe scene action with camera movements, lighting, effects]`}",
     "characterVariation": "How the reference style is adapted for this scene",
     "duration": 6,
     "effects": ["zoom", "particles", "character_motion", "lighting"]
   }
 ]
 
-ANIMATION PROMPT REQUIREMENTS:
-- Always start with "Refer to the image attached and apply the same style to characters/scene if applies"
-- Describe how the reference style applies to this specific scene
+PROMPT REQUIREMENTS:
+- Apply the analyzed style consistently${referenceAnalysis ? ' using the reference analysis' : ''}
 - Add cinematic camera movements (zoom, pan, rotation, tracking)
-- Describe lighting and atmospheric effects
-- Specify motion timing and dynamics
-- Make it suitable for AI video generation
-- Keep each prompt 30-100 words
+- Describe lighting and atmospheric effects  
+- Make suitable for AI image generation (landscape 16:9 format)
+- Keep each prompt 50-150 words for optimal generation
 
 Script to analyze:
-"${script}"`;
+"${script}"`
+
+    console.log(`📝 System prompt length: ${systemPrompt.length} characters`);
 
     const completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -138,12 +240,16 @@ Script to analyze:
       extractedScenes = createFallbackCharacterScenes(script, characterAnalysis);
     }
 
-    // Validate and enhance scenes with character variations
+    // Validate and enhance scenes with character variations and reference analysis
     const validatedScenes = extractedScenes.map((scene, index) => ({
       id: scene.id || `scene_${index + 1}`,
       title: scene.title || `Character Scene ${index + 1}`,
-      prompt: scene.prompt || `Refer to the image attached and apply the same style to characters/scene if applies. Character performing dynamic motion with smooth camera tracking`,
-      characterVariation: scene.characterVariation || `Reference style applied to scene ${index + 1}`,
+      prompt: scene.prompt || (referenceAnalysis ? 
+        `Apply the analyzed reference style: ${referenceAnalysis.artStyle} with ${referenceAnalysis.characterDesign}. Character performing dynamic motion with smooth camera tracking in landscape format.` :
+        `Character performing dynamic motion with smooth camera tracking in consistent visual style.`),
+      characterVariation: scene.characterVariation || (referenceAnalysis ?
+        `Reference style (${referenceAnalysis.artStyle}) applied to scene ${index + 1}` :
+        `Consistent style applied to scene ${index + 1}`),
       duration: scene.duration || (5 + Math.floor(Math.random() * 6)), // 5-10 seconds
       effects: scene.effects || ['character_animation', 'camera_movement', 'lighting']
     }));
@@ -159,7 +265,9 @@ Script to analyze:
       totalScenes: validatedScenes.length,
       scriptLength: script.length,
       characterAnalysis: characterAnalysis,
-      referenceUsed: hasReferenceImage
+      referenceAnalysis: referenceAnalysis,
+      referenceUsed: referenceImage !== null,
+      enhancedPrompts: referenceAnalysis !== null
     });
 
   } catch (error: any) {

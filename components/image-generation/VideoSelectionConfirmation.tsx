@@ -40,7 +40,7 @@ export function VideoSelectionConfirmation({
   }
 
   return (
-    <Card className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 shadow-md">
+    <Card className="border border-green-200 shadow-md">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

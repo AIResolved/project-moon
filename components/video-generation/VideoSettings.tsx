@@ -355,7 +355,7 @@ export function VideoSettings({
           </div>
 
           {/* Volume Controls */}
-          <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="space-y-4 p-4 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Settings className="h-5 w-5 text-blue-600" />
               <h3 className="font-medium text-blue-900">Audio Volume Controls</h3>
@@ -580,7 +580,7 @@ export function VideoSettings({
 
           {/* Prerequisites Warning */}
           {!hasPrerequisites && (
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="p-4 border border-orange-200 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="h-5 w-5 text-orange-600" />
                 <span className="font-medium text-orange-800">Prerequisites Required</span>

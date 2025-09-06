@@ -181,9 +181,15 @@ export const textImageVideoSlice = createSlice({
         state.currentBatch.status = 'completed'
         state.currentBatch.completedAt = new Date().toISOString()
         
-        // Add all completed videos to history
+        // Add all completed videos to history (avoid duplicates)
         const completedVideos = state.currentBatch.videos.filter(v => v.status === 'completed')
-        state.videoHistory.unshift(...completedVideos)
+        const existingVideoIds = new Set(state.videoHistory.map(v => v.id))
+        const newVideos = completedVideos.filter(v => !existingVideoIds.has(v.id))
+        
+        if (newVideos.length > 0) {
+          state.videoHistory.unshift(...newVideos)
+          console.log(`✅ Added ${newVideos.length} new videos to history (avoided ${completedVideos.length - newVideos.length} duplicates)`)
+        }
         
         // Keep only last 50 videos in history
         state.videoHistory = state.videoHistory.slice(0, 50)
@@ -204,10 +210,16 @@ export const textImageVideoSlice = createSlice({
         state.currentBatch.status = 'failed'
         state.currentBatch.completedAt = new Date().toISOString()
         
-        // Still add completed videos to history
+        // Still add completed videos to history (avoid duplicates)
         const completedVideos = state.currentBatch.videos.filter(v => v.status === 'completed')
         if (completedVideos.length > 0) {
-          state.videoHistory.unshift(...completedVideos)
+          const existingVideoIds = new Set(state.videoHistory.map(v => v.id))
+          const newVideos = completedVideos.filter(v => !existingVideoIds.has(v.id))
+          
+          if (newVideos.length > 0) {
+            state.videoHistory.unshift(...newVideos)
+            console.log(`✅ Added ${newVideos.length} completed videos to history from failed batch (avoided ${completedVideos.length - newVideos.length} duplicates)`)
+          }
           state.videoHistory = state.videoHistory.slice(0, 50)
         }
         

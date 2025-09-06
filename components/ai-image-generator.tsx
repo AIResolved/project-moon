@@ -34,7 +34,9 @@ import {
   saveSelectedImagesOrderToLocalStorage,
   getStoredImageSetsFromLocalStorage,
   getConfirmedImageSelectionFromLocalStorage,
-  getSelectedImagesOrderFromLocalStorage
+  getSelectedImagesOrderFromLocalStorage,
+  clearAllImageDataFromLocalStorage,
+  deleteImageSetFromLocalStorage
 } from '@/utils/image-storage-utils'
 import type { ExtractedScene, GeneratedImageSet, ImageProvider } from '@/types/image-generation'
 import { v4 as uuidv4 } from 'uuid'
@@ -127,6 +129,14 @@ export function AIImageGenerator() {
         saveImageSetToLocalStorage(imageSet)
       })
       console.log(`💾 [AI Image Generator] Saved ${imageSets.length} image sets to localStorage`)
+    } else {
+      // Clear from localStorage when empty
+      try {
+        localStorage.removeItem('stored-image-sets')
+        console.log('🧹 [AI Image Generator] Cleared empty image sets from localStorage')
+      } catch (error) {
+        console.error('❌ Failed to clear image sets from localStorage:', error)
+      }
     }
   }, [imageSets])
 
@@ -135,6 +145,14 @@ export function AIImageGenerator() {
     if (selectedImagesOrder.length > 0) {
       saveSelectedImagesOrderToLocalStorage(selectedImagesOrder)
       console.log(`📋 [AI Image Generator] Saved ${selectedImagesOrder.length} selected images order to localStorage`)
+    } else {
+      // Clear from localStorage when empty
+      try {
+        localStorage.removeItem('selected-images-order')
+        console.log('🧹 [AI Image Generator] Cleared empty selected images order from localStorage')
+      } catch (error) {
+        console.error('❌ Failed to clear selected images order from localStorage:', error)
+      }
     }
   }, [selectedImagesOrder])
 
@@ -699,10 +717,14 @@ export function AIImageGenerator() {
 
   const handleClearAll = () => {
     dispatch(clearImageSets())
+    clearAllImageDataFromLocalStorage()
+    console.log('🧹 Cleared all image data from both Redux state and localStorage')
   }
 
   const handleRemoveSet = (setId: string) => {
     dispatch(removeImageSet(setId))
+    deleteImageSetFromLocalStorage(setId)
+    console.log('🗑️ Removed image set from both Redux state and localStorage:', setId)
   }
 
   // Thumbnail generator functions

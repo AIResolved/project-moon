@@ -53,19 +53,99 @@ export async function POST(request: NextRequest) {
       })
     )
 
-    // Compose a detailed, specific prompt for OpenAI
-    // (You may want to further customize this based on your app's needs)
-    const openaiPrompt = `
-Generate a photorealistic animation frame based on the following prompt: "${prompt}".
-Use all the visual details and context from the provided reference images.
-Ensure the resulting image is highly detailed, realistic, and matches the described scene.
-`;
+    // Perform comprehensive reference image analysis
+    let referenceAnalysis = {
+      artStyle: "",
+      characterDesign: "",
+      colorPalette: "",
+      proportions: "",
+      technique: "",
+      visualElements: "",
+      atmosphere: "",
+      composition: "",
+      detailedDescription: ""
+    };
 
-    // Call OpenAI's image editing API with all reference images and the prompt
+    if (imageFiles[0]) {
+      try {
+        const buffer = Buffer.from(await imageFiles[0].arrayBuffer());
+        const base64Image = buffer.toString('base64');
+        
+        console.log("🔍 Starting comprehensive reference image analysis...");
+        
+        const visionResponse = await client.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `Analyze this reference image for UI display purposes. Provide a brief structured breakdown:
+
+ART_STYLE: [Brief description of the artistic style]
+CHARACTER_DESIGN: [Brief description of how characters are designed]
+COLOR_PALETTE: [Main colors used]
+TECHNIQUE: [Drawing/rendering technique]
+
+Keep each section to 1-2 sentences for UI display.`
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${imageFiles[0].type};base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: 400
+        });
+        
+        const analysisText = visionResponse.choices[0]?.message?.content || "";
+        
+        // Parse the simplified structured response
+        const artStyleMatch = analysisText.match(/ART_STYLE:\s*([\s\S]*?)(?=\n\n|\nCHARACTER_DESIGN:|$)/);
+        const characterDesignMatch = analysisText.match(/CHARACTER_DESIGN:\s*([\s\S]*?)(?=\n\n|\nCOLOR_PALETTE:|$)/);
+        const colorPaletteMatch = analysisText.match(/COLOR_PALETTE:\s*([\s\S]*?)(?=\n\n|\nTECHNIQUE:|$)/);
+        const techniqueMatch = analysisText.match(/TECHNIQUE:\s*([\s\S]*?)$/);
+        
+        referenceAnalysis = {
+          artStyle: artStyleMatch?.[1]?.trim() || "Similar artistic style as reference",
+          characterDesign: characterDesignMatch?.[1]?.trim() || "Match character design from reference",
+          colorPalette: colorPaletteMatch?.[1]?.trim() || "Use reference color palette",
+          proportions: "Match reference proportions",
+          technique: techniqueMatch?.[1]?.trim() || "Apply reference technique",
+          visualElements: "Use reference visual elements",
+          atmosphere: "Create reference atmosphere",
+          composition: "Apply reference composition",
+          detailedDescription: analysisText || "Apply the same style as reference image"
+        };
+        
+        console.log("📝 Comprehensive reference analysis completed:");
+        console.log("🎨 Art Style:", referenceAnalysis.artStyle);
+        console.log("👤 Character Design:", referenceAnalysis.characterDesign);
+        console.log("🌈 Color Palette:", referenceAnalysis.colorPalette);
+        console.log("📏 Proportions:", referenceAnalysis.proportions);
+        console.log("🖌️ Technique:", referenceAnalysis.technique);
+        
+      } catch (error) {
+        console.warn("⚠️ Could not analyze reference image:", error);
+        referenceAnalysis.detailedDescription = "Apply the same visual style and character design as the reference image with complete consistency";
+      }
+    }
+
+    // Create a concise prompt since we're passing the reference image directly
+    const editPrompt = `Create a landscape (16:9) scene: "${prompt}". Apply the same visual style, character design, colors, proportions, and artistic technique as shown in the reference image. Maintain complete visual consistency.`;
+
+    console.log(`📝 Edit prompt length: ${editPrompt.length} characters`);
+
+    // Use gpt-image-1 with reference image directly
     const response = await client.images.edit({
       model: "gpt-image-1",
-      image: images,
-      prompt: openaiPrompt,
+      image: images, // Pass the reference images directly
+      prompt: editPrompt,
+      size: "1536x1024", // Landscape aspect ratio (16:9)
     })
 
     // Save the generated image to disk (for debugging or local use)
@@ -114,10 +194,13 @@ Ensure the resulting image is highly detailed, realistic, and matches the descri
       animationUrl: publicUrlData.publicUrl,
       prompt: prompt,
       referenceCount: imageFiles.length,
+      referenceAnalysis: referenceAnalysis,
+      referenceStyleDescription: referenceAnalysis.detailedDescription, // For backward compatibility
       duration: 5,
       format: 'image',
-      resolution: '1024x1024',
-      model: 'openai-dall-e'
+      resolution: '1536x1024', // Landscape format
+      aspectRatio: '16:9',
+      model: 'gpt-image-1'
     })
 
   } catch (error) {

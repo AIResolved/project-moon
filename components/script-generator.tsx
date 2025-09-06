@@ -623,18 +623,97 @@ const ScriptGenerator: React.FC = () => {
     }
   };
 
-  // Function to split text into 500-word segments for display
-  const splitIntoSegments = (text: string, wordsPerSegment = 500): string[] => {
+  // Function to split text into logical segments by sections/paragraphs
+  const splitIntoSegments = (text: string, maxWordsPerSegment = 500): string[] => {
     if (!text) return [];
     
-    const words = text.split(/\s+/);
-    const segments: string[] = [];
+    // First, try to split by markdown sections (headers)
+    const sectionSplits = text.split(/(?=^#{1,6}\s)/gm);
     
-    for (let i = 0; i < words.length; i += wordsPerSegment) {
-      segments.push(words.slice(i, i + wordsPerSegment).join(' '));
+    if (sectionSplits.length > 1) {
+      // If we have markdown sections, use them as natural breakpoints
+      const segments: string[] = [];
+      let currentSegment = '';
+      
+      for (const section of sectionSplits) {
+        if (!section.trim()) continue;
+        
+        const sectionWordCount = section.trim().split(/\s+/).length;
+        const currentWordCount = currentSegment.split(/\s+/).filter(Boolean).length;
+        
+        // If adding this section would exceed max words, start a new segment
+        if (currentSegment && (currentWordCount + sectionWordCount) > maxWordsPerSegment) {
+          segments.push(currentSegment.trim());
+          currentSegment = section.trim();
+        } else {
+          currentSegment += (currentSegment ? '\n\n' : '') + section.trim();
+        }
+      }
+      
+      // Add the last segment
+      if (currentSegment.trim()) {
+        segments.push(currentSegment.trim());
+      }
+      
+      return segments;
     }
     
-    return segments;
+    // Fallback: split by paragraphs if no sections found
+    const paragraphs = text.split(/\n\s*\n/);
+    
+    if (paragraphs.length > 1) {
+      const segments: string[] = [];
+      let currentSegment = '';
+      
+      for (const paragraph of paragraphs) {
+        if (!paragraph.trim()) continue;
+        
+        const paragraphWordCount = paragraph.trim().split(/\s+/).length;
+        const currentWordCount = currentSegment.split(/\s+/).filter(Boolean).length;
+        
+        // If adding this paragraph would exceed max words, start a new segment
+        if (currentSegment && (currentWordCount + paragraphWordCount) > maxWordsPerSegment) {
+          segments.push(currentSegment.trim());
+          currentSegment = paragraph.trim();
+        } else {
+          currentSegment += (currentSegment ? '\n\n' : '') + paragraph.trim();
+        }
+      }
+      
+      // Add the last segment
+      if (currentSegment.trim()) {
+        segments.push(currentSegment.trim());
+      }
+      
+      return segments;
+    }
+    
+    // Final fallback: split by sentences to avoid cutting words
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    const segments: string[] = [];
+    let currentSegment = '';
+    
+    for (const sentence of sentences) {
+      if (!sentence.trim()) continue;
+      
+      const sentenceWordCount = sentence.trim().split(/\s+/).length;
+      const currentWordCount = currentSegment.split(/\s+/).filter(Boolean).length;
+      
+      // If adding this sentence would exceed max words, start a new segment
+      if (currentSegment && (currentWordCount + sentenceWordCount) > maxWordsPerSegment) {
+        segments.push(currentSegment.trim());
+        currentSegment = sentence.trim();
+      } else {
+        currentSegment += (currentSegment ? ' ' : '') + sentence.trim();
+      }
+    }
+    
+    // Add the last segment
+    if (currentSegment.trim()) {
+      segments.push(currentSegment.trim());
+    }
+    
+    return segments.length > 0 ? segments : [text];
   };
   
   const scriptSegments = splitIntoSegments(fullScript?.scriptWithMarkdown || '');

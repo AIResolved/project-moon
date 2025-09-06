@@ -484,12 +484,12 @@ export function AdminDashboard() {
 
   if (!user.isAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <Card className="max-w-md">
+      <div className="min-h-screen bg-gray-900 p-6 flex items-center justify-center">
+        <Card className="max-w-md bg-gray-800 border-gray-700">
           <CardContent className="pt-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-            <p className="text-gray-600">
+            <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">Access Denied</h3>
+            <p className="text-gray-300">
               You don't have admin privileges to access this dashboard.
             </p>
           </CardContent>
@@ -499,7 +499,7 @@ export function AdminDashboard() {
   }
 
   return (
-    <StaggerContainer className="min-h-screen bg-gray-50 p-6">
+    <StaggerContainer className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <StaggerItem>
@@ -510,10 +510,10 @@ export function AdminDashboard() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <div className="flex items-center justify-center gap-2">
-              <Crown className="h-8 w-8 text-yellow-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+              <Crown className="h-8 w-8 text-yellow-400" />
+              <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
             </div>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               User management and system administration
             </p>
           </motion.div>
@@ -579,8 +579,8 @@ export function AdminDashboard() {
             <CardContent className="space-y-6">
               {/* Create User Form */}
               {showCreateUser && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4">
-                  <h4 className="font-medium text-blue-900">Create New User</h4>
+                <div className="p-4 bg-blue-900/20 border border-blue-700 rounded-lg space-y-4">
+                  <h4 className="font-medium text-blue-300">Create New User</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Email *</Label>
@@ -712,17 +712,17 @@ export function AdminDashboard() {
 
                       {/* Expanded User Details */}
                       {expandedUsers.has(userProfile.id) && (
-                        <div className="pt-3 border-t space-y-3">
-                          <h5 className="font-medium text-gray-900">User Videos</h5>
+                        <div className="pt-3 border-t border-gray-600 space-y-3">
+                          <h5 className="font-medium text-white">User Videos</h5>
                           {loadingUserVideos.has(userProfile.id) ? (
                             <div className="text-center py-4">
                               <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-gray-400" />
-                              <p className="text-sm text-gray-500">Loading videos...</p>
+                              <p className="text-sm text-gray-400">Loading videos...</p>
                             </div>
                           ) : userVideos[userProfile.id]?.length > 0 ? (
                             <div className="space-y-2">
                               {userVideos[userProfile.id].map((video) => (
-                                <div key={video.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <div key={video.id} className="flex items-center justify-between p-2 bg-gray-800 rounded">
                                   <div className="flex items-center gap-3">
                                     <Badge 
                                       variant={
@@ -785,8 +785,8 @@ export function AdminDashboard() {
         {/* Edit User Modal */}
         {editingUser && (
           <Card className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-medium mb-4">Edit User</h3>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-medium text-white mb-4">Edit User</h3>
               <div className="space-y-4">
                 <div>
                   <Label>Email</Label>
@@ -946,19 +946,19 @@ export function AdminDashboard() {
         {/* Status Message */}
         {message && (
           <Card className={`border ${
-            messageType === 'success' ? 'border-green-200 bg-green-50' :
-            messageType === 'error' ? 'border-red-200 bg-red-50' :
-            'border-blue-200 bg-blue-50'
+            messageType === 'success' ? 'border-green-600 bg-green-900/20' :
+            messageType === 'error' ? 'border-red-600 bg-red-900/20' :
+            'border-blue-600 bg-blue-900/20'
           }`}>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2">
-                {messageType === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
-                {messageType === 'error' && <AlertCircle className="h-4 w-4 text-red-600" />}
-                {messageType === 'info' && <AlertCircle className="h-4 w-4 text-blue-600" />}
+                {messageType === 'success' && <CheckCircle className="h-4 w-4 text-green-400" />}
+                {messageType === 'error' && <AlertCircle className="h-4 w-4 text-red-400" />}
+                {messageType === 'info' && <AlertCircle className="h-4 w-4 text-blue-400" />}
                 <span className={`text-sm ${
-                  messageType === 'success' ? 'text-green-800' :
-                  messageType === 'error' ? 'text-red-800' :
-                  'text-blue-800'
+                  messageType === 'success' ? 'text-green-300' :
+                  messageType === 'error' ? 'text-red-300' :
+                  'text-blue-300'
                 }`}>
                   {message}
                 </span>

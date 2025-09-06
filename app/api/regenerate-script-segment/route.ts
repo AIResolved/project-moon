@@ -64,20 +64,26 @@ Avoid these words: ${wordsList.join(', ')}.
     const safeTheme = (theme && theme.trim()) ? theme : 'No specific theme'
 
     const regenerationPrompt = `
-You are a professional script writer. I need you to rewrite/improve a segment of a script based on the following details:
+You are a professional script writer. I need you to rewrite/improve a segment of a script while ensuring it flows naturally within the larger narrative context.
 
 SCRIPT DETAILS:
 - Title: ${safeTitle}
 - Theme: ${safeTheme}
-- Segment ${segmentIndex + 1} of the script
+- This is segment ${segmentIndex + 1} of a larger script
 
-CURRENT SEGMENT CONTENT:
+CURRENT SEGMENT CONTENT TO REWRITE:
 ${segmentContent}
 
 REGENERATION INSTRUCTIONS:
 ${additionalPrompt}
 
 ${additionalInstructions}
+
+CONTEXTUAL FLOW REQUIREMENTS:
+- This segment must connect smoothly with the content before and after it
+- Preserve any section headers, timestamps, or structural elements that provide narrative continuity
+- Maintain the same tone and pacing as the original to ensure seamless integration
+- Keep the same general length to maintain overall script timing
 
 MARKDOWN FORMATTING REQUIREMENTS:
 - When including any Call-to-Action (CTA) text, wrap it in **bold markdown** (e.g., **Subscribe to our channel for more amazing content!**)
@@ -90,8 +96,10 @@ IMPORTANT FORMATTING RULES:
 3. Start directly with the narrative content.
 4. Do NOT repeat the title within the content.
 5. Maintain the same approximate word count as the original segment.
+6. Preserve the original structure (paragraphs, sections) for natural flow continuity.
+7. Focus on enhancing clarity, engagement, and smooth transitions rather than restructuring.
 
-Please provide ONLY the rewritten segment content (the actual script text that will be spoken), not any explanations or meta-commentary. The content should be significantly improved based on the regeneration instructions while maintaining the narrative flow and style of the original script.
+Please provide ONLY the rewritten segment content (the actual script text that will be spoken), maintaining the original's structural flow and formatting. Do not add explanations or meta-commentary. The improved content should integrate seamlessly when regeneration is complete.
 `;
 
     console.log(`📝 Sending segment regeneration request to ${modelName}`);

@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Script is required' }, { status: 400 });
     }
 
-    if (!numberOfScenes || numberOfScenes < 1 || numberOfScenes > 50) {
+    if (!numberOfScenes || numberOfScenes < 1 || numberOfScenes > 1000) {
       return NextResponse.json({ 
-        error: 'Number of scenes must be between 1 and 50' 
+        error: 'Number of scenes must be between 1 and 1000' 
       }, { status: 400 });
     }
 

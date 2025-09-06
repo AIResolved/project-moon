@@ -37,6 +37,189 @@ export async function POST(request: NextRequest) {
   }
 }
 
+function getFormatSpecificPrompt(
+  title: string,
+  theme: string,
+  povSelection: string,
+  scriptFormat: string,
+  audience: string,
+  normalizedSections: number,
+  additionalInstructions: string,
+  parser: any
+): string {
+  const baseInfo = `
+- Title: ${title}
+- Theme: ${theme || "No specific theme provided"}
+- POV: ${povSelection}
+- Format: ${scriptFormat}
+- Target Audience: ${audience || "General audience"}
+`;
+
+  switch (scriptFormat) {
+    case 'Facts':
+      return `Create a comprehensive ${normalizedSections}-part factual presentation for "${title}".
+
+FACTUAL CONTENT REQUIREMENTS:
+${baseInfo}
+
+STRUCTURAL REQUIREMENTS:
+1. Create exactly ${normalizedSections} sections that logically organize the factual information
+2. Each section should focus on a specific aspect or category of facts about the topic
+3. Present information in a clear, educational format
+4. Use bullet points, numbered lists, or clear statements to present facts
+5. Include specific data, statistics, dates, and verifiable information when relevant
+
+CONTENT REQUIREMENTS:
+- Focus on accuracy, clarity, and educational value
+- Present information in an engaging but informative manner
+- Use clear, direct language appropriate for the target audience
+- Avoid fictional elements, characters, or narrative storylines
+- Include relevant examples, case studies, or real-world applications
+- Structure information from general to specific within each section
+
+${additionalInstructions}
+
+${parser.getFormatInstructions()}
+
+Create an informative, fact-based presentation that educates the audience about "${title}" through well-organized, verifiable information.`;
+
+    case 'Documentary':
+      return `Create a ${normalizedSections}-part documentary script outline for "${title}".
+
+DOCUMENTARY REQUIREMENTS:
+${baseInfo}
+
+STRUCTURAL REQUIREMENTS:
+1. Create exactly ${normalizedSections} sections that build a comprehensive documentary narrative
+2. Include interview segments, archival footage cues, and expert commentary
+3. Balance storytelling with factual information and evidence
+4. Progress from background/context to deeper investigation or analysis
+5. Conclude with insights, implications, or calls to action
+
+CONTENT REQUIREMENTS:
+- Combine narrative storytelling with factual documentation
+- Include references to real people, events, and evidence
+- Suggest interview subjects and visual elements
+- Maintain journalistic integrity while engaging the audience
+- Use documentary-style language and pacing
+- Include transitions between different types of content (interviews, footage, narration)
+
+${additionalInstructions}
+
+${parser.getFormatInstructions()}
+
+Create a compelling documentary script that informs and engages viewers about "${title}" through a blend of storytelling and factual investigation.`;
+
+    case 'Tutorial':
+      return `Create a step-by-step ${normalizedSections}-part tutorial for "${title}".
+
+TUTORIAL REQUIREMENTS:
+${baseInfo}
+
+STRUCTURAL REQUIREMENTS:
+1. Create exactly ${normalizedSections} sections that represent logical learning progression
+2. Each section should build upon knowledge from previous sections
+3. Include clear step-by-step instructions and explanations
+4. Provide examples, tips, and common mistakes to avoid
+5. End with practical application or next steps for the learner
+
+CONTENT REQUIREMENTS:
+- Use clear, instructional language that's easy to follow
+- Break down complex concepts into manageable steps
+- Include practical examples and real-world applications
+- Anticipate common questions and provide clarification
+- Use "how-to" language and direct instruction
+- Include checkpoints or ways to verify understanding
+
+${additionalInstructions}
+
+${parser.getFormatInstructions()}
+
+Create a comprehensive tutorial that effectively teaches the audience about "${title}" through clear, actionable instruction.`;
+
+    case 'Interview':
+      return `Create a ${normalizedSections}-part interview script format for "${title}".
+
+INTERVIEW FORMAT REQUIREMENTS:
+${baseInfo}
+
+STRUCTURAL REQUIREMENTS:
+1. Create exactly ${normalizedSections} segments that explore different aspects of the topic
+2. Format as interviewer questions and anticipated responses
+3. Progress from general introduction to deeper, more specific topics
+4. Include follow-up questions and conversation flow
+5. Conclude with summary insights or key takeaways
+
+CONTENT REQUIREMENTS:
+- Write both interviewer questions and suggested responses/topics
+- Use conversational, engaging language appropriate for dialogue
+- Include probing follow-up questions to explore topics deeply
+- Balance prepared structure with natural conversation flow
+- Include transitions between topics and sections
+- Consider audience engagement through relatable questions
+
+${additionalInstructions}
+
+${parser.getFormatInstructions()}
+
+Create an engaging interview-style script that explores "${title}" through thoughtful questions and comprehensive discussion.`;
+
+    case 'Presentation':
+      return `Create a ${normalizedSections}-part presentation script for "${title}".
+
+PRESENTATION REQUIREMENTS:
+${baseInfo}
+
+STRUCTURAL REQUIREMENTS:
+1. Create exactly ${normalizedSections} sections with clear presentation flow
+2. Include opening hook, main content sections, and strong conclusion
+3. Structure for visual aids, slides, and audience interaction points
+4. Build arguments or information logically and persuasively
+5. Include clear transitions between sections and key points
+
+CONTENT REQUIREMENTS:
+- Use presentation-style language suitable for speaking aloud
+- Include cues for visual elements, slides, or demonstrations
+- Structure content for maximum audience engagement and retention
+- Use rhetorical devices, repetition, and memorable phrases
+- Include opportunities for audience questions or interaction
+- Balance informative content with persuasive elements
+
+${additionalInstructions}
+
+${parser.getFormatInstructions()}
+
+Create a compelling presentation script that effectively communicates "${title}" to engage and inform the audience.`;
+
+    case 'Story':
+    default:
+      return `Create a complete ${normalizedSections}-part story script outline for "${title}".
+
+STORY REQUIREMENTS:
+${baseInfo}
+
+STRUCTURAL REQUIREMENTS:
+1. Create exactly ${normalizedSections} sections that naturally divide the complete story
+2. Each section must have a clear narrative purpose (setup, development, climax, resolution)
+3. The final section MUST provide a satisfying conclusion to the story
+4. Maintain consistent character names, locations, and details throughout
+5. Ensure the story has a complete arc from beginning to end
+
+CONTENT REQUIREMENTS:
+- Focus on compelling storytelling and natural narrative flow
+- Avoid repetitive content, especially avoid repeating the introduction in later sections
+- Each section should advance the story meaningfully
+- Use specific, consistent details (if mentioning locations, use the same names throughout)
+- Create engaging, original content that serves the story
+
+${additionalInstructions}
+
+${parser.getFormatInstructions()}
+
+Create a compelling, complete story that audiences will want to follow from start to finish. Make sure the story reaches a proper conclusion in the final section.`;
+  }
+}
+
 async function handleNewScriptGeneration(body: any) {
   const { 
     title, 
@@ -167,34 +350,16 @@ Each section should serve a specific narrative purpose and contribute to the com
     ? Math.max(1, Math.ceil(targetSections / 750))
     : targetSections;
 
-  const userPrompt = `Create a complete ${normalizedSections}-part script outline for "${title}".
-
-STORY REQUIREMENTS:
-- Title: ${title}
-- Theme: ${theme || "No specific theme provided"}
-- POV: ${povSelection}
-- Format: ${scriptFormat}
-- Target Audience: ${audience || "General audience"}
-
-STRUCTURAL REQUIREMENTS:
-  1. Create exactly ${normalizedSections} sections that naturally divide the complete story
-2. Each section must have a clear narrative purpose (setup, development, climax, resolution)
-3. The final section MUST provide a satisfying conclusion to the story
-4. Maintain consistent character names, locations, and details throughout
-5. Ensure the story has a complete arc from beginning to end
-
-CONTENT REQUIREMENTS:
-- Focus on compelling storytelling and natural narrative flow
-- Avoid repetitive content, especially avoid repeating the introduction in later sections
-- Each section should advance the story meaningfully
-- Use specific, consistent details (if mentioning locations, use the same names throughout)
-- Create engaging, original content that serves the story
-
-${additionalInstructions}
-
-${parser.getFormatInstructions()}
-
-Create a compelling, complete story that audiences will want to follow from start to finish. Make sure the story reaches a proper conclusion in the final section.`;
+  const userPrompt = getFormatSpecificPrompt(
+    title, 
+    theme, 
+    povSelection, 
+    scriptFormat, 
+    audience, 
+    normalizedSections, 
+    additionalInstructions,
+    parser
+  );
 
   try {
     console.log(`Generating ${targetSections} sections for story structure`);

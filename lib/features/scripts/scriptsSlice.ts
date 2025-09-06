@@ -13,6 +13,8 @@ export interface CallToAction {
   placement: 'beginning' | 'middle' | 'end' | 'custom'
   customPlacement?: string
   additionalInstructions?: string
+  enabled?: boolean
+  wordCount?: number
 }
 
 export interface Hook {
@@ -20,6 +22,8 @@ export interface Hook {
   text: string
   style: 'question' | 'statement' | 'story' | 'statistic' | 'custom'
   additionalInstructions?: string
+  enabled?: boolean
+  wordCount?: number
 }
 
 export interface ScriptSection {

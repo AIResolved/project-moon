@@ -12,6 +12,173 @@ interface ScriptSection {
 }
 
 // Simple function to remove markdown formatting
+function getFullScriptFormatPrompt(
+  scriptFormat: string,
+  title: string,
+  theme: string,
+  povSelection: string,
+  audience: string,
+  section: any,
+  index: number,
+  totalSections: number,
+  contextInformation: string,
+  roleSpecificInstructions: string,
+  additionalInstructions: string
+): string {
+  const baseInfo = `
+SCRIPT OVERVIEW:
+TITLE: ${title}
+THEME: ${theme || "No specific theme provided"}
+POV: Write in ${povSelection} perspective
+FORMAT: This is a ${scriptFormat} format script
+${audience ? `TARGET AUDIENCE: ${audience}` : ""}
+
+CURRENT SECTION DETAILS:
+SECTION ${index + 1} TITLE: ${section.title}
+SECTION ROLE: ${section.narrativeRole || 'Content progression'}
+CONTENT CONTRIBUTION: ${section.storyArc || 'Advances the content'}
+WRITING INSTRUCTIONS: ${section.writingInstructions}
+
+${contextInformation}
+${roleSpecificInstructions}
+${additionalInstructions}`;
+
+  const commonRules = `
+CRITICAL FORMATTING AND CONTENT RULES:
+1. Generate ONLY the spoken content for this section
+2. Do NOT include any titles, headers, section names, or meta-commentary
+3. Do NOT begin with greetings, introductions, or announcements
+4. Start directly with the content
+5. Write in ${povSelection} perspective throughout
+6. Do NOT use interactive phrases like "Would you like me to continue", "Let me continue", etc.
+7. Do NOT repeat content from other sections - each section should advance the content
+8. Maintain consistency in names, places, and facts throughout the script
+9. Focus on quality content rather than reaching arbitrary length targets
+
+MARKDOWN FORMATTING:
+- Use **bold** for Call-to-Action (CTA) text when specified in writing instructions
+- Use **bold** for Hook text when specified in writing instructions  
+- Use *italics* for emphasis on important points
+- Keep formatting minimal and focused on content flow`;
+
+  switch (scriptFormat) {
+    case 'Facts':
+      return `You are creating section ${index + 1} of ${totalSections} of a comprehensive factual presentation.
+
+${baseInfo}
+
+${commonRules}
+
+FACTUAL CONTENT GUIDELINES:
+- Present accurate, verifiable information about "${title}"
+- Use clear, educational language appropriate for the audience
+- Structure information logically and systematically
+- Include specific data, examples, and evidence when relevant
+- Avoid fictional elements, characters, or narrative storylines
+- Focus on informing and educating the audience
+- Use bullet points or numbered lists when it improves clarity
+- Build upon information from previous sections without repetition
+
+Generate the spoken factual content for this section, ensuring it provides valuable, accurate information as part of the complete ${totalSections}-part factual presentation about "${title}".`;
+
+    case 'Documentary':
+      return `You are creating section ${index + 1} of ${totalSections} of a documentary script.
+
+${baseInfo}
+
+${commonRules}
+
+DOCUMENTARY CONTENT GUIDELINES:
+- Combine narrative storytelling with factual documentation
+- Include references to real people, events, and evidence
+- Suggest interview segments or archival footage when appropriate
+- Maintain journalistic integrity while engaging the audience
+- Use documentary-style language and pacing
+- Build investigative narrative toward insights or revelations
+- Include transitions that suggest different types of content
+- Balance informative content with compelling presentation
+
+Generate the spoken documentary content for this section, ensuring it contributes to the complete ${totalSections}-part documentary investigation of "${title}".`;
+
+    case 'Tutorial':
+      return `You are creating section ${index + 1} of ${totalSections} of a step-by-step tutorial.
+
+${baseInfo}
+
+${commonRules}
+
+TUTORIAL CONTENT GUIDELINES:
+- Provide clear, step-by-step instruction about "${title}"
+- Use instructional language that's easy to follow
+- Build upon knowledge from previous sections
+- Include practical examples and real-world applications
+- Anticipate common questions and provide clarification
+- Use "how-to" language and direct instruction
+- Include tips, warnings, or common mistakes to avoid
+- Structure content for progressive learning
+
+Generate the spoken tutorial content for this section, ensuring it teaches effectively as part of the complete ${totalSections}-part tutorial about "${title}".`;
+
+    case 'Interview':
+      return `You are creating section ${index + 1} of ${totalSections} of an interview-style script.
+
+${baseInfo}
+
+${commonRules}
+
+INTERVIEW CONTENT GUIDELINES:
+- Write in conversational, interview format
+- Include both questions and responses naturally woven together
+- Use engaging dialogue appropriate for the format
+- Progress through topics in logical interview flow
+- Include follow-up points and natural conversation development
+- Balance prepared structure with conversational authenticity
+- Consider audience engagement through relatable discussion
+- Build upon previous interview segments
+
+Generate the spoken interview content for this section, ensuring it flows naturally as part of the complete ${totalSections}-part interview exploration of "${title}".`;
+
+    case 'Presentation':
+      return `You are creating section ${index + 1} of ${totalSections} of a presentation script.
+
+${baseInfo}
+
+${commonRules}
+
+PRESENTATION CONTENT GUIDELINES:
+- Use presentation-style language suitable for speaking aloud
+- Structure content for maximum audience engagement and retention
+- Include rhetorical devices and memorable phrases when appropriate
+- Build arguments or information logically and persuasively
+- Consider visual aid cues or demonstration points
+- Use transitions that maintain audience attention
+- Balance informative content with persuasive elements
+- Create content suitable for live delivery
+
+Generate the spoken presentation content for this section, ensuring it engages effectively as part of the complete ${totalSections}-part presentation about "${title}".`;
+
+    case 'Story':
+    default:
+      return `You are a professional scriptwriter creating section ${index + 1} of ${totalSections} of a complete narrative script.
+
+${baseInfo}
+
+${commonRules}
+
+STORY CONTENT GUIDELINES:
+- Create engaging, original content that directly relates to "${title}"
+- Each section should feel like a natural part of a complete story
+- Build narrative tension and resolution appropriate to this section's role
+- Use specific, consistent details throughout
+- Write conversational, engaging prose suitable for narration
+- Ensure this section contributes meaningfully to the complete story arc
+- Develop characters, settings, and plot elements consistently
+- Focus on storytelling that captivates and entertains
+
+Generate the spoken narrative content for this section, ensuring it flows naturally as part of the complete ${totalSections}-part story about "${title}".`;
+  }
+}
+
 function removeMarkdown(text: string): string {
   return text
     .replace(/#{1,6}\s+/g, '') // Remove headers
@@ -198,54 +365,20 @@ MIDDLE SECTION REQUIREMENTS:
 `;
         }
         
-        // Create a prompt for this section
-        const sectionPrompt = `
-You are a professional scriptwriter creating section ${index + 1} of ${sections.length} of a complete narrative script.
-
-SCRIPT OVERVIEW:
-TITLE: ${title}
-THEME: ${theme || "No specific theme provided"}
-POV: Write in ${povSelection} perspective
-FORMAT: This is a ${scriptFormat} format script
-${audience ? `TARGET AUDIENCE: ${audience}` : ""}
-
-CURRENT SECTION DETAILS:
-SECTION ${index + 1} TITLE: ${section.title}
-SECTION ROLE: ${section.narrativeRole || 'Story progression'}
-STORY ARC CONTRIBUTION: ${section.storyArc || 'Advances the narrative'}
-WRITING INSTRUCTIONS: ${section.writingInstructions}
-
-${contextInformation}
-${roleSpecificInstructions}
-${additionalInstructions}
-
-CRITICAL FORMATTING AND CONTENT RULES:
-1. Generate ONLY the spoken narrative content for this section
-2. Do NOT include any titles, headers, section names, or meta-commentary
-3. Do NOT begin with greetings, introductions, or announcements
-4. Start directly with the narrative content
-5. Write in ${povSelection} perspective throughout
-6. Follow ${scriptFormat} format conventions
-7. Do NOT use interactive phrases like "Would you like me to continue", "Let me continue", etc.
-8. Do NOT repeat content from other sections - each section should advance the story
-9. Maintain consistency in names, places, and facts throughout the script
-10. Focus on quality storytelling rather than reaching arbitrary length targets
-
-MARKDOWN FORMATTING:
-- Use **bold** for Call-to-Action (CTA) text when specified in writing instructions
-- Use **bold** for Hook text when specified in writing instructions  
-- Use *italics* for emphasis on important narrative points
-- Keep formatting minimal and focused on narrative flow
-
-CONTENT GUIDELINES:
-- Create engaging, original content that directly relates to "${title}"
-- Each section should feel like a natural part of a complete story
-- Build narrative tension and resolution appropriate to this section's role
-- Use specific, consistent details throughout
-- Write conversational, engaging prose suitable for narration
-- Ensure this section contributes meaningfully to the complete story arc
-
-Generate the spoken narrative content for this section, ensuring it flows naturally as part of the complete ${sections.length}-part story about "${title}".`;
+        // Create a format-specific prompt for this section
+        const sectionPrompt = getFullScriptFormatPrompt(
+          scriptFormat,
+          title,
+          theme,
+          povSelection,
+          audience,
+          section,
+          index,
+          sections.length,
+          contextInformation,
+          roleSpecificInstructions,
+          additionalInstructions
+        );
 
         // Generate content for this section
         const response = await model.invoke(sectionPrompt);

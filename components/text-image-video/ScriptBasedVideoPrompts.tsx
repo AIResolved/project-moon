@@ -16,6 +16,7 @@ interface ExtractedVideoScene {
   chunkIndex: number
   originalText: string
   videoPrompt: string
+  searchQuery: string
   summary: string
   error?: string
 }
@@ -64,6 +65,7 @@ export function ScriptBasedVideoPrompts({
   const [showCustomScene, setShowCustomScene] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('')
   const [customTitle, setCustomTitle] = useState('')
+  const [regeneratingScene, setRegeneratingScene] = useState<number | null>(null)
 
   const handleStartEdit = (index: number, currentPrompt: string) => {
     setEditingScene(index)
@@ -81,6 +83,44 @@ export function ScriptBasedVideoPrompts({
   const handleCancelEdit = () => {
     setEditingScene(null)
     setEditPrompt('')
+  }
+
+  const handleRegeneratePrompt = async (index: number, scene: ExtractedVideoScene) => {
+    try {
+      setRegeneratingScene(index)
+      
+      const response = await fetch('/api/regenerate-video-prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          originalText: scene.originalText,
+          existingPrompt: scene.videoPrompt,
+          summary: scene.summary,
+          scriptContext: scriptInput.substring(0, 500), // Provide some script context
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to regenerate video prompt')
+      }
+
+      const data = await response.json()
+      
+      if (onUpdateScenePrompt) {
+        onUpdateScenePrompt(index, data.regeneratedPrompt)
+      }
+      
+      console.log(`✅ Successfully regenerated video prompt for scene ${index + 1}`)
+      
+    } catch (error: any) {
+      console.error('Error regenerating video prompt:', error)
+      alert(`Failed to regenerate prompt: ${error.message}`)
+    } finally {
+      setRegeneratingScene(null)
+    }
   }
 
   const handleAddCustomScene = () => {
@@ -340,17 +380,36 @@ export function ScriptBasedVideoPrompts({
                         </Label>
                       </div>
                       
-                      {/* Edit Button */}
-                      {onUpdateScenePrompt && (
+                      {/* Action Buttons */}
+                      <div className="flex gap-1">
+                        {/* Regenerate Button */}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleStartEdit(index, scene.videoPrompt)}
-                          disabled={editingScene === index}
+                          onClick={() => handleRegeneratePrompt(index, scene)}
+                          disabled={regeneratingScene === index || editingScene === index || isExtractingScenes}
+                          title="Regenerate this video prompt"
                         >
-                          <Edit3 className="h-4 w-4" />
+                          {regeneratingScene === index ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
                         </Button>
-                      )}
+                        
+                        {/* Edit Button */}
+                        {onUpdateScenePrompt && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleStartEdit(index, scene.videoPrompt)}
+                            disabled={editingScene === index || regeneratingScene === index}
+                            title="Edit this video prompt"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     
                     {/* Video Prompt Display/Edit */}

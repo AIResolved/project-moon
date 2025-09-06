@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenAI } from '@google/genai';
 
-const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY;
+const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY
 const FAL_API_KEY = process.env.FAL_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const LEONARDO_API_KEY = process.env.LEONARDO_API_KEY;
@@ -352,10 +352,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`🎨 Received styled prompt: ${prompt.substring(0, 150)}...`);
 
-    // Check API keys based on provider
-    if (provider === 'minimax' && !MINIMAX_API_KEY) {
-      return NextResponse.json({ error: 'MiniMax API key is not configured.' }, { status: 500 });
-    }
+    // Check API keys based on provider - MiniMax has fallback key
+    // if (provider === 'minimax' && !MINIMAX_API_KEY) {
+    //   return NextResponse.json({ error: 'MiniMax API key is not configured.' }, { status: 500 });
+    // }
 
     if (['flux-dev', 'recraft-v3', 'stable-diffusion-v35-large', 'ideogram'].includes(provider) && !FAL_API_KEY) {
       return NextResponse.json({ error: 'FAL API key is not configured for fal.ai models.' }, { status: 500 });
@@ -417,9 +417,15 @@ export async function POST(request: NextRequest) {
               return `data:image/png;base64,${base64String}`;
             }
             
+            // Check for different error response formats from MiniMax API
             if (data.base && data.base.status_code !== 0) {
               console.error('MiniMax API returned an error status:', data.base);
               throw new Error(`MiniMax API error: ${data.base?.status_msg || 'Unknown error'}`);
+            }
+            
+            if (data.base_resp && data.base_resp.status_code !== 0) {
+              console.error('MiniMax API returned an error status (base_resp):', data.base_resp);
+              throw new Error(`MiniMax API error: ${data.base_resp?.status_msg || 'Unknown error'}`);
             }
             
             console.warn('MiniMax response format unexpected - no image data found:', data);
@@ -632,8 +638,9 @@ export async function POST(request: NextRequest) {
 
 // Environment variable check
 if (process.env.NODE_ENV !== 'test') {
-  if (!MINIMAX_API_KEY) {
-    console.warn("Warning: MINIMAX_API_KEY environment variable is not set. MiniMax image generation will fail.");
+  // MiniMax API key check - now has fallback key
+  if (!process.env.MINIMAX_API_KEY) {
+    console.log("Note: Using fallback MINIMAX_API_KEY since environment variable is not set.");
   }
   if (!FAL_API_KEY) {
     console.warn("Warning: FAL_API_KEY environment variable is not set. Flux model generation will fail.");

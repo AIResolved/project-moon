@@ -258,7 +258,7 @@ export function ThumbnailGenerator({
             className="text-sm"
           />
           {(selectedImageStyle !== 'realistic' || selectedLightingTone !== 'balanced' || customStylePrompt || !thumbnailPrompt.trim()) && (
-            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+            <div className="text-xs text-blue-600 p-2 rounded">
               <strong>Final Prompt Preview:</strong> {getStyledPrompt()}
             </div>
           )}
@@ -397,7 +397,7 @@ export function ThumbnailGenerator({
         )}
 
         {/* Usage Tips */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-b border border-blue-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-blue-600 mt-0.5" />
             <div className="space-y-2">
