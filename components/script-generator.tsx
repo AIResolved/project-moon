@@ -35,6 +35,7 @@ import { InvestigationForm } from "./script-variations/investigation";
 import { OptionsGenerator } from "./script-variations/investigation-1";
 import { Philosophy2Form } from "./script-variations/philosophy-2";
 import { ScriptUpload } from "./script-variations/upload";
+import { OriginalForm } from "./script-variations/original/OriginalForm";
 
 // True-crime uses the same UI as original; only the full-script route differs
 import { 
@@ -1130,7 +1131,9 @@ const ScriptGenerator: React.FC = () => {
           </div>
 
 
-          {promptVariant === 'pepe' ? (
+          {promptVariant === 'original' ? (
+            <OriginalForm />
+          ) : promptVariant === 'pepe' ? (
             <PepeScriptGenerator />
           ) : promptVariant === 'investigation' ? (
             <InvestigationForm />

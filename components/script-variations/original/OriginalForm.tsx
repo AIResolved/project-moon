@@ -11,17 +11,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Upload } from 'lucide-react'
 import { ScriptUploadModal } from '../ScriptUploadModal'
 
-export function InvestigationForm() {
+export function OriginalForm() {
   const dispatch = useAppDispatch()
   const { scriptSections } = useAppSelector(state => state.scripts)
 
   const [title, setTitle] = useState('')
+  const [theme, setTheme] = useState('')
   const [sectionPrompt, setSectionPrompt] = useState('')
   const [scriptPrompt, setScriptPrompt] = useState('')
-  const [additionalContext, setAdditionalContext] = useState('')
+  const [additionalPrompt, setAdditionalPrompt] = useState('')
   const [forbiddenWords, setForbiddenWords] = useState('')
-  const [model, setModel] = useState('gpt-4o-mini')
-  const [desiredWordCount, setDesiredWordCount] = useState<number | ''>('')
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
+  const [targetSections, setTargetSections] = useState<number>(2400)
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false)
   const [isGeneratingInstructions, setIsGeneratingInstructions] = useState(false)
   const [isGeneratingScript, setIsGeneratingScript] = useState(false)
@@ -36,16 +37,17 @@ export function InvestigationForm() {
     if (!title.trim()) return
     setIsGeneratingOutline(true)
     try {
-      const response = await fetch('/api/generate-titles-only/investigation', {
+      const response = await fetch('/api/generate-titles-only/original', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
+          theme,
           sectionPrompt,
-          additionalContext,
+          additionalPrompt,
           forbiddenWords,
-          selectedModel: model,
-          wordCount: desiredWordCount || 2400
+          selectedModel,
+          targetSections
         })
       })
       if (!response.ok) throw new Error('Failed to generate outline')
@@ -65,18 +67,19 @@ export function InvestigationForm() {
     if (titleOnlyOutline.length === 0) return
     setIsGeneratingInstructions(true)
     try {
-      const response = await fetch('/api/generate-writing-instructions/investigation', {
+      const response = await fetch('/api/generate-writing-instructions/original', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
+          theme,
           titles: titleOnlyOutline,
           sectionPrompt,
           scriptPrompt,
-          additionalContext,
+          additionalPrompt,
           forbiddenWords,
-          selectedModel: model,
-          wordCount: desiredWordCount || 2400
+          selectedModel,
+          targetSections
         })
       })
       if (!response.ok) throw new Error('Failed to generate writing instructions')
@@ -92,6 +95,46 @@ export function InvestigationForm() {
       alert('Failed to generate writing instructions. Please try again.')
     } finally {
       setIsGeneratingInstructions(false)
+    }
+  }
+
+  // Step 3: Generate full script (existing functionality)
+  const handleGenerateScript = async () => {
+    if (!scriptSections.length) return
+    setIsGeneratingScript(true)
+    try {
+      const response = await fetch('/api/generate-full-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          theme,
+          sections: scriptSections,
+          additionalPrompt,
+          scriptPrompt,
+          forbiddenWords,
+          modelName: selectedModel,
+          povSelection: '3rd Person',
+          scriptFormat: 'Story',
+          audience: '',
+          inspirationalTranscript: ''
+        })
+      })
+      if (!response.ok) throw new Error('Failed to generate script')
+      const data = await response.json()
+      dispatch(setFullScript({
+        scriptWithMarkdown: data.scriptWithMarkdown,
+        scriptCleaned: data.scriptCleaned || data.scriptWithMarkdown,
+        title: title || 'NEW Script',
+        theme: theme || 'General',
+        wordCount: data.wordCount || 0
+      }))
+      setCurrentStep('script')
+    } catch (e) {
+      console.error(e)
+      alert('Failed to generate script. Please try again.')
+    } finally {
+      setIsGeneratingScript(false)
     }
   }
 
@@ -120,49 +163,12 @@ export function InvestigationForm() {
     setCurrentStep('titles')
   }
 
-  // Step 3: Generate full script (existing functionality)
-  const handleGenerateScript = async () => {
-    if (!scriptSections.length) return
-    setIsGeneratingScript(true)
-    try {
-      const response = await fetch('/api/full-script-variations/investigation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          sections: scriptSections,
-          selectedModel: model,
-          selectedView: '3rd',
-          scriptPrompt,
-          excludedWords: forbiddenWords,
-          desiredWordCount: desiredWordCount || '',
-          additionalData: additionalContext
-        })
-      })
-      if (!response.ok) throw new Error('Failed to generate script')
-      const data = await response.json()
-      dispatch(setFullScript({
-        scriptWithMarkdown: data.scriptWithMarkdown,
-        scriptCleaned: data.scriptCleaned || data.scriptWithMarkdown,
-        title: title || 'Investigation Script',
-        theme: 'Investigation',
-        wordCount: data.wordCount || 0
-      }))
-      setCurrentStep('script')
-    } catch (e) {
-      console.error(e)
-      alert('Failed to generate script. Please try again.')
-    } finally {
-      setIsGeneratingScript(false)
-    }
-  }
-
   const handleScriptUpload = (script: string) => {
     dispatch(setFullScript({
       scriptWithMarkdown: script,
       scriptCleaned: script,
       title: title || "Uploaded Script",
-      theme: 'Investigation',
+      theme: theme || 'General',
       wordCount: script.split(/\s+/).filter(Boolean).length
     }))
     setIsScriptUploadOpen(false)
@@ -176,12 +182,17 @@ export function InvestigationForm() {
           <Card>
             <CardHeader>
               <CardTitle>Step 1: Configuration</CardTitle>
-              <CardDescription>Set up your investigation script parameters</CardDescription>
+              <CardDescription>Set up your script parameters</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Title</Label>
                 <Input placeholder="Enter title for your script" value={title} onChange={(e) => setTitle(e.target.value)} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Theme (Optional)</Label>
+                <Input placeholder="Enter theme or topic for your script" value={theme} onChange={(e) => setTheme(e.target.value)} />
               </div>
 
               <div className="space-y-2">
@@ -198,7 +209,7 @@ export function InvestigationForm() {
 
               <div className="space-y-2">
                 <Label>General Instructions (Optional)</Label>
-                <Textarea placeholder="Any other general instructions that apply to both section generation and script writing" value={additionalContext} onChange={(e) => setAdditionalContext(e.target.value)} />
+                <Textarea placeholder="Any other general instructions that apply to both section generation and script writing" value={additionalPrompt} onChange={(e) => setAdditionalPrompt(e.target.value)} />
               </div>
 
               <div className="space-y-2">
@@ -209,7 +220,7 @@ export function InvestigationForm() {
 
               <div className="space-y-2">
                 <Label>AI Model</Label>
-                <select className="border rounded px-3 py-2 bg-background" value={model} onChange={(e) => setModel(e.target.value)}>
+                <select className="border rounded px-3 py-2 bg-background" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
                   <option value="gpt-5">GPT-5</option>
                   <option value="gpt-5-mini">GPT-5 Mini</option>
                   <option value="gpt-5-nano">GPT-5 Nano</option>
@@ -221,8 +232,8 @@ export function InvestigationForm() {
               </div>
 
               <div className="space-y-2">
-                <Label>Desired Word Count (optional)</Label>
-                <Input placeholder="e.g., 1000" type="number" value={desiredWordCount} onChange={(e) => setDesiredWordCount(e.target.value ? parseInt(e.target.value) : '')} />
+                <Label>Target Word Count</Label>
+                <Input placeholder="e.g., 2400" type="number" value={targetSections} onChange={(e) => setTargetSections(e.target.value ? parseInt(e.target.value) : 2400)} />
               </div>
 
               <Button onClick={handleGenerateOutline} disabled={isGeneratingOutline || !title.trim()} className="bg-purple-600 hover:bg-purple-700 w-full">
@@ -319,7 +330,7 @@ export function InvestigationForm() {
           <Card>
             <CardHeader>
               <CardTitle>✅ Script Generated Successfully!</CardTitle>
-              <CardDescription>Your investigation script has been generated and is ready for use.</CardDescription>
+              <CardDescription>Your script has been generated and is ready for use.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
@@ -392,5 +403,3 @@ export function InvestigationForm() {
     </div>
   )
 }
-
-
