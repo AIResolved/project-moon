@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       theme = '',
       targetAudience = "women over 60",
       genre = "contemporary inspirational fiction novelette",
+      scriptFormat = 'Story',
       outline = null,
       characters = [],
       themes = [],

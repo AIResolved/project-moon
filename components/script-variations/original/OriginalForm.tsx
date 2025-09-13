@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Upload, Edit, Trash2, Plus, RefreshCw } from 'lucide-react'
 import { ScriptUploadModal } from '../ScriptUploadModal'
 
@@ -39,6 +40,7 @@ export function OriginalForm() {
   const [theme, setTheme] = useState('')
   const [targetAudience, setTargetAudience] = useState('women over 60')
   const [genre, setGenre] = useState('contemporary inspirational fiction novelette')
+  const [scriptFormat, setScriptFormat] = useState('Story')
   const [sectionPrompt, setSectionPrompt] = useState('')
   const [scriptPrompt, setScriptPrompt] = useState('')
   const [additionalPrompt, setAdditionalPrompt] = useState('')
@@ -81,6 +83,7 @@ export function OriginalForm() {
           theme,
           targetAudience,
           genre,
+          scriptFormat,
           sectionPrompt,
           additionalPrompt,
           forbiddenWords,
@@ -123,6 +126,7 @@ export function OriginalForm() {
           theme,
           targetAudience,
           genre,
+          scriptFormat,
           outline: storyOutline,
           characters,
           themes,
@@ -161,6 +165,7 @@ export function OriginalForm() {
           theme,
           targetAudience,
           genre,
+          scriptFormat,
           outline: storyOutline,
           characters,
           themes,
@@ -207,7 +212,7 @@ export function OriginalForm() {
           forbiddenWords,
           modelName: selectedModel,
           povSelection: '3rd Person',
-          scriptFormat: 'Story',
+          scriptFormat,
           audience: targetAudience,
           inspirationalTranscript: ''
         })
@@ -351,6 +356,38 @@ export function OriginalForm() {
                     value={genre} 
                     onChange={(e) => setGenre(e.target.value)} 
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Format</Label>
+                  <Select value={scriptFormat} onValueChange={setScriptFormat}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Story">Story</SelectItem>
+                      <SelectItem value="Facts">Facts</SelectItem>
+                      <SelectItem value="Documentary">Documentary</SelectItem>
+                      <SelectItem value="Tutorial">Tutorial</SelectItem>
+                      <SelectItem value="Interview">Interview</SelectItem>
+                      <SelectItem value="Presentation">Presentation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>AI Model</Label>
+                  <Select value={selectedModel} onValueChange={setSelectedModel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
+                      <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

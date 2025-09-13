@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       theme = '',
       targetAudience = "women over 60",
       genre = "contemporary inspirational fiction novelette",
+      scriptFormat = 'Story',
       outline,
       characters = [],
       themes = [],
@@ -45,7 +46,48 @@ export async function POST(request: NextRequest) {
 
     const structuredModel = model.withStructuredOutput(SectionSummaries);
 
-    const systemPrompt = `You are a bestselling fiction author creating section breakdowns for "${title}".
+    // Create format-aware prompt
+    const isFactualFormat = scriptFormat === 'Facts' || scriptFormat === 'Documentary' || scriptFormat === 'Tutorial' || scriptFormat === 'Interview' || scriptFormat === 'Presentation';
+    
+    const systemPrompt = isFactualFormat ? 
+      `You are a professional content creator breaking down ${scriptFormat.toLowerCase()} content for "${title}".
+
+CONTENT OVERVIEW:
+Title: ${title}
+Format: ${scriptFormat}
+Target Audience: ${targetAudience}
+Target Word Count: ${targetWordCount} words
+${theme ? `Theme: ${theme}` : ''}
+
+CONTENT STRUCTURE:
+Introduction: ${outline.introduction || outline.act1}
+Main Content: ${outline.mainContent || outline.act2}
+Conclusion: ${outline.conclusion || outline.act3}
+
+EXPERTS/NARRATORS:
+${characters?.map((char: any) => `- ${char.name} (${char.role}): ${char.description}`).join('\n') || 'No experts provided'}
+
+CONTEXT: ${setting || 'Not specified'}
+
+KEY POINTS: ${keyPlotPoints?.join(', ') || 'None specified'}
+
+TOPICS: ${themes?.join(', ') || 'Not specified'}
+
+INSTRUCTIONS:
+Create ${numberOfSections} section titles with brief summaries for this ${scriptFormat.toLowerCase()} content. Each section should:
+1. Have a clear, informative title
+2. Include a brief 2-3 sentence summary of the factual content covered in that section
+3. Flow logically and maintain audience engagement
+4. Work together to deliver the complete information outlined above
+5. Be roughly equal in length (approximately ${Math.round(targetWordCount / numberOfSections)} words each)
+
+${sectionPrompt ? `Section Structure Guidelines: ${sectionPrompt}` : ''}
+${additionalPrompt ? `Additional Instructions: ${additionalPrompt}` : ''}
+${forbiddenWords ? `Avoid using these words: ${forbiddenWords}` : ''}`
+
+      :
+
+      `You are a bestselling fiction author creating section breakdowns for "${title}".
 
 STORY OVERVIEW:
 Title: ${title}

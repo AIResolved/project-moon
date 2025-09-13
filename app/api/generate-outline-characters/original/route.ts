@@ -3,11 +3,18 @@ import { ChatOpenAI } from "@langchain/openai";
 import { z } from "zod";
 
 // Define the Zod schema for structured output
-const Character = z.object({
+const StoryCharacter = z.object({
   name: z.string().describe("Character's name"),
   role: z.string().describe("Character's role (Main character/Supporting character/Antagonist)"),
   description: z.string().describe("Detailed character description including personality, background, motivations"),
   arc: z.string().describe("How this character develops throughout the story")
+});
+
+const FactsCharacter = z.object({
+  name: z.string().describe("Expert's name or title"),
+  role: z.string().describe("Expert's role (Narrator/Expert 1/Expert 2/Research Specialist/Host)"),
+  description: z.string().describe("Expert's credentials, background, and area of expertise"),
+  arc: z.string().describe("How this expert contributes throughout the presentation")
 });
 
 const StoryOutline = z.object({
@@ -16,10 +23,22 @@ const StoryOutline = z.object({
     act2: z.string().describe("Detailed description of Act 2"),
     act3: z.string().describe("Detailed description of Act 3")
   }),
-  characters: z.array(Character).describe("Array of story characters"),
+  characters: z.array(StoryCharacter).describe("Array of story characters"),
   themes: z.array(z.string()).describe("List of main themes explored in the story"),
   setting: z.string().describe("Description of the story's setting and time period"),
   keyPlotPoints: z.array(z.string()).describe("List of major plot points and twists")
+});
+
+const FactsOutline = z.object({
+  outline: z.object({
+    introduction: z.string().describe("Introduction and topic overview"),
+    mainContent: z.string().describe("Main factual content and evidence"),
+    conclusion: z.string().describe("Summary and key takeaways")
+  }),
+  characters: z.array(FactsCharacter).describe("Array of experts and narrators"),
+  themes: z.array(z.string()).describe("List of main topics covered"),
+  setting: z.string().describe("Context where facts are presented"),
+  keyPlotPoints: z.array(z.string()).describe("List of major facts and evidence points")
 });
 
 export async function POST(request: NextRequest) {
@@ -29,6 +48,7 @@ export async function POST(request: NextRequest) {
       theme = '',
       targetAudience = "women over 60",
       genre = "contemporary inspirational fiction novelette",
+      scriptFormat = 'Story',
       sectionPrompt = '',
       additionalPrompt = '',
       forbiddenWords = '',
@@ -47,9 +67,38 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.OPENAI_API_KEY
     });
 
-    const structuredModel = model.withStructuredOutput(StoryOutline);
+    // Use appropriate schema based on format
+    const isFactualFormat = scriptFormat === 'Facts' || scriptFormat === 'Documentary' || scriptFormat === 'Tutorial' || scriptFormat === 'Interview' || scriptFormat === 'Presentation';
+    const structuredModel = model.withStructuredOutput(isFactualFormat ? FactsOutline : StoryOutline);
 
-    const prompt = `Generate a detailed story outline and character profiles for the story "${title}".
+    // Create prompt based on format
+    const prompt = isFactualFormat ? 
+      `Generate a detailed factual outline and expert profiles for the ${scriptFormat.toLowerCase()} content: "${title}".
+
+<CONTEXT> You are a professional content creator with expertise in creating ${scriptFormat.toLowerCase()} content. You specialize in presenting factual information in an engaging and informative manner for ${targetAudience}. </CONTEXT>
+
+<CONTENT TYPE> Your content is fact-based, well-researched, and informative. It focuses on delivering accurate information, expert insights, and educational value. The content should be engaging but maintain credibility and factual accuracy throughout.${theme ? ` Focus particularly on topics related to: ${theme}` : ''} </CONTENT TYPE>
+
+<STRUCTURE> All your factual content follows a clear three-part structure:
+- Introduction: Hook the audience with an interesting fact or question, introduce the topic, and outline what will be covered.
+- Main Content: Present the core information, evidence, expert opinions, and detailed explanations in a logical flow.
+- Conclusion: Summarize key points, provide actionable insights, and leave the audience with valuable takeaways. </STRUCTURE>
+
+INSTRUCTIONS:
+Create an excellent and informative outline for ${scriptFormat.toLowerCase()} content with the title: "${title}"
+
+Important Notes:
+- Create appropriate expert roles (e.g., "Narrator", "Expert 1", "Research Specialist", "Host") instead of fictional characters.
+- Focus on factual accuracy and credible information presentation.
+- The content should be suitable for ${targetAudience} and maintain their interest throughout.
+- Target word count: approximately ${targetWordCount} words.
+${sectionPrompt ? `\nAdditional Section Instructions: ${sectionPrompt}` : ''}
+${additionalPrompt ? `\nGeneral Instructions: ${additionalPrompt}` : ''}
+${forbiddenWords ? `\nAvoid using these words: ${forbiddenWords}` : ''}`
+
+      : 
+
+      `Generate a detailed story outline and character profiles for the story "${title}".
 
 <CONTEXT> You are now acting as a bestselling fiction author with decades of experience and 50 published books. You specialize in writing ${genre} that are heartwarming and inspirational. You cater to ${targetAudience}. </CONTEXT>
 
