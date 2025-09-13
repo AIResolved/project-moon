@@ -140,9 +140,16 @@ export function Investigation2Form() {
           <div className="space-y-2">
             <Label>AI Model</Label>
             <select className="border rounded px-3 py-2 bg-background" value={model} onChange={(e) => setModel(e.target.value)}>
-              <option value="gpt-4o-mini">GPT-4o Mini (Fast & Economical)</option>
-              <option value="gpt-4o">GPT-4o</option>
-              <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+            <option value="gpt-5">GPT-5</option>
+            <option value="gpt-5-mini">GPT-5 Mini</option>
+            <option value="gpt-5-nano">GPT-5 Nano</option>
+            <option value="gpt-4.1">GPT-4.1</option>
+            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini (Fast & Economical)</option>
+            <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+            <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
             </select>
           </div>
 

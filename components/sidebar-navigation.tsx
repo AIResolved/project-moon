@@ -58,17 +58,18 @@ export function SidebarNavigation({
       description: 'Create animations from reference images'
     },
     {
-      id: 'mixed-content-generator' as NavigationView,
-      label: 'Mixed Content Generator',
-      icon: Layers,
-      description: 'Organize all content for videos'
-    },
-    {
       id: 'text-image-video-generator' as NavigationView,
       label: 'Text & Image to Video Generator',
       icon: VideoIcon,
       description: 'Create videos from text and images'
     },
+    {
+      id: 'mixed-content-generator' as NavigationView,
+      label: 'Mixed Content Generator',
+      icon: Layers,
+      description: 'Organize all content for videos'
+    },
+   
     {
       id: 'audio-generator' as NavigationView,
       label: 'Audio Generator',

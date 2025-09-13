@@ -143,6 +143,16 @@ export const videoSlice = createSlice({
       state.isGeneratingVideo = false
     },
     
+    removeVideoFromHistory: (state, action: PayloadAction<string>) => {
+      const videoId = action.payload
+      state.generationHistory = state.generationHistory.filter(video => video.id !== videoId)
+      // If this was the current generation, clear it
+      if (state.currentGeneration?.id === videoId) {
+        state.currentGeneration = null
+        state.isGeneratingVideo = false
+      }
+    },
+    
     setStatusRefreshInterval: (state, action: PayloadAction<number | null>) => {
       state.statusRefreshInterval = action.payload
     },
@@ -201,6 +211,7 @@ export const {
   saveVideoToHistory,
   loadVideoHistory,
   clearCurrentGeneration,
+  removeVideoFromHistory,
   setStatusRefreshInterval,
   clearAllVideoData,
   addVideoToSelection,

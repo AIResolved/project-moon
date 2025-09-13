@@ -772,7 +772,7 @@ export function UnifiedAnimationGenerator() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <h1 className="text-3xl font-bold text-gray-900">Animation Generator</h1>
+          <h1 className="text-3xl font-bold text-white-900">Animation Generator</h1>
           <p className="text-gray-600">
             Create animations from reference images with AI-powered motion and effects
           </p>
@@ -803,7 +803,7 @@ export function UnifiedAnimationGenerator() {
                 {/* Gallery Header */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Generated Gallery</h2>
+                    <h2 className="text-2xl font-bold text-white-900">Generated Gallery</h2>
                     <p className="text-gray-600">
                       View and manage all your generated animations ({getAllResults().length} total)
                       {selectedAnimationImages.length > 0 && ` • ${selectedAnimationImages.length} selected`}
@@ -931,7 +931,7 @@ export function UnifiedAnimationGenerator() {
                 ) : (
                   <div className="text-center py-12">
                     <Grid className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No animations generated yet</h3>
+                    <h3 className="text-lg font-medium text-white-900 mb-2">No animations generated yet</h3>
                     <p className="text-gray-600 mb-4">
                       Generate images from the "Animation Generation" tab to see them here.<br />
                       You can then select images and send them to the video generator.

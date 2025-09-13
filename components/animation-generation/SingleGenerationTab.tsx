@@ -125,7 +125,7 @@ export function SingleGenerationTab({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-purple-600" />
+          <Zap className="h-5 w-5 text-white-600" />
           Animation Generator
         </CardTitle>
         <CardDescription>

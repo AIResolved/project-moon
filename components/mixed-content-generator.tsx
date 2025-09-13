@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Separator } from './ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { Input } from './ui/input'
+import { Textarea } from './ui/textarea'
 import { 
   Image, 
   Video, 
@@ -22,10 +25,22 @@ import {
   Download,
   AlertTriangle,
   X,
-  RefreshCw
+  RefreshCw,
+  Save,
+  History,
+  Calendar,
+  Edit2,
+  Loader2
 } from 'lucide-react'
 import { setSelectedImagesOrder, setMixedContentSequence, clearMixedContentSequence } from '@/lib/features/imageGeneration/imageGenerationSlice'
 import { clearSelectedVideosForGenerator, toggleVideoForGenerator } from '@/lib/features/textImageVideo/textImageVideoSlice'
+import { 
+  saveMixedContentSequenceToLocalStorage,
+  getStoredMixedContentSequencesFromLocalStorage,
+  deleteStoredMixedContentSequence,
+  updateStoredMixedContentSequence,
+  type StoredMixedContentSequence
+} from '@/utils/mixed-content-storage-utils'
 
 interface ContentItem {
   id: string
@@ -50,6 +65,15 @@ export function MixedContentGenerator() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null)
   const [hasCustomOrder, setHasCustomOrder] = useState(false)
+  
+  // History and save functionality
+  const [savedSequences, setSavedSequences] = useState<StoredMixedContentSequence[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [sequenceName, setSequenceName] = useState('')
+  const [sequenceDescription, setSequenceDescription] = useState('')
+  const [editingSequenceId, setEditingSequenceId] = useState<string | null>(null)
+  const [currentTab, setCurrentTab] = useState('current')
 
   // Save custom order to localStorage
   const saveCustomOrder = (items: ContentItem[]) => {
@@ -328,6 +352,89 @@ export function MixedContentGenerator() {
     console.log('🧹 Cleared all mixed content items')
   }
 
+  // History management functions
+  const loadSavedSequences = () => {
+    const sequences = getStoredMixedContentSequencesFromLocalStorage()
+    setSavedSequences(sequences)
+  }
+
+  const handleSaveSequence = async () => {
+    if (contentItems.length === 0) {
+      alert('No content to save!')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const name = sequenceName.trim() || `Mixed Content ${new Date().toLocaleDateString()}`
+      const id = saveMixedContentSequenceToLocalStorage(contentItems, name, sequenceDescription.trim())
+      
+      if (id) {
+        loadSavedSequences() // Refresh the list
+        setSaveDialogOpen(false)
+        setSequenceName('')
+        setSequenceDescription('')
+        alert('✅ Sequence saved successfully!')
+      } else {
+        alert('❌ Failed to save sequence')
+      }
+    } catch (error) {
+      console.error('Failed to save sequence:', error)
+      alert('❌ Failed to save sequence')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleLoadSequence = (sequence: StoredMixedContentSequence) => {
+    if (window.confirm(`Load "${sequence.name}"? This will replace your current content.`)) {
+      setContentItems(sequence.items)
+      updateVideoGeneratorOrder(sequence.items)
+      setCurrentTab('current')
+      alert(`✅ Loaded sequence: ${sequence.name}`)
+    }
+  }
+
+  const handleDeleteSequence = async (sequenceId: string) => {
+    if (window.confirm('Are you sure you want to delete this sequence? This cannot be undone.')) {
+      setIsLoading(true)
+      try {
+        await deleteStoredMixedContentSequence(sequenceId)
+        loadSavedSequences() // Refresh the list
+        alert('✅ Sequence deleted')
+      } catch (error) {
+        console.error('Failed to delete sequence:', error)
+        alert('❌ Failed to delete sequence')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+  }
+
+  const handleEditSequence = async (sequenceId: string, updates: { name?: string; description?: string }) => {
+    setIsLoading(true)
+    try {
+      const success = updateStoredMixedContentSequence(sequenceId, updates)
+      if (success) {
+        loadSavedSequences() // Refresh the list
+        setEditingSequenceId(null)
+        alert('✅ Sequence updated')
+      } else {
+        alert('❌ Failed to update sequence')
+      }
+    } catch (error) {
+      console.error('Failed to update sequence:', error)
+      alert('❌ Failed to update sequence')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load saved sequences on component mount
+  useEffect(() => {
+    loadSavedSequences()
+  }, [])
+
   // Drag and drop handlers
   const handleDragStart = (e: React.DragEvent, itemId: string) => {
     setDraggedItem(itemId)
@@ -408,6 +515,16 @@ export function MixedContentGenerator() {
           </p>
         </motion.div>
       </StaggerItem>
+
+      {/* Tabs */}
+      <StaggerItem>
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="current">Current Sequence</TabsTrigger>
+            <TabsTrigger value="history">Past Generations ({savedSequences.length})</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="current" className="space-y-6 mt-6">
 
       {/* Controls */}
       <StaggerItem>
@@ -810,6 +927,186 @@ export function MixedContentGenerator() {
             )}
           </CardContent>
         </Card>
+      </StaggerItem>
+      </TabsContent>
+
+      {/* History Tab */}
+      <TabsContent value="history" className="space-y-6 mt-6">
+        {/* Save Current Sequence Card */}
+        {contentItems.length > 0 && (
+          <Card className="bg-gray-800 border-gray-600">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Save className="h-5 w-5" />
+                Save Current Sequence
+              </CardTitle>
+              <CardDescription className="text-gray-300">
+                Save your current content arrangement to load later
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm text-gray-300">
+                  <Badge variant="outline">{contentItems.length} items</Badge>
+                  <Badge variant="outline">{contentItems.filter(i => i.type === 'image' || i.type === 'animation').length} images</Badge>
+                  <Badge variant="outline">{contentItems.filter(i => i.type === 'video').length} videos</Badge>
+                </div>
+                
+                {!saveDialogOpen ? (
+                  <Button onClick={() => setSaveDialogOpen(true)} className="bg-green-600 hover:bg-green-700">
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Sequence
+                  </Button>
+                ) : (
+                  <div className="space-y-3 p-4 border border-gray-600 rounded-lg">
+                    <Input
+                      placeholder="Sequence name (optional)"
+                      value={sequenceName}
+                      onChange={(e) => setSequenceName(e.target.value)}
+                    />
+                    <Textarea
+                      placeholder="Description (optional)"
+                      value={sequenceDescription}
+                      onChange={(e) => setSequenceDescription(e.target.value)}
+                      rows={2}
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleSaveSequence} 
+                        disabled={isLoading}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                        Save
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setSaveDialogOpen(false)
+                          setSequenceName('')
+                          setSequenceDescription('')
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Saved Sequences */}
+        <Card className="bg-gray-800 border-gray-600">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <History className="h-5 w-5" />
+              Past Generations ({savedSequences.length})
+            </CardTitle>
+            <CardDescription className="text-gray-300">
+              Load previously saved content sequences
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {savedSequences.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No saved sequences yet</p>
+                <p className="text-sm">Save your current arrangement to see it here</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {savedSequences.map((sequence) => (
+                  <div
+                    key={sequence.id}
+                    className="border border-gray-600 rounded-lg p-4 hover:border-gray-500 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        {editingSequenceId === sequence.id ? (
+                          <div className="space-y-2">
+                            <Input
+                              defaultValue={sequence.name}
+                              onBlur={(e) => {
+                                if (e.target.value.trim() !== sequence.name) {
+                                  handleEditSequence(sequence.id, { name: e.target.value.trim() })
+                                } else {
+                                  setEditingSequenceId(null)
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleEditSequence(sequence.id, { name: e.currentTarget.value.trim() })
+                                } else if (e.key === 'Escape') {
+                                  setEditingSequenceId(null)
+                                }
+                              }}
+                              autoFocus
+                            />
+                          </div>
+                        ) : (
+                          <h3 className="font-medium text-white text-lg">{sequence.name}</h3>
+                        )}
+                        
+                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-400">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(sequence.createdAt).toLocaleDateString()} at {new Date(sequence.createdAt).toLocaleTimeString()}
+                        </div>
+                        
+                        {sequence.description && (
+                          <p className="text-sm text-gray-300 mt-2">{sequence.description}</p>
+                        )}
+                        
+                        <div className="flex gap-2 mt-3">
+                          <Badge variant="outline">{sequence.totalItems} items</Badge>
+                          <Badge variant="outline">{sequence.totalImages} images</Badge>
+                          <Badge variant="outline">{sequence.totalVideos} videos</Badge>
+                          {sequence.totalAnimations > 0 && (
+                            <Badge variant="outline">{sequence.totalAnimations} animations</Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 ml-4">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingSequenceId(sequence.id)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleLoadSequence(sequence)}
+                          className="bg-blue-600 hover:bg-blue-700 border-blue-600"
+                        >
+                          Load
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteSequence(sequence.id)}
+                          className="text-red-400 hover:text-red-300 border-red-600"
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      </Tabs>
       </StaggerItem>
     </StaggerContainer>
   )

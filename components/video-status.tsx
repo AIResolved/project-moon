@@ -5,7 +5,8 @@ import { useAppSelector, useAppDispatch } from '../lib/hooks'
 import { 
   loadVideoHistory,
   updateVideoStatus,
-  clearCurrentGeneration
+  clearCurrentGeneration,
+  removeVideoFromHistory
 } from '../lib/features/video/videoSlice'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card'
@@ -33,6 +34,7 @@ export function VideoStatus() {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false)
   const [uploadingVideos, setUploadingVideos] = useState<Set<string>>(new Set())
   const [uploadingToYouTube, setUploadingToYouTube] = useState<Set<string>>(new Set())
+  const [deletingVideos, setDeletingVideos] = useState<Set<string>>(new Set())
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
   const [message, setMessage] = useState("")
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info')
@@ -538,6 +540,40 @@ export function VideoStatus() {
     showMessage('Current generation cleared', 'info')
   }
 
+  // Delete video
+  const handleDeleteVideo = async (videoId: string) => {
+    if (!window.confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingVideos(prev => new Set([...prev, videoId]))
+    
+    try {
+      const response = await fetch(`/api/delete-video?videoId=${videoId}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete video')
+      }
+
+      // Remove from Redux state
+      dispatch(removeVideoFromHistory(videoId))
+      
+      showMessage('Video deleted successfully', 'success')
+    } catch (error: any) {
+      console.error('Failed to delete video:', error)
+      showMessage(`Failed to delete video: ${error.message}`, 'error')
+    } finally {
+      setDeletingVideos(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(videoId)
+        return newSet
+      })
+    }
+  }
+
   return (
     <div className="flex-1 p-6 space-y-6 bg-gray-950 min-h-screen">
       {/* Header */}
@@ -762,7 +798,32 @@ export function VideoStatus() {
                               <PlayCircle className="h-3 w-3 mr-1" />
                               View
                             </Button>
-                            
+                          </>
+                        )}
+
+                        {/* Delete Button - Available for all videos */}
+                        <Button
+                          onClick={() => handleDeleteVideo(video.id)}
+                          size="sm"
+                          variant="outline"
+                          disabled={deletingVideos.has(video.id)}
+                          className="border-red-600 bg-gray-800 hover:bg-red-900/50 text-red-300 hover:text-red-200"
+                        >
+                          {deletingVideos.has(video.id) ? (
+                            <>
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              Deleting...
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Delete
+                            </>
+                          )}
+                        </Button>
+
+                        {video.status === 'completed' && video.final_video_url && (
+                          <>
                             {/* Google Drive Upload Button */}
                             {isLoggedIn && hasGoogleTokens ? (
                               <div className="flex flex-col gap-1">
